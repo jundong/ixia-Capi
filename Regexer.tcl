@@ -593,8 +593,13 @@ Deputs "ipStep:$ipStep"
 	}
 	 
 	proc SaveConfigAsXML { path } {
-	
+		# Convert xml file to ixncfg file
+		if { [file extension $path] == ".xml" } {
+			set path [string replace $path [expr [string length $path] - 4] end ".ixncfg"]
+		}
+		Tester::save_config $path
 	}
+	
 	proc ixConvertAllToLowerCase {args} {
 	   set args [eval subst $args]
 	   set ixargs ""

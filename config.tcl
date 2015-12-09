@@ -295,7 +295,6 @@ namespace eval IxiaCapi {
     set Debug 0
     set DebugLog 1
     proc Deputs { value } {
-        
         if { $IxiaCapi::Debug } {
             set timeVal  [ clock format [ clock seconds ] -format %T ]
             set clickVal [ clock clicks ]
@@ -311,6 +310,27 @@ namespace eval IxiaCapi {
     }
     proc IxDebugOff { } {
         set IxiaCapi::Debug 0
+    }
+    proc SetLogOption { args } {
+        #读取输入参数并进行赋值
+        if {[catch {array set args_array $args} error]} {
+            error "Wrong arguments: $args"
+        }
+          
+        foreach {option value} [array get args_array] {
+            switch -- $option {
+                "-debug" {
+                    if { [string tolower $value] == "enable" } {
+                        IxDebugOn 1
+                    }
+                }
+                "-logto" {
+                }
+                "-filename" {
+                }
+                default {}
+            }
+        };#end of switch option_value
     }
 }
 

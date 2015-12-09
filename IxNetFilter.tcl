@@ -11,7 +11,7 @@ namespace eval IxiaCapi {
     class Filter {
         constructor { portHandle type {filtervalue null}} {
 		    set tag "body Filter::constructor [info script]"
-Deputs "----- TAG: $tag -----"
+            Deputs "----- TAG: $tag -----"
             set cap_filter [list]
             set hPort $portHandle
             set Type $type
@@ -29,12 +29,10 @@ Deputs "----- TAG: $tag -----"
         destructor {}
     }  
 	
-         
-    
     body Filter::CleanFilter {} {
 	    set tag "body Filter::CleanFilter [info script]"
-Deputs "----- TAG: $tag -----"
-    if { [ catch {
+        Deputs "----- TAG: $tag -----"
+        if { [ catch {
 			ixNet setM $handle/filter \
 				-captureFilterDA anyAddr \
 				-captureFilterSA anyAddr \
@@ -44,29 +42,28 @@ Deputs "----- TAG: $tag -----"
 			ixNet commit
 					
 			ixNet setMultiAttrs $handle/filterPallette \
-			 -DA1 {00 00 00 00 00 00} -DAMask1 {00 00 00 00 00 00} \
-			 -SA1 {00 00 00 00 00 00} -SAMask1 {00 00 00 00 00 00} \
-			 -pattern1 0 \
-			 -patternMask1 0 \
-			 -patternOffset1 0 \
-			 -pattern2 0 \
-			 -patternMask2 0 \
-			 -patternOffset2 0 
+                -DA1 {00 00 00 00 00 00} -DAMask1 {00 00 00 00 00 00} \
+                -SA1 {00 00 00 00 00 00} -SAMask1 {00 00 00 00 00 00} \
+                -pattern1 0 \
+                -patternMask1 0 \
+                -patternOffset1 0 \
+                -pattern2 0 \
+                -patternMask2 0 \
+                -patternOffset2 0 
 
 			ixNet commit
 		} err ] } {
-Deputs "err:$err"
+            Deputs "err:$err"
 		}
 		
 		set handle ""
 		set cap_filter ""
-
     }
 
     body Filter::Config { type filtervalue  } {
         global errorInfo
         set tag "body Filter::Config [info script]"
-Deputs "----- TAG: $tag -----"
+        Deputs "----- TAG: $tag -----"
         foreach filterel $cap_filter {
 		    set level 1
             if { [ catch { uplevel $level " delete object $filterel " } ] } {

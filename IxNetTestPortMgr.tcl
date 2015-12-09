@@ -29,35 +29,29 @@ namespace eval IxiaCapi::Supervisor {
             set Chassis ""
         }
         method Reset {} {
-		set tag "body TestPortMgr::Reset [info script]"
-Deputs "----- TAG: $tag -----"
+			set tag "body TestPortMgr::Reset [info script]"
+			Deputs "----- TAG: $tag -----"
             set TestPortList [ list ]
             set TestPortHandleList [ list ]
             #set VlantagList [ list ]
             set HostHandleList [ list ]
         }
         method AddTestPort { portname porthandle } {
-		set tag "body TestPortMgr::AddTestPort [info script]"
-Deputs "----- TAG: $tag -----"
+			set tag "body TestPortMgr::AddTestPort [info script]"
+			Deputs "----- TAG: $tag -----"
 
             set index [ lsearch -exact $TestPortList $portname ]
 
             if { $index < 0 } {
-
                 lappend TestPortList $portname
                 lappend TestPortList $porthandle
             } else {
-
                 set handleIndex [ lsearch -exact $TestPortHandleList [ lindex $TestPortList [expr $index+1] ] ]
-
                 set TestPortHandleList [ lreplace $TestPortHandleList $handleIndex $handleIndex ]
-
                 lset $TestPortList [expr $index+1] $porthandle 
-
             }
             AddTestPortHandle $porthandle
 			puts "$TestPortList"
-
         }
         
         method AddTestPortHandle { porthandle } {

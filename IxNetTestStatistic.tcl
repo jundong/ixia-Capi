@@ -40,8 +40,10 @@ namespace eval IxiaCapi {
     
     body TestStatistic::constructor { portHandle } {
         global errorInfo
+        
         set tag "body TestStatistics::Ctor [info script]"
-Deputs "----- TAG: $tag -----"
+        Deputs "----- TAG: $tag -----"
+        
         set strObjList [ list ]
         set hPort $portHandle
         set portView {::ixNet::OBJ-/statistics/view:"Port Statistics"}
@@ -51,17 +53,17 @@ Deputs "----- TAG: $tag -----"
     }
     
     body TestStatistic::GetPortStats { args } {
+        global errorInfo
         
-        global errorInfo        
         set tag "body TestStatistics::GetPortStats [info script]"
-Deputs "----- TAG: $tag -----"
+        Deputs "----- TAG: $tag -----"
         
-# param collection --
+        set retStats [list ]
+        # param collection --
         foreach { key value } $args {
             set key [string tolower $key]
             switch -exact -- $key {
                 -txframes {
-
                     set TxFrames $value
                 }
                 -rxframes {
@@ -112,7 +114,6 @@ Deputs "----- TAG: $tag -----"
                     set OverSize $value
                 }
                 -fragorundersize {
-
                     set FragOrUndersize $value
                 }
                 -txarpreplies {
@@ -159,26 +160,29 @@ Deputs "----- TAG: $tag -----"
                 }
                 -filtername {
                 }
+                -filteredstream {
+                    set FilteredStream $value
+                }
             }
         }
         if { $hPort == [ixNet getNull] } {
             IxiaCapi::Logger::LogIn -type err -message "$IxiaCapi::s_TestStatisticGetStats5" -tag $tag
             return $IxiaCapi::errorcode(4)
         }
-# Get acuumulated value
+        # Get acuumulated value
         set statistics  [ ixNet getA $portView/page -columnCaptions ]
 	
 		set datastatistics  [ ixNet getA $dataPortview/page -columnCaptions ]
-Deputs "stats:$statistics"
-Deputs "data stats:$datastatistics"
-# Port Information
+        Deputs "stats:$statistics"
+        Deputs "data stats:$datastatistics"
+        # Port Information
         set portInfo [ixNet getA $hPort -connectionInfo]
         regexp {chassis=\"([\d\.]+)\"} $portInfo match chassis
-#Deputs "chassis:$chassis"
+        #Deputs "chassis:$chassis"
         regexp {card=\"([\d]+)\"} $portInfo match card
-#Deputs "card:$card"
+        #Deputs "card:$card"
         regexp {port=\"([\d]+)\"} $portInfo match port
-#Deputs "port:$port"
+        #Deputs "port:$port"
         if { [ string length $card ] == 1 } {
             set card 0$card
         }
@@ -186,15 +190,15 @@ Deputs "data stats:$datastatistics"
             set port 0$port
         }
         set portName $chassis/Card$card/Port$port
-# Get port information
+        # Get port information
         set portInfoIndex [ lsearch -exact $statistics {Stat Name} ]
-Deputs "portInfoIndex:$portInfoIndex"
+        Deputs "portInfoIndex:$portInfoIndex"
         set resultList [ ixNet getA $portView/page -rowValues ]
         set resultIndex 0
         set portFound   0
         foreach result $resultList {
             set statName [ eval lindex $result $portInfoIndex ]
-#Deputs "stat name:$statName == $portName"
+            #Deputs "stat name:$statName == $portName"
             if { $statName == $portName } {
                 set portFound 1
                 break
@@ -207,255 +211,321 @@ Deputs "portInfoIndex:$portInfoIndex"
             IxiaCapi::Logger::LogIn -type err -message "$IxiaCapi::s_TestStatisticGetStats6" -tag $tag
             return $IxiaCapi::errorcode(4)            
         }
-Deputs "Accumulated value:$result"
-        if { [ info exists TxFrames ] } {
-            set index [ lsearch -exact $statistics {Frames Tx.} ]
+        Deputs "Accumulated value:$result"
+        foreach caption $statistics {
+            set index [ lsearch -exact $statistics $caption ]
             set value [ lindex $result $index ]
-            set value [ IxiaCapi::Regexer::IntTrans $value ]
-            if { [ string is double $value ] == 0 || $value == ""} {
-                set value 0
+            
+            if { $caption == "Frames Tx." } {
+                set value [ IxiaCapi::Regexer::IntTrans $value ]
+                if { [ string is double $value ] == 0 || $value == ""} {
+                    set value 0
+                }
+                
+                lappend retStats -TxFrames
+                lappend retStats $value
+                
+                if { [ info exists TxFrames ] } {
+                    uplevel 1 "set $TxFrames $value"
+                }
+            } elseif { $caption == "Valid Frames Rx." } {
+                set value [ IxiaCapi::Regexer::IntTrans $value ]
+                puts "Valid Frames Rx.: $value"
+                if { [ string is double $value ] == 0 || $value == ""} {
+                    set value 0
+                }
+                
+                lappend retStats -RxFrames
+                lappend retStats $value
+                
+                if { [ info exists RxFrames ] } {
+                    uplevel 1 "set $RxFrames $value"
+                }
+            } elseif { $caption == "Bytes Tx." } {
+                set value [ IxiaCapi::Regexer::IntTrans $value ]
+                if { [ string is double $value ] == 0 || $value == ""} {
+                    set value 0
+                }
+                
+                lappend retStats -TxBytes
+                lappend retStats $value
+                
+                if { [ info exists TxBytes ] } {
+                    uplevel 1 "set $TxBytes $value"
+                }
+            } elseif { $caption == "Bytes Rx." } {
+                set value [ IxiaCapi::Regexer::IntTrans $value ]
+                if { [ string is double $value ] == 0 || $value == ""} {
+                    set value 0
+                }
+                
+                lappend retStats -RxBytes
+                lappend retStats $value
+                
+                if { [ info exists RxBytes ] } {
+                    uplevel 1 "set $RxBytes $value"
+                }
+            } elseif { $caption == "Frames Rx." } {
+                set value [ IxiaCapi::Regexer::IntTrans $value ]
+                if { [ string is double $value ] == 0 || $value == ""} {
+                    set value 0
+                }
+                
+                lappend retStats -TxSignature
+                lappend retStats $value
+                
+                if { [ info exists TxSignature ] } {
+                    uplevel 1 "set $TxSignature $value"
+                }
+            } elseif { $caption == "CRC Errors" } {
+                set value [ IxiaCapi::Regexer::IntTrans $value ]
+                if { [ string is double $value ] == 0 || $value == ""} {
+                    set value 0
+                }
+                
+                lappend retStats -CrcErrors
+                lappend retStats $value
+                
+                if { [ info exists CrcErrors ] } {
+                    uplevel 1 "set $CrcErrors $value"
+                }
+            } elseif { $caption == "Oversize" } {
+                set value [ IxiaCapi::Regexer::IntTrans $value ]
+                if { [ string is double $value ] == 0 || $value == ""} {
+                    set value 0
+                }
+                
+                lappend retStats -OverSize
+                lappend retStats $value
+                
+                if { [ info exists OverSize ] } {
+                    uplevel 1 "set $OverSize $value"
+                }
+            } elseif { $caption == "Undersize" } {
+                set value [ IxiaCapi::Regexer::IntTrans $value ]
+                if { [ string is double $value ] == 0 || $value == ""} {
+                    set value 0
+                }
+                
+                lappend retStats -FragOrUndersize
+                lappend retStats $value
+                
+                if { [ info exists FragOrUndersize ] } {
+                    uplevel 1 "set $FragOrUndersize $value"
+                }
+            } elseif { $caption == "Transmit Arp Reply" } {
+                set value [ IxiaCapi::Regexer::IntTrans $value ]
+                if { [ string is double $value ] == 0 || $value == ""} {
+                    set value 0
+                }
+                
+                lappend retStats -TxArpReplies
+                lappend retStats $value
+                
+                if { [ info exists TxArpReplies ] } {
+                    uplevel 1 "set $TxArpReplies $value"
+                }
+            } elseif { $caption == "Receive Arp Reply" } {
+                set value [ IxiaCapi::Regexer::IntTrans $value ]
+                if { [ string is double $value ] == 0 || $value == ""} {
+                    set value 0
+                }
+                
+                lappend retStats -RxArpReplies
+                lappend retStats $value
+                
+                if { [ info exists RxArpReplies ] } {
+                    uplevel 1 "set $RxArpReplies $value"
+                }
+            } elseif { $caption == "Transmit Arp Request" } {
+                set value [ IxiaCapi::Regexer::IntTrans $value ]
+                if { [ string is double $value ] == 0 || $value == ""} {
+                    set value 0
+                }
+                
+                lappend retStats -TxArpRequests
+                lappend retStats $value
+                
+                if { [ info exists TxArpRequests ] } {
+                    uplevel 1 "set $TxArpRequests $value"
+                }
+            } elseif { $caption == "Receive Arp Request" } {
+                set value [ IxiaCapi::Regexer::IntTrans $value ]
+                if { [ string is double $value ] == 0 || $value == ""} {
+                    set value 0
+                }
+                
+                lappend retStats -RxArpRequests
+                lappend retStats $value
+                
+                if { [ info exists RxArpRequests ] } {
+                    uplevel 1 "set $RxArpRequests $value"
+                }
+            } elseif { $caption == "Undersize" } {
+                set value [ IxiaCapi::Regexer::IntTrans $value ]
+                if { [ string is double $value ] == 0 || $value == ""} {
+                    set value 0
+                }
+                
+                lappend retStats -RxJumboFrames
+                lappend retStats $value
+                
+                if { [ info exists RxJumboFrames ] } {
+                    uplevel 1 "set $RxJumboFrames $value"
+                }
+            } elseif { $caption == "Valid Frames Rx. Rate" } {
+                set value [ IxiaCapi::Regexer::IntTrans $value ]
+                if { [ string is double $value ] == 0 || $value == ""} {
+                    set value 0
+                }
+                
+                lappend retStats -RxRateFrames
+                lappend retStats $value
+                
+                if { [ info exists RxRateFrames ] } {
+                    uplevel 1 "set $RxRateFrames $value"
+                }
+            } elseif { $caption == "Bytes Rx. Rate" } {
+                set value [ IxiaCapi::Regexer::IntTrans $value ]
+                if { [ string is double $value ] == 0 || $value == ""} {
+                    set value 0
+                }
+                
+                lappend retStats -RxRateBytes
+                lappend retStats $value
+                
+                if { [ info exists RxRateBytes ] } {
+                    uplevel 1 "set $RxRateBytes $value"
+                }
+            } elseif { $caption == "Frames Tx. Rate" } {
+                set value [ IxiaCapi::Regexer::IntTrans $value ]
+                if { [ string is double $value ] == 0 || $value == ""} {
+                    set value 0
+                }
+                
+                lappend retStats -TxRateFrames
+                lappend retStats $value
+                
+                if { [ info exists TxRateFrames ] } {
+                    uplevel 1 "set $TxRateFrames $value"
+                }
+            } elseif { $caption == "Bytes Tx. Rate" } {
+                set value [ IxiaCapi::Regexer::IntTrans $value ]
+                if { [ string is double $value ] == 0 || $value == ""} {
+                    set value 0
+                }
+                
+                lappend retStats -TxRateBytes
+                lappend retStats $value
+                
+                if { [ info exists TxRateBytes ] } {
+                    uplevel 1 "set $TxRateBytes $value"
+                }
             }
-            uplevel 1 "set $TxFrames $value"
         }
-
-        if { [ info exists RxFrames ] } {
-            set index [ lsearch -exact $statistics {Valid Frames Rx.} ]			
-            set value [ lindex $result $index ]			
-            set value [ IxiaCapi::Regexer::IntTrans $value ]
-            if { [ string is double $value ] == 0 || $value == ""} {
-                set value 0
-            }
-            uplevel 1 "set $RxFrames $value"
-        }
-
-        if { [ info exists TxBytes ] } {
-            set index [ lsearch -exact $statistics {Bytes Tx.} ]
-            set value [ lindex $result $index ]
-            set value [ IxiaCapi::Regexer::IntTrans $value ]
-            if { [ string is double $value ] == 0 || $value == ""} {
-                set value 0
-            }
-            uplevel 1 "set $TxBytes $value"
-        }
-
-        if { [ info exists RxBytes ] } {
-            set index [ lsearch -exact $statistics {Bytes Rx.} ]
-            set value [ lindex $result $index ]
-            set value [ IxiaCapi::Regexer::IntTrans $value ]
-            if { [ string is double $value ] == 0 || $value == ""} {
-                set value 0
-            }
-            uplevel 1 "set $RxBytes $value"
-        }
-
-        if { [ info exists TxSignature ] } {
-            set index [ lsearch -exact $statistics {Frames Tx.} ]
-            set value [ lindex $result $index ]
-            set value [ IxiaCapi::Regexer::IntTrans $value ]
-            if { [ string is double $value ] == 0 || $value == ""} {
-                set value 0
-            }
-            uplevel 1 "set $TxSignature $value"
-        }
-
-        # if { [ info exists RxSignature ] } {
-            # set index [ lsearch -exact $datastatistics {Rx Frames}  ]
-            # set value [ lindex $result $index ]
-            # set value [ IxiaCapi::Regexer::IntTrans $value ]
-            # if { [ string is double $value ] == 0 || $value == ""} {
-                # set value 0
-            # }
-            # uplevel 1 "set $RxSignature $value"
-        # }
-
-        if { [ info exists TxIpv4Frames ] } {
-            uplevel 1 "set $TxIpv4Frames NAN"
-        }
-
-        if { [ info exists RxIpv4Frames ] } {
-            uplevel 1 "set $RxIpv4Frames NAN"
-        }
-
-        if { [ info exists TxIpv6Frames ] } {
-            uplevel 1 "set $TxIpv6Frames NAN"
-        }
-
-        if { [ info exists RxIpv6Frames ] } {
-            uplevel 1 "set $RxIpv6Frames NAN"
-        }
-
-        if { [ info exists RxMplsFrames ] } {
-            uplevel 1 "set $RxMplsFrames NAN"
-        }
-
-        if { [ info exists RxMplsSignature ] } {
-            uplevel 1 "set $RxMplsSignature NAN"
-        }
-
-        if { [ info exists CrcErrors ] } {
-            set index [ lsearch -exact $statistics {CRC Errors} ]
-            set value [ lindex $result $index ]
-            set value [ IxiaCapi::Regexer::IntTrans $value ]
-            if { [ string is double $value ] == 0 || $value == ""} {
-                set value 0
-            }
-            uplevel 1 "set $CrcErrors $value"
-        }
-
-        if { [ info exists OverSize ] } {
-            set index [ lsearch -exact $statistics {Oversize} ]
-            set value [ lindex $result $index ]
-            set value [ IxiaCapi::Regexer::IntTrans $value ]
-            if { [ string is double $value ] == 0 || $value == ""} {
-                set value 0
-            }
-            uplevel 1 "set $OverSize $value"
-       }
-
-        if { [ info exists FragOrUndersize ] } {
-Deputs "FragOrUndersize..."
-            set index [ lsearch -exact $statistics {Undersize} ]
-Deputs "index:$index"
-            set value [ lindex $result $index ]
-Deputs "value:$value"
-            set value [ IxiaCapi::Regexer::IntTrans $value ]
-Deputs " trans value:$value"
-            if { [ string is double $value ] == 0 || $value == ""} {
-                set value 0
-            }
-            uplevel 1 "set $FragOrUndersize $value"
-        }
-
-        if { [ info exists TxArpReplies ] } {
-            set index [ lsearch -exact $statistics {Transmit Arp Reply} ]
-            set value [ lindex $result $index ]
-            set value [ IxiaCapi::Regexer::IntTrans $value ]
-            if { [ string is double $value ] == 0 || $value == ""} {
-                set value 0
-            }
-            uplevel 1 "set $TxArpReplies $value"
-        }
-
-        if { [ info exists RxArpReplies ] } {
-            set index [ lsearch -exact $statistics {Receive Arp Reply} ]
-            set value [ lindex $result $index ]
-            set value [ IxiaCapi::Regexer::IntTrans $value ]
-            if { [ string is double $value ] == 0 || $value == ""} {
-                set value 0
-            }
-            uplevel 1 "set $RxArpReplies $value"
-        }
-
-        if { [ info exists TxArpRequests ] } {
-            set index [ lsearch -exact $statistics {Transmit Arp Request} ]
-            set value [ lindex $result $index ]
-            set value [ IxiaCapi::Regexer::IntTrans $value ]
-            if { [ string is double $value ] == 0 || $value == ""} {
-                set value 0
-            }
-            uplevel 1 "set $TxArpRequests $value"
-        }
-
-        if { [ info exists RxArpRequests ] } {
-            set index [ lsearch -exact $statistics {Receive Arp Request} ]
-            set value [ lindex $result $index ]
-            set value [ IxiaCapi::Regexer::IntTrans $value ]
-            if { [ string is double $value ] == 0 || $value == ""} {
-                set value 0
-            }
-            uplevel 1 "set $RxArpRequests $value"
-        }
-
-        if { [ info exists RxJumboFrames ] } {
-            set index [ lsearch -exact $statistics {Undersize} ]
-            set value [ lindex $result $index ]
-            set value [ IxiaCapi::Regexer::IntTrans $value ]
-            if { [ string is double $value ] == 0 || $value == ""} {
-                set value 0
-            }
-            uplevel 1 "set $RxJumboFrames $value"
-        }
-
-        if { [ info exists RxIcmpv4DstUnreachable ] } {
-            uplevel 1 "set $RxIcmpv4DstUnreachable NAN"
-        }
-
-        if { [ info exists RxIcmpv6DstUnreachable ] } {
-            uplevel 1 "set $RxIcmpv6DstUnreachable NAN"
-        }
-
-        if { [ info exists RxIpv4chesumError ] } {
-            uplevel 1 "set $RxIpv4chesumError NAN"
-        }
-
-        if { [ info exists RxRateFrames ] } {
-            set index [ lsearch -exact $statistics {Valid Frames Rx. Rate} ]
-            set value [ lindex $result $index ]
-            set value [ IxiaCapi::Regexer::IntTrans $value ]
-            if { [ string is double $value ] == 0 || $value == ""} {
-                set value 0
-            }
-            uplevel 1 "set $RxRateFrames $value"
-        }
-
-        if { [ info exists RxRateBytes ] } {
-            set index [ lsearch -exact $statistics {Bytes Rx. Rate} ]
-            set value [ lindex $result $index ]
-            set value [ IxiaCapi::Regexer::IntTrans $value ]
-            if { [ string is double $value ] == 0 || $value == ""} {
-                set value 0
-            }
-            uplevel 1 "set $RxRateBytes $value"
-        }
-
-        if { [ info exists TxRateFrames ] } {
-            set index [ lsearch -exact $statistics {Frames Tx. Rate} ]
-            set value [ lindex $result $index ]
-            set value [ IxiaCapi::Regexer::IntTrans $value ]
-            if { [ string is double $value ] == 0 || $value == ""} {
-                set value 0
-            }
-            uplevel 1 "set $TxRateFrames $value"
-        }
-
-        if { [ info exists TxRateBytes ] } {
-            set index [ lsearch -exact $statistics {Bytes Tx. Rate} ]
-            set value [ lindex $result $index ]
-            set value [ IxiaCapi::Regexer::IntTrans $value ]
-            if { [ string is double $value ] == 0 || $value == ""} {
-                set value 0
-            }
-            uplevel 1 "set $TxRateBytes $value"
-        }
-
+        
         if { [ info exists TxStackFrames ] } {
             uplevel 1 "set $TxStackFrames NAN"
         }
-
+        lappend retStats -TxStackFrames
+        lappend retStats "NAN"
+        
         if { [ info exists RxStackFrames ] } {
             uplevel 1 "set $RxStackFrames NAN"
         }
-
+        lappend retStats -RxStackFrames
+        lappend retStats "NAN"
+        
         if { [ info exists PacketLoss ] } {
             uplevel 1 "set $PacketLoss NAN"
-        }        
+        }
+        lappend retStats -PacketLoss
+        lappend retStats "NAN"
+        
         if { [ info exists FilterName1 ] } {
             uplevel 1 "set $FilterName1 NAN"
         }
+        lappend retStats -FilterName1
+        lappend retStats "NAN"
+        
         if { [ info exists FilterName2 ] } {
             uplevel 1 "set $FilterName2 NAN"
         }
+        lappend retStats -FilterName2
+        lappend retStats "NAN"
+        
         if { [ info exists FilterName11 ] } {
             uplevel 1 "set $FilterName11 NAN"
         }
+        lappend retStats -FilterName11
+        lappend retStats "NAN"
+        
         if { [ info exists FilterName22 ] } {
             uplevel 1 "set $FilterName22 NAN"
         }
-
+        lappend retStats -FilterName22
+        lappend retStats "NAN"
+        
         if { [ info exists AverageLantency ] } {
             uplevel 1 "set $AverageLantency NAN"
         }
-		
+        lappend retStats -AverageLantency
+        lappend retStats "NAN"
+        
+        if { [ info exists RxIcmpv4DstUnreachable ] } {
+            uplevel 1 "set $RxIcmpv4DstUnreachable NAN"
+        }
+        lappend retStats -RxIcmpv4DstUnreachable
+        lappend retStats "NAN"
+        
+        if { [ info exists RxIcmpv6DstUnreachable ] } {
+            uplevel 1 "set $RxIcmpv6DstUnreachable NAN"
+        }
+        lappend retStats -RxIcmpv6DstUnreachable
+        lappend retStats "NAN"
+        
+        if { [ info exists RxIpv4chesumError ] } {
+            uplevel 1 "set $RxIpv4chesumError NAN"
+        }
+        lappend retStats -RxIpv4chesumError
+        lappend retStats "NAN"
+        
+        if { [ info exists TxIpv4Frames ] } {
+            uplevel 1 "set $TxIpv4Frames NAN"
+        }
+        lappend retStats -TxIpv4Frames
+        lappend retStats "NAN"
+        
+        if { [ info exists RxIpv4Frames ] } {
+            uplevel 1 "set $RxIpv4Frames NAN"
+        }
+        lappend retStats -RxIpv4Frames
+        lappend retStats "NAN"
+        
+        if { [ info exists TxIpv6Frames ] } {
+            uplevel 1 "set $TxIpv6Frames NAN"
+        }
+        lappend retStats -TxIpv6Frames
+        lappend retStats "NAN"
+        
+        if { [ info exists RxIpv6Frames ] } {
+            uplevel 1 "set $RxIpv6Frames NAN"
+        }
+        lappend retStats -RxIpv6Frames
+        lappend retStats "NAN"
+        
+        if { [ info exists RxMplsFrames ] } {
+            uplevel 1 "set $RxMplsFrames NAN"
+        }
+        lappend retStats -RxMplsFrames
+        lappend retStats "NAN"
+        
+        if { [ info exists RxMplsSignature ] } {
+            uplevel 1 "set $RxMplsSignature NAN"
+        }
+        lappend retStats -RxMplsSignature
+        lappend retStats "NAN"
+            
 		set dataresultList [ ixNet getA $dataPortview/page -rowValues ]
 		set rx_port        [ lsearch -exact $datastatistics Port]
 		set resultIndex 0
@@ -467,19 +537,24 @@ Deputs " trans value:$value"
 			    continue
 		    }
             
+            set index [ lsearch -exact $datastatistics {Rx Frames}  ]				
+            set value [ lindex $dataresult $index ]
+            set value [ IxiaCapi::Regexer::IntTrans $value ]
+            if { [ string is double $value ] == 0 || $value == ""} {
+                set value 0
+            }
             if { [ info exists RxSignature ] } {
-				set index [ lsearch -exact $datastatistics {Rx Frames}  ]				
-				set value [ lindex $dataresult $index ]
-				set value [ IxiaCapi::Regexer::IntTrans $value ]
-				if { [ string is double $value ] == 0 || $value == ""} {
-					set value 0
-				}
 				uplevel 1 "set $RxSignature $value"
 		    } 
-				
+            lappend retStats -RxSignature
+            lappend retStats $value	
 		}
         
-        return $IxiaCapi::errorcode(0)
+        if { [ info exists FilteredStream ] } {
+            return [list $retStats]
+        }
+
+        return $retStats
     }
 
     body TestStatistic::GetStreamStats_old { args } {

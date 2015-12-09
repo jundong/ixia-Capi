@@ -20,7 +20,7 @@
 #        4.add ixNetwork Stream
 #        5.add ixNetwork HeaderCreator
 #        6.add ixNetwork PacketBuilder
-# Change mad by Cathy on v2.7
+# Change made by Cathy on v2.7
 #        1.add ixNetwork TestAnalysis in TestStatistics
 #        2.add ixNetwork Filter
 #        3.remove ixOS package 
@@ -31,7 +31,6 @@ package req ip
 namespace import itcl::*
 
 proc GetEnvTcl { product } {
-   
    set productKey     "HKEY_LOCAL_MACHINE\\SOFTWARE\\Ixia Communications\\$product"
    set versionKey     [ registry keys $productKey ]
    set latestKey      [ lindex $versionKey end ]
@@ -40,29 +39,28 @@ proc GetEnvTcl { product } {
    }
    set installInfo    [ append productKey \\ $latestKey \\ InstallInfo ]            
    return             [ registry get $installInfo  HOMEDIR ]
-
 }
 
 set ixN_tcl_v "6.0"
 puts "connect to ixNetwork Tcl Server version $ixN_tcl_v"
 if { $::tcl_platform(platform) == "windows" } {
-	puts "windows platform..."
-	package require registry
+   puts "windows platform..."
+   package require registry
 
-	if { [ catch {
-	  lappend auto_path  "[ GetEnvTcl IxNetwork ]/TclScripts/lib/IxTclNetwork"
-	} err ] } {
-	  puts "Failed to invoke IxNetwork environment...$err"
-	}
+   if { [ catch {
+      lappend auto_path  "[ GetEnvTcl IxNetwork ]/TclScripts/lib/IxTclNetwork"
+   } err ] } {
+      puts "Failed to invoke IxNetwork environment...$err"
+   }
 
-puts "load package IxTclNetwork..."
-	package require IxTclNetwork
-	
-	# catch {	
-	# puts "load package IxTclHal..."	
-		# source [ GetEnvTcl IxOS ]/TclScripts/bin/ixiawish.tcl
-		# package require IxTclHal
-	# }
+   puts "load package IxTclNetwork..."
+   package require IxTclNetwork
+   
+   # catch {	
+   # puts "load package IxTclHal..."	
+      # source [ GetEnvTcl IxOS ]/TclScripts/bin/ixiawish.tcl
+      # package require IxTclHal
+   # }
 }
 
 set gOffline 0

@@ -3,7 +3,8 @@
 #
 # Copyright (c) Ixia technologies, Inc.
 
-# Change made
+# Change made by Judo on v3.3
+#       1. Added BreakLinks and RestoreLinks
 
 namespace eval IxiaCapi {
     class TestDevice {
@@ -22,6 +23,8 @@ namespace eval IxiaCapi {
         method ResetSession {} {}
         method CleanupTest {} {}
         method ForceReleasePort { args } {}
+        method BreakLinks { args } {}
+        method RestoreLinks { args } {}
         destructor {}
         
         private variable chassis
@@ -36,30 +39,30 @@ namespace eval IxiaCapi {
 
     body TestDevice::ResetSession {} {
 	    set tag "body TestDevice::ResetSession [info script]"
-Deputs "----- TAG: $tag -----"
+        Deputs "----- TAG: $tag -----"
         global errorInfo
    		
 		foreach portObj $PortList {           
-Deputs "port obj:$portObj reset"
+            Deputs "port obj:$portObj reset"
             $portObj Reset
         }
 		#IxiaCapi::PortManager Reset
         IxiaCapi::TrafficManager Reset
         set objects [ find objects ]
-Deputs "obj:$objects"
+        Deputs "obj:$objects"
         #how to avoid deleting itself...
         foreach obj $objects {
-#Deputs "Judge Objects:$obj"
+            #Deputs "Judge Objects:$obj"
             # if { [ lsearch -exact [ find objects ] $obj ] < 0 } {
-# #Deputs "deleted continue...$obj"
+                # #Deputs "deleted continue...$obj"
                 # continue
             # }
             # avoid to deleting the object out of the IxiaCapi
-#Deputs "Filter the object which is not created by IxiaCapi"
+            #Deputs "Filter the object which is not created by IxiaCapi"
             set outObject   1
-#Deputs "Class:[$obj info class]"
+            #Deputs "Class:[$obj info class]"
             foreach class $IxiaCapi::ResetSessionClass {
-#Deputs "regexp result:$class [regexp $class [ $obj info class ]]"
+            #Deputs "regexp result:$class [regexp $class [ $obj info class ]]"
                 if { [ regexp $class [ $obj info class ] ] } {
                     set outObject 0
                     break
@@ -71,55 +74,52 @@ Deputs "obj:$objects"
             
             set isTD [ $obj isa IxiaCapi::TestDevice ]
             if { $isTD > 0 } {
-Deputs "TestDevice continue...$obj"
+                Deputs "TestDevice continue...$obj"
                 continue
             }
                        
-			
 			if { [ regexp "DeviceManager" $obj ] ||
                 [ regexp "PortManager" $obj ] ||
                 [ regexp "TrafficManager" $obj ] ||
                 [ regexp "StatsManager" $obj ]  || 
 				([ $obj isa IxiaCapi::TestPort ] &&![$obj isa IxiaCapi::VlanSubInt])
-                 }   {
-Deputs "Manager continue...$obj"
+            }{
+                Deputs "Manager continue...$obj"
                 continue
             } else {
-
-Deputs "delete:$obj"
+                Deputs "delete:$obj"
                 if { [ lsearch -exact [find objects] $obj ] >=0 } {
                     catch {
                         delete object $obj
 						set objects [ find objects ]
-#Deputs "obj:$objects"
+                        #Deputs "obj:$objects"
                     }
                 }
             }
-        }
-        
+        }  
     }
-    body TestDevice::CleanupTest {} {
-       
-Deputs "----- TAG: CleanupTest -----"
+    
+    body TestDevice::CleanupTest {} {       
+        Deputs "----- TAG: CleanupTest -----"
         global errorInfo
         ResetPCFlag
         if { [ catch {			
 			IxiaCapi::TrafficManager Reset
             set objects [ find objects ]
-Deputs "obj:$objects"
-        #how to avoid deleting itself...
+            Deputs "obj:$objects"
+            #how to avoid deleting itself...
             foreach obj $objects {
-#Deputs "Judge Objects:$obj"
+                #Deputs "Judge Objects:$obj"
                 if { [ lsearch -exact [ find objects ] $obj ] < 0 } {
-#Deputs "deleted continue...$obj"
+                    #Deputs "deleted continue...$obj"
                     continue
                 }
                 # avoid to deleting the object out of the IxiaCapi
-#Deputs "Filter the object which is not created by IxiaCapi"
+                #Deputs "Filter the object which is not created by IxiaCapi"
                 set outObject   1
-#Deputs "Class:[$obj info class]"
+                #Deputs "Class:[$obj info class]"
                 foreach class $IxiaCapi::ResetSessionClass {
-#Deputs "regexp result:$class [regexp $class [ $obj info class ]]"
+                    #Deputs "regexp result:$class [regexp $class [ $obj info class ]]"
                     if { [ regexp $class [ $obj info class ] ] } {
                         set outObject 0
                         break
@@ -134,10 +134,10 @@ Deputs "obj:$objects"
                     [ regexp "PortManager" $obj ] ||
                     [ regexp "TrafficManager" $obj ] ||
                     [ regexp "StatsManager" $obj ] }   {    
-    Deputs "Manager continue...$obj"
+                    Deputs "Manager continue...$obj"
                     continue
                 } else {
-    Deputs "delete:$obj"
+                    Deputs "delete:$obj"
                     if { [ lsearch -exact [find objects] $obj ] >=0 } {
                         catch {
                             delete object $obj
@@ -153,11 +153,10 @@ Deputs "obj:$objects"
         return 0
     }
 
-
     # The hostname should be case sensitive 
     body TestDevice::constructor { {ipaddress null} {sessionlabel SYSTEM} } {
         set tag "body TestDevice::Ctor [info script]"
-Deputs "----- TAG: $tag -----"
+        Deputs "----- TAG: $tag -----"
         global gOffline
         set hConnect -1
         set PortList [ list ]
@@ -172,7 +171,7 @@ Deputs "----- TAG: $tag -----"
     body TestDevice::destructor { } {
         global errorInfo
         set tag "body TestDevice::destructor [info script]"
-Deputs "----- TAG: $tag -----"
+        Deputs "----- TAG: $tag -----"
         catch {
             DestroyTestPort
         }
@@ -181,8 +180,7 @@ Deputs "----- TAG: $tag -----"
         }
     }
     
-    body TestDevice::Connect { args } {
-        
+    body TestDevice::Connect { args } {       
         # to see more infomation about the following global params, see DefaultConfigue.tcl        
         global IxiaCapi::TRUE IxiaCapi::FALSE IxiaCapi::success IxiaCapi::fail IxiaCapi::on IxiaCapi::off
         global IxiaCapi::ConnectDefaultSession IxiaCapi::ConnectRetries \
@@ -198,7 +196,7 @@ Deputs "----- TAG: $tag -----"
         set port 8009
         set localhost localhost
         set tag "body TestDevice::Connect [info script]"
-Deputs "----- TAG: $tag -----"
+        Deputs "----- TAG: $tag -----"
         
         # To fix case TestDevice_009
         #Disconnect
@@ -229,10 +227,10 @@ Deputs "----- TAG: $tag -----"
             }
         }
         
-# set hostname
-Deputs "Connect $localhost ixNetwork Tcl Server "
+        # set hostname
+        Deputs "Connect $localhost ixNetwork Tcl Server "
         ixNet connect $localhost -version [ixNet getVersion] -port 8009;# connect to tclserver
-Deputs "Create a new Config"
+        Deputs "Create a new Config"
         ixNet exec newConfig ;# execute a new configuration
 
         if { $gOffline == 1 } {
@@ -240,8 +238,8 @@ Deputs "Create a new Config"
         } else {
             set root  [ixNet getRoot]
             set chassis [ixNet add $root/availableHardware chassis]
-Deputs "chassis:$chassis"
-Deputs "$ipCheck == $TRUE"
+            Deputs "chassis:$chassis"
+            Deputs "$ipCheck == $TRUE"
             if { $ipCheck == $TRUE } {
                 ixNet setAttribute $chassis -hostname $ipaddress ;#connect to chsssis
                 
@@ -252,7 +250,7 @@ Deputs "$ipCheck == $TRUE"
                 set chassis [ixNet remapIds $chassis]
 
             } else {
-    #Deputs "off:$off"
+                #Deputs "off:$off"
                 if {$ConnectDefaultSession == $off} {
                     IxiaCapi::Logger::LogIn -type warn -message "$IxiaCapi::s_TestDeviceConnect2 $IxiaCapi::s_TestDeviceConnect4"
                     return $IxiaCapi::errorcode(3)
@@ -274,7 +272,7 @@ Deputs "$ipCheck == $TRUE"
     body TestDevice::Disconnect { } {
         global errorInfo
         set tag "body TestDevice::Disonnect [info script]"
-Deputs "----- TAG: $tag -----"
+        Deputs "----- TAG: $tag -----"
         if { [ catch {
             ixNet exec newConfig ;# execute a new configuration
         } result ] } {
@@ -330,9 +328,9 @@ Deputs "----- TAG: $tag -----"
 		global gOffline
         
         set tag "body TestDevice::CreateTestPort [info script]"
-Deputs "----- TAG: $tag -----"
-Deputs "args: $args"
-# Param collection
+		Deputs "----- TAG: $tag -----"
+		Deputs "args: $args"
+		# Param collection
         foreach { key value } $args {
             set key [string tolower $key]
             switch -exact -- $key {
@@ -354,7 +352,7 @@ Deputs "args: $args"
                 -name {
                     #set value [::IxiaCapi::NamespaceDefine $value]
                     if { [ lsearch -exact $PortList $value ] < 0 } {    
-                        set name $value
+                        set name [::IxiaCapi::NamespaceDefine $value]
                     } else {
                         IxiaCapi::Logger::LogIn -type err -message \
                         "$IxiaCapi::s_TestDeviceCreateTestPort5 $value" -tag $tag
@@ -373,28 +371,29 @@ Deputs "args: $args"
                 }
             }
         }
-# Make sure the necessary params has been assigned
-    # ----- Location -----
+		# Make sure the necessary params has been assigned
+		# ----- Location -----
         if { [ info exist moduleNo ] == 0 || [ info exist portNo ] == 0 } {
             IxiaCapi::Logger::LogIn -type err -message \
             "$IxiaCapi::s_TestDeviceCreateTestPort2" -tag $tag
             return $IxiaCapi::errorcode(3)
         }
-    # ----- Name -----
+		# ----- Name -----
         if { [ info exists name ] == 0 } {
             IxiaCapi::Logger::LogIn -type err -message \
             "$IxiaCapi::s_TestDeviceCreateTestPort3" -tag $tag
             return $IxiaCapi::errorcode(3)
         }
-    # ----- Type -----
+		# ----- Type -----
         if { [ info exists type ] == 0 } {
             IxiaCapi::Logger::LogIn -type err -message \
             "$IxiaCapi::s_TestDeviceCreateTestPort4" -tag $tag
             return $IxiaCapi::errorcode(3)
         }
-# Type mapping
+		# Type mapping
         set type [string tolower $type]
         switch -exact -- $type {
+            ethernetvm -
             ethernet -
             eth {
                 set command "IxiaCapi::ETHPort $name $chassis $moduleNo $portNo"
@@ -427,12 +426,12 @@ Deputs "args: $args"
             }
         }
         if { [ info exists command ] } {
-Deputs $command
+			Deputs $command
 			eval $command
 			
-# -- set port configuration when the type of port is pos3, pos12, pos48, pos192, atm155, atm622
+			# -- set port configuration when the type of port is pos3, pos12, pos48, pos192, atm155, atm622
             if { [ info exists subType ] } {
-Deputs "Type: $subType "
+				Deputs "Type: $subType "
                 switch -exact -- $subType {
                     pos3 -
                     atm155 {
@@ -456,12 +455,12 @@ Deputs "Type: $subType "
             }
             
 			lappend PortList $name
-# -- obsolete: var create on up level
+			# -- obsolete: var create on up level
             #IxiaCapi::PortManager AddTestPort $name \
             #[ ${IxiaCapi::ObjectNamespace}$name cget -hPort ]
             #set handle [ uplevel 1 " $name cget -hPort " ]
 			set handle [ $name cget -hPort  ]
-Deputs "port handle:$handle\tname:$name"
+			Deputs "port handle:$handle\tname:$name"
             IxiaCapi::PortManager AddTestPort $name $handle
             IxiaCapi::Logger::LogIn -message \
             "$IxiaCapi::s_TestDeviceCreateTestPort7 $type"
@@ -477,14 +476,14 @@ Deputs "port handle:$handle\tname:$name"
         global errorInfo
         
         set tag "body TestDevice::DestroyTestPort [info script]"
-Deputs "----- TAG: $tag -----"
+		Deputs "----- TAG: $tag -----"
         
-# Make sure the traffic engine is stopped
-#Deputs Step10
-#        ixTclNet::StopTraffic
-#Deputs Step20
-#        ixTclNet::StopProtocols
-# Param collection
+		# Make sure the traffic engine is stopped
+		#Deputs Step10
+		#        ixTclNet::StopTraffic
+		#Deputs Step20
+		#        ixTclNet::StopProtocols
+		# Param collection
 
         foreach { key value } $args {
             set key [string tolower $key]
@@ -609,25 +608,25 @@ Deputs "streamlist value $streamstartList"
                 return $IxiaCapi::errorcode(7)
             }            
         }
-# Check the existence of start list
-# If negative start all 
+		# Check the existence of start list
+		# If negative start all 
         if { [info exists startList] == 0 && [info exists streamstartList] == 0 } {
 			Tester::start_traffic
         } else {
-# Or else start certain port
+			# Or else start certain port
             if { [info exists startList] } {
 				if { [ catch {
 					set exist 0
 					foreach port $startList {
 						if { [ lsearch -exact $PortList $port ] >= 0 } {
-Deputs "Port: $port "
+							Deputs "Port: $port "
 							if { [ catch {
 								set tra [ uplevel "[ uplevel "$port cget -Traffic" ] isa TrafficEngine" ]
 							} ] } {
-Deputs "Error occured:$errorInfo"
+								Deputs "Error occured:$errorInfo"
 								continue
 							}
-Deputs "Traffic: $tra"
+							Deputs "Traffic: $tra"
 							if { $tra == 0 } { continue }
 							#uplevel 1 " $port StartTraffic "
 							$port StartTraffic
@@ -732,9 +731,9 @@ Deputs "Traffic: $tra"
         global IxiaCapi::PortManager
         
         set tag "body TestDevice::StopTraffic [info script]"        
-Deputs "----- TAG: $tag -----"
-Deputs "args: $args "
-# Param collection --         
+        Deputs "----- TAG: $tag -----"
+        Deputs "args: $args "
+        # Param collection --         
         foreach { key value } $args {
             set key [string tolower $key]
             switch -exact -- $key {
@@ -763,19 +762,19 @@ Deputs "args: $args "
             }
         }
 
-# Check the existence of stop list
-# If negative stop all 
+        # Check the existence of stop list
+        # If negative stop all 
         if { [ info exists stopList ] == 0 && [ info exists streamstartList ] == 0 } {
             IxiaCapi::Logger::LogIn -message "$IxiaCapi::s_TestDeviceStopTraffic3"
             #set stopList $PortList
 			Tester::stop_traffic
         } else {
-# Or else start certain port
+            # Or else start certain port
             if { [info exists stopList] } {
 				set exist 0
 				foreach port $stopList {
-		Deputs "Port name: $port"
-		#Deputs "Port list: $PortList"
+                    Deputs "Port name: $port"
+                    #Deputs "Port list: $PortList"
 					if { [ lsearch -exact $PortList $port ] >= 0 } {
 						if { [ catch {
 							set tra [ uplevel 1 "$port cget -Traffic" ] 
@@ -783,10 +782,10 @@ Deputs "args: $args "
 								continue
 							}
 						} ] } {
-		Deputs "$errorInfo"
+                            Deputs "$errorInfo"
 							continue
 						}
-		Deputs "Traffic: $tra"
+                        Deputs "Traffic: $tra"
 						if { $tra == 0 } { continue }
 						#uplevel 1 " $port StopTraffic "
 						$port StopTraffic
@@ -839,13 +838,12 @@ Deputs "args: $args "
 		}	
     }
 
-
     body TestDevice::GetTestState { args } {
         global IxiaCapi::fail IxiaCapi::success
         global errorInfo 
         set tag "body TestDevice::GetTestState [info script]"        
-Deputs "----- TAG: $tag -----"
-# Param collection --                 
+        Deputs "----- TAG: $tag -----"
+        # Param collection --                 
         foreach { key value } $args {
             set key [string tolower $key]
             switch -exact -- $key {
@@ -965,8 +963,8 @@ Deputs "now:$now\tstart:$start\tduration:$duration"
     body TestDevice::ForceReleasePort { args } {
         global errorInfo 
         set tag "body TestDevice::ForceReleasePort [info script]"        
-Deputs "----- TAG: $tag -----"
-# Param collection --                 
+        Deputs "----- TAG: $tag -----"
+        # Param collection --                 
         foreach { key value } $args {
             set key [string tolower $key]
             switch -exact -- $key {
@@ -977,8 +975,7 @@ Deputs "----- TAG: $tag -----"
                 default {
                     IxiaCapi::Logger::LogIn -type err -message \
                     "$IxiaCapi::s_common1 $key\n\t\
-                    $IxiaCapi::s_common4 -routeengine\t-trafficengine\t\
-                    -elapsedtime\t-starttime" -tag $tag
+                    $IxiaCapi::s_common4 -portlocation\t-port" -tag $tag
                     return $IxiaCapi::errorcode(1)
                 }
             }
@@ -992,18 +989,18 @@ Deputs "----- TAG: $tag -----"
         set root [ixNet getRoot]
         set portList [ixNet getList $root vport]
         foreach port $portList {
-Deputs "port: $port"
+            Deputs "port: $port"
             set connectInfo [ ixNet getA $port -connectionInfo ]
-Deputs "connect info: $connectInfo"
+            Deputs "connect info: $connectInfo"
             if { [ regexp {card="(\d+)"} $connectInfo match cardNo ] && \
                 [ regexp {port="(\d+)"} $connectInfo match portNo ] } {
                 set portInfo ${cardNo}/$portNo
-Deputs "port info:$portInfo"
-Deputs "location:$location"
-Deputs "index search:[ lsearch -exact $location $portInfo ]"
+                Deputs "port info:$portInfo"
+                Deputs "location:$location"
+                Deputs "index search:[ lsearch -exact $location $portInfo ]"
                 if { [ lsearch -exact $location $portInfo ] >= 0 } {
                     lappend releasePort $port
-Deputs "release port:$releasePort"
+                    Deputs "release port:$releasePort"
                 }
             }
         }
@@ -1011,7 +1008,68 @@ Deputs "release port:$releasePort"
         if { [ llength $releasePort ] > 0 } {
             ixTclNet::ReleasePorts $releasePort
         }
-            return $IxiaCapi::errorcode(0)
+        
+        return $IxiaCapi::errorcode(0)
+    }
+    
+    body TestDevice::BreakLinks { args } {
+        global errorInfo 
+        set tag "body TestDevice::BreakLinks [info script]"        
+        Deputs "----- TAG: $tag -----"
+        # Param collection --                 
+        foreach { key value } $args {
+            set key [string tolower $key]
+            switch -exact -- $key {
+                -portname {
+                    set portObj $value
+                }
+                default {
+                    IxiaCapi::Logger::LogIn -type err -message \
+                    "$IxiaCapi::s_common1 $key\n\t\
+                    $IxiaCapi::s_common4 -PortName" -tag $tag
+                    return $IxiaCapi::errorcode(1)
+                }
+            }
+        }
+        if { [ info exists portObj ] == 0 } {
+            IxiaCapi::Logger::LogIn -type err -message \
+            "$IxiaCapi::s_common2 -PortName" -tag $tag
+            return $IxiaCapi::errorcode(3)
+        }
+        set port_hdl [$portObj cget -handle]
+        ixNet exec linkUpDn $port_hdl down
+        ixNet commit
+        return $IxiaCapi::errorcode(0)
+    }
+    
+    body TestDevice::RestoreLinks { args } {
+        global errorInfo 
+        set tag "body TestDevice::RestoreLinks [info script]"        
+        Deputs "----- TAG: $tag -----"
+        # Param collection --                 
+        foreach { key value } $args {
+            set key [string tolower $key]
+            switch -exact -- $key {
+                -portname {
+                    set portObj $value
+                }
+                default {
+                    IxiaCapi::Logger::LogIn -type err -message \
+                    "$IxiaCapi::s_common1 $key\n\t\
+                    $IxiaCapi::s_common4 -PortName" -tag $tag
+                    return $IxiaCapi::errorcode(1)
+                }
+            }
+        }
+        if { [ info exists portObj ] == 0 } {
+            IxiaCapi::Logger::LogIn -type err -message \
+            "$IxiaCapi::s_common2 -PortName" -tag $tag
+            return $IxiaCapi::errorcode(3)
+        }
+        set port_hdl [$portObj cget -handle]
+        ixNet exec linkUpDn $port_hdl up
+        ixNet commit
+        return $IxiaCapi::errorcode(0)
     }
 }
 

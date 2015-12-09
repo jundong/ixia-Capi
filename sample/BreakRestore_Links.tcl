@@ -40,18 +40,19 @@
 ######################################################################
 
 #Parameter configuration
-set chassisAddr 10.61.34.249
-set islot 3
-set portList {1 2} ;#The port list is port1, port2
+set chassisAddr 172.16.174.137
+set slotList {1 2}
+set portList {1 1} ;#The port list is port1, port2
 set ipList {10.0.0.3 20.0.0.3} 
 set macList {00-00-00-00-00-01 00-00-00-00-00-02}
 
 if { [catch {
-
-    cd ../Source
+    #cd "C:/Ixia/Workspace/ixia-Capi"
+    lappend auto_path "C:/Ixia/Workspace/ixia-Capi"
     #Loading HLAPI Lib
     puts "Loading HLAPI Lib"
-    source ./pkgIndex.tcl
+    #source ./pkgIndex.tcl
+    package require IxiaCAPI
 
     SetLogOption -Debug Enable
     
@@ -61,8 +62,8 @@ if { [catch {
 
     #Reserve 2 ports
     puts "Reserve 2 ports"
-    for {set i 0} {$i <[llength $portList]} {incr i} {
-        chassis1 CreateTestPort -PortLocation $islot/[lindex $portList $i] -PortName port[expr $i+1] -PortType Ethernet
+    for {set i 0} {$i < [llength $slotList]} {incr i} {
+        chassis1 CreateTestPort -PortLocation [lindex $slotList $i]/[lindex $portList $i] -PortName port[expr $i+1] -PortType Ethernet
     }
 
     #Create stream on sender port
@@ -112,7 +113,7 @@ if { [catch {
     port1 CreateStaEngine -StaEngineName Statistics1 -StaType Statistics
     port2 CreateStaEngine -StaEngineName Statistics2 -StaType Statistics
 
-    SaveConfigAsXML "D:/test_stream.xml"
+    SaveConfigAsXML "C:/Tmp/test_stream.xml"
 
     #Start statistics engine
     puts "Start statistics engine"

@@ -54,6 +54,7 @@ class Tester {
     proc start_traffic { { restartCaptureJudgement 1 } } {}
     proc stop_traffic {} {}
     proc start_router {} {}
+    proc apply_traffic {} {}
     proc stop_router {} {}
     proc start_capture { args } {}
     proc stop_capture { { wait 3000} } {}
@@ -645,27 +646,15 @@ Deputs "A2W..."
 			stop_router
 		}
 	}
+    
 	return [ GetStandardReturnHeader ]
-	
 }
 
 proc Tester::save_config { { config_file "d:/configfile.ixncfg" } } {
-   set tag "proc Tester::save_config [info script]"
-Deputs "----- TAG: $tag -----"
+    set tag "proc Tester::save_config [info script]"
+    Deputs "----- TAG: $tag -----"
 
-	# set config_file "d:/configfile.ixncfg" 
-
-    # foreach { key value } $args {
-        # set key [string tolower $key]
-        # switch -exact -- $key {
-            # -config_file {
-                # set config_file $value
-            # }
-        # }
-    # }
-	
-    set  result [ixNet exec  saveConfig [ixNet writeTo $config_file  -overwrite]]
+    set result [ixNet exec saveConfig [ixNet writeTo $config_file -overwrite]]
 	return [ GetStandardReturnHeader ]
-
 }
 

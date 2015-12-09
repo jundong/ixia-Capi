@@ -93,9 +93,9 @@ namespace eval IxiaCapi {
         public variable hPort
         public variable ospfRouterIdList
         public variable handle
-	public variable m_staEngineList
-	public variable m_trafficNameList
-	public variable m_filterNameList
+        public variable m_staEngineList
+        public variable m_trafficNameList
+        public variable m_filterNameList
         #public variable hostargs
         
         private variable MTU
@@ -162,7 +162,7 @@ Deputs "port handle to reset: $hPort"
         constructor { {chassis 0}  { slot 0 } { portNo 0 } { porthandle 0 }  } {
             chain $chassis $slot $portNo $porthandle } {
         set tag "body ETHPort::ctor [info script]"
-Deputs "----- TAG: $tag -----"
+			Deputs "----- TAG: $tag -----"
             set VlanIntList [ list ]
             set ArpList [ list ]
             set NdpList [ list ]
@@ -242,7 +242,7 @@ Deputs "----- TAG: $tag -----"
         set ModuleNo $moduleNo
         set PortNo $portNo
         set tag "body TestPort::ctor [info script]"
-Deputs "----- TAG: $tag -----"
+        Deputs "----- TAG: $tag -----"
         #-type (readOnly=False, type=kEnumValue=atm,ethernet,ethernetFcoe,ethernetImpairment,ethernetvm,
         #fc,fortyGigLan,fortyGigLanFcoe,hundredGigLan,hundredGigLanFcoe,pos,tenFortyHundredGigLan,
         #tenFortyHundredGigLanFcoe,tenGigLan,tenGigLanFcoe,tenGigWan,tenGigWanFcoe)
@@ -265,7 +265,7 @@ Deputs "----- TAG: $tag -----"
         set vport   [ixNet add $root vport]
         if { $gOffline == 0 } {
             set realPort    [ GetRealPort $chassis $ModuleNo $PortNo ]
-    Deputs "Real Port:$realPort"
+            Deputs "Real Port:$realPort"
             ixNet setMultiAttrs $vport \
                                 -name $this \
                                 -connectedTo $realPort
@@ -452,11 +452,10 @@ Deputs "Destroy host: $delHost success..."
         return $IxiaCapi::errorcode(0)
     }
 
-    body TestPort::CreateTraffic { args } {
-        
+    body TestPort::CreateTraffic { args } {   
         global errorInfo
         set tag "body TestPort::CreateTraffic [info script]"
-Deputs "----- TAG: $tag -----"
+		Deputs "----- TAG: $tag -----"
 
         foreach { key value } $args {
             set key [string tolower $key]
@@ -578,15 +577,13 @@ Deputs "args: $args"
     }
     
     body TestPort::StartTraffic { args } {
-        
         global errorInfo
-        
         global IxiaCapi::PortManager IxiaCapi::TrafficManager
         
         set tag "body TestPort::StartTraffic [info script]"
-Deputs "----- TAG: $tag -----"
+        Deputs "----- TAG: $tag -----"
         set clearStats 1
-# Param collection --        
+        # Param collection --        
         foreach { key value } $args {
             set key [string tolower $key]
             switch -exact -- $key {
@@ -621,8 +618,7 @@ Deputs "----- TAG: $tag -----"
             }
         }
 			
-	
-# Check the existence of TrafficEngine
+        # Check the existence of TrafficEngine
         set exist 1
         if { [ info exists Traffic ] == 0 } {
             set exist 0
@@ -647,14 +643,13 @@ Deputs "----- TAG: $tag -----"
 				break
 			}
 		}
-		
-		
+			
 		set flowList ""
-# Check streams, which should stop the traffic engine.
+        # Check streams, which should stop the traffic engine.
         if { [ info exists streamList ] } {
-    # To find how many profiles does stream list have
+            # To find how many profiles does stream list have
             # foreach stream  [ IxiaCapi::TrafficManager GetStreamHandleList ] {
-# Deputs "disable stream $stream"
+                # Deputs "disable stream $stream"
                 # ixNet setA $stream -suspend True
             # }
             foreach stream $streamList {
@@ -672,7 +667,6 @@ Deputs "----- TAG: $tag -----"
 								after 1000				
 								ixNet exec closeAllTabs		
                                 set restartCaptureJudgement 1								
-								
 							}
 						} 
 					}
@@ -687,7 +681,7 @@ Deputs "----- TAG: $tag -----"
                 }
             }
         }
-# Check profile, which should exist
+        # Check profile, which should exist
         if { [ info exists profileList ] } {
             set traObj [ IxiaCapi::Regexer::GetObject $Traffic ]
             set streamList [ $traObj GetStreamList ]
@@ -718,10 +712,10 @@ Deputs "----- TAG: $tag -----"
                 }
             }
         }
-# Start all stream --
+        # Start all stream --
         if { ( [ info exists streamList ] == 0 ) && ( [ info exists profileList ] == 0 ) } {
             # foreach stream  [ IxiaCapi::TrafficManager GetStreamHandleList ] {
-# Deputs "enable stream $stream"
+                # Deputs "enable stream $stream"
                 # ixNet setA $stream -suspend False
             # }
 			
@@ -747,14 +741,11 @@ Deputs "----- TAG: $tag -----"
 							after 1000				
 							ixNet exec closeAllTabs		
 							set restartCaptureJudgement 1								
-							
 						}
 					} 
 				}
 				lappend flowList $trafficObj
-				
 			}
-			
         }
         
 		#ixNet commit
@@ -766,13 +757,12 @@ Deputs "----- TAG: $tag -----"
 		
 		if { $restartCaptureJudgement } {
 			catch { 
-				
 				Deputs "start capture..."
 				ixNet exec startCapture
 				after 2000
 			}
 		}
-Deputs "flowList: $flowList"	
+        Deputs "flowList: $flowList"	
         if {$flowList != "" } {
 		    ixNet exec startStatelessTraffic $flowList
 		}
@@ -784,7 +774,7 @@ Deputs "flowList: $flowList"
 		}
 		set state [ ixNet getA $root/traffic -state ] 
 		if { $state != "started" } {
-	Deputs "start state:$state"
+            Deputs "start state:$state"
 			if { [string match startedWaiting* $state ] } {
 				set stopflag 1
 			} elseif {[string match stopped* $state ] && ($stopflag == 1)} {
@@ -792,26 +782,24 @@ Deputs "flowList: $flowList"
 			}	
 			after 1000		
 		} else {
-	Deputs "start state:$state"
+            Deputs "start state:$state"
 			break
 		}
 		incr timeout -1
-	Deputs "start timeout:$timeout state:$state"
+            Deputs "start timeout:$timeout state:$state"
 		}
 
         return $IxiaCapi::errorcode(0)
     }
     
-    body TestPort::StopTraffic { args } {
-        
+    body TestPort::StopTraffic { args } {      
         global errorInfo
-        
         global IxiaCapi::PortManager IxiaCapi::TrafficManager
                 
         set tag "body TestPort::StopTraffic [info script]"
-Deputs "----- TAG: $tag -----"
-        
-# Param collection --        
+        Deputs "----- TAG: $tag -----"
+                
+        # Param collection --        
         foreach { key value } $args {
             set key [string tolower $key]
             switch -exact -- $key {
@@ -819,7 +807,7 @@ Deputs "----- TAG: $tag -----"
                 -streams -
                 -streamlist -
                 -streamnamelist {
-                #-- the start based on stream is not supported
+                    #-- the start based on stream is not supported
                     #set streamList $value
                     set streamList [::IxiaCapi::NamespaceDefine $value]
                 }
@@ -837,7 +825,7 @@ Deputs "----- TAG: $tag -----"
             }
         }
         
-# Check the existence of TrafficEngine
+        # Check the existence of TrafficEngine
         if { [ info exists Traffic ] == 0 } {
             IxiaCapi::Logger::LogIn -type err \
             -message "$IxiaCapi::s_TestPortStopTraffic6"
@@ -852,11 +840,11 @@ Deputs "----- TAG: $tag -----"
             return $IxiaCapi::errorcode(2)
         }
 		set flowList ""
-# Check streams, which should stop the traffic engine.
+        # Check streams, which should stop the traffic engine.
         if { [ info exists streamList ] } {
-    # To find how many profiles does stream list have
+            # To find how many profiles does stream list have
             # foreach stream  [ IxiaCapi::TrafficManager GetStreamHandleList ] {
-# Deputs "disable stream $stream"
+                # Deputs "disable stream $stream"
                 # ixNet setA $stream -suspend True
             # }
             foreach stream $streamList {
@@ -879,45 +867,35 @@ Deputs "----- TAG: $tag -----"
                 }
             }
         }
-# Check profile, which should exist
+        # Check profile, which should exist
         if { [ info exists profileList ] } {
             set traObj [ IxiaCapi::Regexer::GetObject $Traffic ]
             set streamList [ $traObj GetStreamList ]
             foreach profile $profileList {
                 foreach stream $streamList {
                     set streamObj [ IxiaCapi::Regexer::GetObject $stream ]
-#Deputs "streamObj:$streamObj"
+                    #Deputs "streamObj:$streamObj"
                     set ProfileName [ $streamObj cget -ProfileName ]
-#Deputs "$ProfileName == $profile"
+                    #Deputs "$ProfileName == $profile"
                     if { $ProfileName == $profile } {
                         #ixNet setA $strObj -suspend False
 						set strObj [ uplevel 1 " $streamObj cget -hStream " ]
 						set trafficObj [ uplevel 1 " $streamObj cget -hTrafficItem " ]
-	#Deputs "enable stream $strObj"
+                        #Deputs "enable stream $strObj"
 						
 						lappend flowList $trafficObj
                     }
                 }
             }
         }
-# Start all stream --
+        # Start all stream --
         if { ( [ info exists streamList ] == 0 ) && ( [ info exists profileList ] == 0 ) } {
-            # foreach stream  [ IxiaCapi::TrafficManager GetStreamHandleList ] {
-# Deputs "enable stream $stream"
-                # ixNet setA $stream -suspend False
-            # }
 			set traObj [ IxiaCapi::Regexer::GetObject $Traffic ]
             set streamList [ $traObj GetStreamList ]
 			foreach stream $streamList {
 				set streamObj [ IxiaCapi::Regexer::GetObject $stream ]
-#Deputs "streamObj:$streamObj"				
-				#ixNet setA $strObj -suspend False
 				set strObj [ uplevel 1 " $streamObj cget -hStream " ]
 				set trafficObj [ uplevel 1 " $streamObj cget -hTrafficItem " ]
-#Deputs "enable stream $strObj"
-				# if {[ ixNet getA $trafficObj -state ] == "unapplied" } {
-				   # Tester::apply_traffic
-				# }
 				lappend flowList $trafficObj
 				
 			}
@@ -929,28 +907,30 @@ Deputs "----- TAG: $tag -----"
 		set timeout 10
 		set root [ixNet getRoot]
 		while { 1 } {
-		if { !$timeout } {
-			break
+            if { !$timeout } {
+                break
+            }
+            set state [ ixNet getA $root/traffic -state ] 
+            if { ( $state != "stopped" ) && ( $state != "unapplied" ) } {
+                after 1000
+            } else {
+                break
+            }
+            incr timeout -1
+            Deputs "stop timeout:$timeout"
 		}
-		set state [ ixNet getA $root/traffic -state ] 
-		if { ( $state != "stopped" ) && ( $state != "unapplied" ) } {
-			after 1000
-		} else {
-			break
-		}
-		incr timeout -1
-	Deputs "stop timeout:$timeout"
-		}
-		
-
+        
+        Deputs "stop capture..."
+        ixNet exec stopCapture
+        after 1000
+                            
         return $IxiaCapi::errorcode(0)
     }
+    
     body TestPort::CreateStaEngine { args } {
-        
-        
         global errorInfo
         set tag "body TestPort::CreateStaEngine [info script]"
-Deputs "----- TAG: $tag -----"
+        Deputs "----- TAG: $tag -----"
         
         set EType [ list STATISTICS ANALYSIS ]
         
@@ -1157,15 +1137,14 @@ Deputs "Exist : $exist "
 
     
     
-    body TestPort::CreateFilter { args } {
-        
+    body TestPort::CreateFilter { args } {       
         global errorInfo
         set tag "body TestPort::CreateFilter [info script]"
-Deputs "----- TAG: $tag -----"
+		Deputs "----- TAG: $tag -----"
 
         set EType [ list UDF STACK ]
         
-# Param collection --        
+		# Param collection --        
         foreach { key value } $args {
             set key [string tolower $key]
             switch -exact -- $key {
@@ -1201,36 +1180,36 @@ Deputs "----- TAG: $tag -----"
                 }
             }
         }
-# Make sure the traffic engine is stopped
+		# Make sure the traffic engine is stopped
         if { [ IxiaCapi::Lib::TrafficStopped ] == 0 } {
             IxiaCapi::Logger::LogIn -type err -message \
             "$IxiaCapi::s_common5" -tag $tag
             return $IxiaCapi::errorcode(8)
         }
-# Make sure the necessary params has been assigned
-    # ----- Name -----
+		# Make sure the necessary params has been assigned
+		# ----- Name -----
         if { [ info exists name ] == 0 } {
             IxiaCapi::Logger::LogIn -type err -message \
             "$IxiaCapi::s_common1 $IxiaCapi::s_TestPortCreateFilter2" -tag $tag
             return $IxiaCapi::errorcode(3)
         }
-    # ----- Type -----
+		# ----- Type -----
         if { [ info exists type ] == 0 } {
             IxiaCapi::Logger::LogIn -type err -message \
                 "$IxiaCapi::s_common1 $IxiaCapi::s_TestPortCreateFilter3 $EType" -tag $tag
             return $IxiaCapi::errorcode(3)
         }
-    # ----- Value -----
+		# ----- Value -----
         if { [ info exists filtervalue ] == 0 } {
             IxiaCapi::Logger::LogIn -type err -message \
                 "$IxiaCapi::s_common1 $IxiaCapi::s_TestPortCreateFilter6" -tag $tag
             return $IxiaCapi::errorcode(3)
         }
-# Invoke the Filter constructor
+		# Invoke the Filter constructor
         if { [ catch {
-Deputs Step00
+			Deputs Step00
             set command "IxiaCapi::Filter $name $hPort $type {$filtervalue}"
-Deputs "$name $hPort $type $filtervalue"
+			Deputs "$name $hPort $type $filtervalue"
             #namespace inscope $IxiaCapi::ObjectNamespace $command
             uplevel 1 " eval {$command} "
             #set hMatch [ uplevel 1 "$name cget -hMatch" ]
@@ -1249,12 +1228,11 @@ Deputs "$name $hPort $type $filtervalue"
     }
     
     body TestPort::DestroyFilter { args } {
-        
         global errorInfo
         set tag "body TestPort::DestroyFilter [info script]"
-Deputs "----- TAG: $tag -----"
+        Deputs "----- TAG: $tag -----"
         set level 1
-# Param collection --        
+        # Param collection --        
         foreach { key value } $args {
             set key [string tolower $key]
             switch -exact -- $key {
@@ -1265,52 +1243,56 @@ Deputs "----- TAG: $tag -----"
                 }
             }
         }
-# Make sure the traffic engine is stopped
+        # Make sure the traffic engine is stopped
         if { [ IxiaCapi::Lib::TrafficStopped ] == 0 } {
             IxiaCapi::Logger::LogIn -type err -message \
             "$IxiaCapi::s_common5" -tag $tag
             return $IxiaCapi::errorcode(8)
         }
-# Make sure the existence of the Name
-    # If positive delete the certain filter
+        # Make sure the existence of the Name
+        # If positive delete the certain filter
         if { [ catch {
-Deputs Step10
-        if { [ info exists name ] } {
-            set index [ lsearch -exact $FilterList $name ]
-Deputs Step20
-Deputs "index:$index"
-            if { $index < 0 } {
-Deputs Step30
-                IxiaCapi::Logger::LogIn -type err -message \
-                "$IxiaCapi::s_TestPortDestroyFilter1 $value" -tag $tag
-Deputs Step35
-                return $IxiaCapi::errorcode(4)
-            } else {
-Deputs Step40
-                set FilterList [ lreplace $FilterList $index $index ]
-Deputs "Filter list:$FilterList"
-Deputs Step50
-Deputs "objects:[find objects]"
-                $name CleanFilter
-                if { [ catch { uplevel $level " delete object $name " } ] } {
-                    incr level
-                    catch { uplevel $level " delete object $name " } 
-                } 
-Deputs Step60
-            }
-        } else {
-    # Or else delete all filters
-            if { [ info exists FilterList ] } {
-                foreach filter $FilterList {
-                    if { [ catch { uplevel $level " delete object $filter " } ] } {
+            Deputs Step10
+            if { [ info exists name ] } {
+                set index [ lsearch -exact $FilterList $name ]
+                Deputs Step20
+                Deputs "index:$index"
+                if { $index < 0 } {
+                    Deputs Step30
+                    IxiaCapi::Logger::LogIn -type err -message \
+                    "$IxiaCapi::s_TestPortDestroyFilter1 $value" -tag $tag
+                    Deputs Step35
+                    return $IxiaCapi::errorcode(4)
+                } else {
+                    Deputs Step40
+                    set FilterList [ lreplace $FilterList $index $index ]
+                    Deputs "Filter list:$FilterList"
+                    Deputs Step50
+                    Deputs "objects:[find objects]"
+                    $name CleanFilter
+                    if { [ catch { uplevel $level " delete object $name " } ] } {
                         incr level
-                        [ catch { uplevel $level " delete object $filter " } ]
-                    }
+                        catch { uplevel $level " delete object $name " } 
+                    } 
+                    Deputs Step60
                 }
-                set FilterList  [ list ]
-                set m_filterNameList [ list ]
+            } else {
+                # Or else delete all filters
+                if { [ info exists FilterList ] } {
+                    set level 1
+                    foreach filter $FilterList {
+                        Deputs "delete:$filter"
+                        if { [ lsearch -exact [find objects] $filter ] >=0 } {
+                            if { [ catch { uplevel $level " delete object $filter " } ] } {
+                                incr level
+                                [ catch { uplevel $level " delete object $filter " } ]
+                            }
+                        }
+                    }
+                    set FilterList  [ list ]
+                    set m_filterNameList [ list ]
+                }
             }
-        }
         } result ] } {
             IxiaCapi::Logger::LogIn -type err -message "$errorInfo" -tag $tag
             return $IxiaCapi::errorcode(7)
@@ -1322,14 +1304,13 @@ Deputs Step60
     }
     
     body TestPort::ConfigFilter { args } {
-        
         global errorInfo
         set tag "body TestPort::ConfigFilter [info script]"
-Deputs "----- TAG: $tag -----"
+        Deputs "----- TAG: $tag -----"
         
         set EType [ list UDF STACK ]
         
-# Param collection --        
+        # Param collection --        
         foreach { key value } $args {
             set key [string tolower $key]
             switch -exact -- $key {
