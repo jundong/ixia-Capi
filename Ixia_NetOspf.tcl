@@ -82,24 +82,15 @@ Deputs "handle:$handle"
 	}	
 }
 body OspfSession::config { args } {
-	
     global errorInfo
     global errNumber
 	
-	#set area_id "0.0.0.0"
-	#set hello_interval 10
-	#set if_cost 1
-	#set network_type "native"
-	#set options "v6bit | rbit | ebit"
-	#set router_dead_interval 40
-	
 	set intf_num 1
-	
     set tag "body OspfSession::config [info script]"
-Deputs "----- TAG: $tag -----"
-	
-#param collection
-Deputs "Args:$args "
+    Deputs "----- TAG: $tag -----"
+        
+    #param collection
+    Deputs "Args:$args "
     foreach { key value } $args {
         set key [string tolower $key]
         switch -exact -- $key {
@@ -145,10 +136,11 @@ Deputs "Args:$args "
 	ixNet setM $handle -enabled True
 	
 	if { [ info exists router_id ] } {
-Deputs "router_id:$router_id"	
+        Deputs "router_id:$router_id"	
 		ixNet setA $handle -routerId $router_id
 		ixNet commit
-	}	
+	}
+    
 	if { [ info exists area_id ] } {
 		if {[ixNet getA $hPort/protocols/ospf -enabled]} {
 			set attri "-areaId"
@@ -164,6 +156,7 @@ Deputs "router_id:$router_id"
 		}
 		ixNet commit
 	}
+    
 	if { [ info exists hello_interval ] } {
 		foreach int $rb_interface {
 			ixNet setA $interface($int) -helloInterval $hello_interval

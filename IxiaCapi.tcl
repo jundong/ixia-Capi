@@ -121,9 +121,6 @@ source [file join $currDir Ixia_NetIsis.tcl]
 source [file join $currDir IxNetISIS.tcl]
 source [file join $currDir IxNetOSPF.tcl]
 
-
-
-
 set errNumber(1)    "Bad argument value or out of range..."
 set errNumber(2)    "Madatory argument missed..."
 set errNumber(3)    "Unsupported parameter..."

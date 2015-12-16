@@ -53,12 +53,10 @@ namespace eval IxiaCapi {
         }
     }
 
-
-    
     body TrafficEngine::constructor { portHnadle } {
         global errorInfo IxiaCapi::TrafficManager
         set tag "body TrafficEngine::ctor [info script]"
-Deputs "----- TAG: $tag -----"
+        Deputs "----- TAG: $tag -----"
         set hPort $portHnadle
         set ProfileList [ list ]
         set StreamList [ list ]
@@ -67,9 +65,7 @@ Deputs "----- TAG: $tag -----"
         # Get port name to create default profile
         set vport $portHnadle
         #CreateProfile -name ${this}_Profile1
-		
-        set ProfileLevel 1
-        
+        set ProfileLevel 1 
     }
     
     body TrafficEngine::CreateProfile { args } {
@@ -77,12 +73,12 @@ Deputs "----- TAG: $tag -----"
         global IxiaCapi::TrafficManager
 
         set tag "body TrafficEngine::CreateProfile [info script]"
-Deputs "----- TAG: $tag -----"
+        Deputs "----- TAG: $tag -----"
 
         set EType [ list CONSTANT BURST CUSTOM ]
         set Type  $IxiaCapi::DefaultTrafficType
         set level $ProfileLevel
-# Param collection --
+        # Param collection --
         foreach { key value } $args {
             set key [string tolower $key]
             switch -exact -- $key {
@@ -97,36 +93,36 @@ Deputs "----- TAG: $tag -----"
                 }
             }
         }
-# Make sure the traffic engine is stopped
+        # Make sure the traffic engine is stopped
         if { [ IxiaCapi::Lib::TrafficStopped ] == 0 } {
             IxiaCapi::Logger::LogIn -type err -message \
             "$IxiaCapi::s_common5" -tag $tag
                     return $IxiaCapi::errorcode(8)
         }
-# Make sure the necessary param has been assigned --
+        # Make sure the necessary param has been assigned --
         if { [info exists name] == 0 } {
             IxiaCapi::Logger::LogIn -type err -message \
             "$IxiaCapi::s_common1 \n\t $IxiaCapi::s_TrafficEngineCreateProfile1" -tag $tag
                     return $IxiaCapi::errorcode(3)
         }
-# Check whether the profile with same name has been existed.
-# If so an error will occured --
+        # Check whether the profile with same name has been existed.
+        # If so an error will occured --
         if { [ lsearch -exact $ProfileList $name ] >= 0 } {
             IxiaCapi::Logger::LogIn -type err -message \
             "$IxiaCapi::s_TrafficEngineCreateProfile2 $value" -tag $tag
                     return $IxiaCapi::errorcode(4)
         }
-# Create the new object --
+        # Create the new object --
         if { [ catch {
             set command " IxiaCapi::Profile $name -hPort $hPort -type $Type"
-Deputs "CMD:$command"
+            Deputs "CMD:$command"
             #namespace inscope $IxiaCapi::ObjectNamespace $command
             #eval ${IxiaCapi::ObjectNamespace}$name Config $args
-Deputs "level:$level"
+            Deputs "level:$level"
             #uplevel " eval $command "
             set relprofile [ uplevel $level " eval $command " ]
 			Deputs "relprofile: $relprofile"
-Deputs "create profile done...configuration started"
+            Deputs "create profile done...configuration started"
             uplevel $level " $relprofile Config $args "
             } result ] } {
             IxiaCapi::Logger::LogIn -type err -message "$errorInfo" -tag $tag
@@ -141,13 +137,14 @@ Deputs "create profile done...configuration started"
         IxiaCapi::Logger::LogIn -message "$IxiaCapi::s_TrafficEngineCreateProfile3 $name"
                     return $IxiaCapi::errorcode(0)
     }
+    
     body TrafficEngine::DestroyProfile { args } {
         global errorInfo
         global IxiaCapi::TrafficManager
         set tag "body TrafficEngine::CreateProfile [info script]"
         set level 1
-Deputs "----- TAG: $tag -----"
-# Param collection --
+        Deputs "----- TAG: $tag -----"
+        # Param collection --
         foreach { key value } $args {
             set key [string tolower $key]
             switch -exact -- $key {
@@ -167,18 +164,18 @@ Deputs "----- TAG: $tag -----"
                 }
             }
         }
-# Make sure the traffic engine is stopped
+        # Make sure the traffic engine is stopped
         if { [ IxiaCapi::Lib::TrafficStopped ] == 0 } {
             IxiaCapi::Logger::LogIn -type err -message \
             "$IxiaCapi::s_common5" -tag $tag
                     return $IxiaCapi::errorcode(8)
         }
-# Check whether the name is assigned
-# If negative destroy the all profiles on current port
+        # Check whether the name is assigned
+        # If negative destroy the all profiles on current port
         if { [ info exists name ] == 0 } {
             set delList $ProfileList
         }
-# or else destroy certain ones
+        # or else destroy certain ones
         foreach delPro $delList {
             set delIndex [ lsearch $ProfileList $delPro ]
             if { $delIndex < 0 } {
@@ -200,12 +197,13 @@ Deputs "----- TAG: $tag -----"
         }
                     return $IxiaCapi::errorcode(0)
     }
+    
     body TrafficEngine::ConfigProfile { args } {
         global errorInfo
         set tag "body TrafficEngine::ConfigProfile [info script]"
         set level $ProfileLevel
-Deputs "----- TAG: $tag -----"
-# Param collection --
+        Deputs "----- TAG: $tag -----"
+        # Param collection --
         foreach { key value } $args {
             set key [string tolower $key]
             switch -exact -- $key {
@@ -262,11 +260,11 @@ Deputs "----- TAG: $tag -----"
 
         set frameLen $IxiaCapi::DefaultFrameLen
         set level 1
-Deputs "----- TAG: $tag -----"
-Deputs " args: $args "
+        Deputs "----- TAG: $tag -----"
+        Deputs " args: $args "
         set EType   [ list NORMAL DHCPV4 DHCPV6 PPPOXV4 PPPOXV6 802DOT1XV4 802DOT1XV6 PPPOX  ]
         set Type NORMAL
-# Param collection --
+        # Param collection --
         foreach { key value } $args {
             set key [string tolower $key]
             switch -exact -- $key {
@@ -328,15 +326,15 @@ Deputs " args: $args "
                 }
             }
         }
-# Make sure the traffic engine is stopped
+        # Make sure the traffic engine is stopped
         if { [ IxiaCapi::Lib::TrafficStopped ] == 0 } {
             IxiaCapi::Logger::LogIn -type err -message \
             "$IxiaCapi::s_common5" -tag $tag
                     return $IxiaCapi::errorcode(8)
         }
-# Check the type of stream to create
-
-Deputs "Stream Type:$Type"
+        # Check the type of stream to create
+        
+        Deputs "Stream Type:$Type"
         # if { [$srcPoolName isa IxiaCapi::TestPort ] ||  [$dstPoolName isa IxiaCapi::TestPort ]} {
 		    # set Type NORMAL
 			# Deputs "Stream Type:$Type"
@@ -349,18 +347,18 @@ Deputs "Stream Type:$Type"
          }
         switch -exact -- $Type {
             NORMAL {
-        # Make sure the necessary variable has been assigned --
+                # Make sure the necessary variable has been assigned --
                 if { [ info exists name ] } {
-        # Check the existence of the stream to be created
-        # If posotive an error will be occured
+                    # Check the existence of the stream to be created
+                    # If posotive an error will be occured
 		            ListStreams 
                     if { [ lsearch -regexp $StreamList .*$name ] >= 0 } {
                         IxiaCapi::Logger::LogIn -type err -message \
                         "$IxiaCapi::s_TrafficEngineCreateStream8" -tag $tag
                             return $IxiaCapi::errorcode(4)
                     }
-        # Check the existence of the input profile name
-        # If negative a default profile will be created
+                    # Check the existence of the input profile name
+                    # If negative a default profile will be created
                     if { [ catch {
                         if { [ info exists profileName ] } {
                             if { [ lsearch -exact $ProfileList $profileName ] < 0 } {
@@ -379,34 +377,34 @@ Deputs "Stream Type:$Type"
                         IxiaCapi::Logger::LogIn -type err -message "$errorInfo" -tag $tag
                             return $IxiaCapi::errorcode(7)
                     }
-        # Invoke the Ctor of Stream class
+                    # Invoke the Ctor of Stream class
                     #namespace inscope $IxiaCapi::ObjectNamespace $command
                     #uplevel $level " eval $command "
 					set relstreamname [  eval $command  ]					
 					Deputs "relstreamname: $relstreamname"
 		
 					$relstreamname configure -flagCommit 0
-        # To config the stream obj
+                    # To config the stream obj
                     if { [ catch {                      
 						set hStreamGroup [ $relstreamname cget -hStream  ]
 						AddStream $relstreamname
                         #lappend StreamList $relstreamname
-        Deputs "Config Stream..."
+                        Deputs "Config Stream..."
                         set StreamLevel 2   
 						
                         eval { ConfigStream } $args -encaptype APP
-        #Deputs "StreamLevel:$StreamLevel"
+                        #Deputs "StreamLevel:$StreamLevel"
                        
                         set StreamLevel 1
-        #Deputs "Config Stream success."
+                        #Deputs "Config Stream success."
                     } result ] } {
                         IxiaCapi::Logger::LogIn -type err -message "$errorInfo" -tag $tag
                             return $IxiaCapi::errorcode(7)
                         catch { DestroyStream -name $name }
                     } else {
-        # Add to Surpervisor
+                        # Add to Surpervisor
                         TrafficManager AddStreamGroup $relstreamname $hStreamGroup
-        Deputs "name:$name\tstream handle:$hStreamGroup"
+                        Deputs "name:$name\tstream handle:$hStreamGroup"
                     }
                 } else {
                     IxiaCapi::Logger::LogIn -type err -message \
@@ -418,24 +416,25 @@ Deputs "Stream Type:$Type"
 			802DOT1XV4 -
             DHCPV4 -
             PPPOXV4 {
-        # Make sure the necessary variable has been assigned --
+                # Make sure the necessary variable has been assigned --
                 if { [ info exists name ] } {
-        # Check the existence of the stream to be created
-        # If posotive an error will be occured
+                    # Check the existence of the stream to be created
+                    # If posotive an error will be occured
 		            ListStreams 
                     if { [ lsearch -regexp $StreamList .*$name ] >= 0 } {
                         IxiaCapi::Logger::LogIn -type err -message \
                         "$IxiaCapi::s_TrafficEngineCreateStream8" -tag $tag
                             return $IxiaCapi::errorcode(4)
                     }
-        # Check the existence of the input profile name
-        # If negative a default profile will be created
+                    # Check the existence of the input profile name
+                    # If negative a default profile will be created
                     if { [ catch {
                         if { [ info exists profileName ] } {
                             if { [ lsearch -exact $ProfileList $profileName ] < 0 } {
                                 IxiaCapi::Logger::LogIn -type err -message \
                                 "$IxiaCapi::s_TrafficEngineCreateStream3 $profileName" -tag $tag
-                            return $IxiaCapi::errorcode(4)
+                                
+                                return $IxiaCapi::errorcode(4)
                             }
                             #set command " IxiaCapi::Stream $name $hPort $hTrafficItem $profileName "
 							set command " IxiaCapi::Stream $name $hPort $PortObj -profileName $profileName "
@@ -450,28 +449,28 @@ Deputs "Stream Type:$Type"
                         IxiaCapi::Logger::LogIn -type err -message "$errorInfo" -tag $tag
                             return $IxiaCapi::errorcode(7)
                     }
-        # Invoke the Ctor of Stream class                 
+                    # Invoke the Ctor of Stream class                 
 					set relstreamname [  eval $command  ]
 					
 					Deputs "relstreamname: $relstreamname"					
 					$relstreamname configure -flagCommit 0
-        # To config the stream obj
+                    # To config the stream obj
                     if { [ catch {
                         #set hStreamGroup [ uplevel $level " $name cget -hStream " ]
 						set hStreamGroup [ $relstreamname cget -hStream  ]
 						AddStream $relstreamname
                         #lappend StreamList $relstreamname
-        Deputs "Config Stream..."                        
+                        Deputs "Config Stream..."                        
                         set StreamLevel 1
-        Deputs "Config Stream success."
+                        Deputs "Config Stream success."
                     } result ] } {
                         IxiaCapi::Logger::LogIn -type err -message "$errorInfo" -tag $tag
                             return $IxiaCapi::errorcode(7)
                         catch { DestroyStream -name $name }
                     } else {
-        # Add to Surpervisor
+                        # Add to Surpervisor
                         TrafficManager AddStreamGroup $relstreamname $hStreamGroup
-        Deputs "name:$name\tstream handle:$hStreamGroup"
+                        Deputs "name:$name\tstream handle:$hStreamGroup"
                     }
                 } else {
                     IxiaCapi::Logger::LogIn -type err -message \
@@ -484,18 +483,18 @@ Deputs "Stream Type:$Type"
             DHCPV6 -
             PPPOXV6 -
 			PPPOX {
-        # Make sure the necessary variable has been assigned --
+                # Make sure the necessary variable has been assigned --
                 if { [ info exists name ] } {
-        # Check the existence of the stream to be created
-        # If posotive an error will be occured
+                    # Check the existence of the stream to be created
+                    # If posotive an error will be occured
 		            ListStreams 
                     if { [ lsearch -regexp $StreamList .*$name ] >= 0 } {
                         IxiaCapi::Logger::LogIn -type err -message \
                         "$IxiaCapi::s_TrafficEngineCreateStream8" -tag $tag
                             return $IxiaCapi::errorcode(4)
                     }
-        # Check the existence of the input profile name
-        # If negative a default profile will be created
+                    # Check the existence of the input profile name
+                    # If negative a default profile will be created
                     if { [ catch {
                         if { [ info exists profileName ] } {
                             if { [ lsearch -exact $ProfileList $profileName ] < 0 } {
@@ -516,28 +515,28 @@ Deputs "Stream Type:$Type"
                         IxiaCapi::Logger::LogIn -type err -message "$errorInfo" -tag $tag
                             return $IxiaCapi::errorcode(7)
                     }
-        # Invoke the Ctor of Stream class                 
+                    # Invoke the Ctor of Stream class                 
 					set relstreamname [  eval $command  ]
 					
 					Deputs "relstreamname: $relstreamname"					
 					$relstreamname configure -flagCommit 0
-        # To config the stream obj
+                    # To config the stream obj
                     if { [ catch {
                         #set hStreamGroup [ uplevel $level " $name cget -hStream " ]
 						set hStreamGroup [ $relstreamname cget -hStream  ]
 						AddStream $relstreamname
                         #lappend StreamList $relstreamname
-        #Deputs "Config Stream..."                        
+                        #Deputs "Config Stream..."                        
                         set StreamLevel 1
-        #Deputs "Config Stream success."
+                        #Deputs "Config Stream success."
                     } result ] } {
                         IxiaCapi::Logger::LogIn -type err -message "$errorInfo" -tag $tag
                             return $IxiaCapi::errorcode(7)
                         catch { DestroyStream -name $name }
                     } else {
-        # Add to Surpervisor
+                        # Add to Surpervisor
                         TrafficManager AddStreamGroup $relstreamname $hStreamGroup
-        Deputs "name:$name\tstream handle:$hStreamGroup"
+                        Deputs "name:$name\tstream handle:$hStreamGroup"
                     }
                 } else {
                     IxiaCapi::Logger::LogIn -type err -message \
@@ -547,6 +546,7 @@ Deputs "Stream Type:$Type"
                 }
             }
         }
+        
         return $IxiaCapi::errorcode(0)
     }
     
@@ -622,9 +622,9 @@ Deputs "$StreamList "
         set level $StreamLevel
         set encapType MOD
         set l2 "ethernet"
-Deputs "----- TAG: $tag -----"
-Deputs "args: $args"
-# Param collection --
+        Deputs "----- TAG: $tag -----"
+        Deputs "args: $args"
+        # Param collection --
         foreach { key value } $args {
             set key [string tolower $key]
             switch -exact -- $key {
@@ -635,7 +635,6 @@ Deputs "args: $args"
 					
 					Deputs "streamname: $name" 
 					Deputs "StreamList:$StreamList"
-					
                 }
                 -framelen {
                     set transLen [ IxiaCapi::Regexer::UnitTrans $value ]
@@ -685,24 +684,23 @@ Deputs "args: $args"
                 }
             }
         }
-# Make sure the traffic engine is stopped
+        # Make sure the traffic engine is stopped
         if { [ IxiaCapi::Lib::TrafficStopped ] == 0 } {
             IxiaCapi::Logger::LogIn -type err -message \
             "$IxiaCapi::s_common5" -tag $tag
                     return $IxiaCapi::errorcode(8)
         }
        
-# Make sure the necessary variable has been assigned --
+        # Make sure the necessary variable has been assigned --
         if { [ info exists name ] } {
-# Check the existence of the stream to be created
-# If negative an error will be occured
+            # Check the existence of the stream to be created
+            # If negative an error will be occured
             if { [ lsearch -exact $StreamList $name ] < 0 } {
-
                 IxiaCapi::Logger::LogIn -type err -message \
                 "$IxiaCapi::s_TrafficEngineConfigStream5" -tag $tag
                     return $IxiaCapi::errorcode(4)
             }
-# To config the stream obj
+            # To config the stream obj
 
             if { [ catch { 
 			    
@@ -713,34 +711,31 @@ Deputs "args: $args"
 				set endpointSet  [ $name cget -endPoint ]
 				Deputs "endpointSet:$endpointSet"
             } ] } {
-Deputs "$errorInfo"
+                Deputs "$errorInfo"
                 IxiaCapi::Logger::LogIn -type err -message \
                 "$IxiaCapi::s_TrafficEngineConfigStream5" -tag $tag
                     return $IxiaCapi::errorcode(4)
             }
-Deputs "stream handle:$hStreamGroup"
+            Deputs "stream handle:$hStreamGroup"
             if { $hStreamGroup == -1 } {
                 IxiaCapi::Logger::LogIn -type err -message \
                 "$IxiaCapi::s_TrafficEngineConfigStream5" -tag $tag
                     return $IxiaCapi::errorcode(4)
             }
-# ----- FrameLen -----
+            # ----- FrameLen -----
             if { [ info exists frameLen ] } {
-Deputs "Frame length:$frameLen"
+                Deputs "Frame length:$frameLen"
                 ixNet setA $hStreamGroup/frameSize -fixedSize $frameLen
-
             }
             if { [ info exists insertfcserror ] } {
-Deputs "Frame length:$frameLen"
+                Deputs "Frame length:$frameLen"
                 if { $insertfcserror == "true" || $insertfcserror == "1" } {
 					ixNet setA $hStreamGroup -crc badCrc
 					ixNet commit
 				}
-
             }
-# ----- Destination -----
+            # ----- Destination -----
             if { [ info exists des ] } {
-
                 set desList [ list ]
                 foreach dename $des {
                     set dename [ IxiaCapi::Regexer::GetObject $dename ]
@@ -754,7 +749,7 @@ Deputs "Frame length:$frameLen"
                 }
 
                 if { [ llength $desList ] > 0 } {
-Deputs "des list:$desList"
+                    Deputs "des list:$desList"
                     ixNet setA $endpointSet -destinations $desList
                 } else {                        
                     IxiaCapi::Logger::LogIn -type err -message \
@@ -763,12 +758,12 @@ Deputs "des list:$desList"
                     return $IxiaCapi::errorcode(4)
                 }
             } else {
-# Deputs Step22.8
+                # Deputs Step22.8
                 # set desList [ list ]
                 # set root [ixNet getRoot]
                 # set portList [ixNet getList $root vport]
                 # foreach port $portList {
-# Deputs "dst expect:$port == hPort:$hPort"
+                    # Deputs "dst expect:$port == hPort:$hPort"
                     # #if { $hPort == $port } {
                     # #    continue
                     # #}
@@ -776,35 +771,35 @@ Deputs "des list:$desList"
                 # }
                 # ixNet setA $endpointSet -destinations $desList
             }
-# ----- Modify fields -----
-Deputs Modify
+        # ----- Modify fields -----
+        Deputs Modify
 	    if { [ catch {
-                uplevel $level {
-                    IxiaCapi::HeaderCreator IxHead
-                    IxiaCapi::PacketBuilder IxPkt 
-                }
-# ----- Encapsulation -----
-Deputs [find object]
-    # To reomve -option form parameters from args in case
-    # mis-translated the "" in later command like
-    # -option { -XX abcd } -> -option -XX abcd
-                foreach { key value } $args {
-                    set keyNew [string tolower $key]
-                    switch -exact -- $keyNew {
-                        -option -
-                        -dhcpoption {
-                            set OpValue $value
-                            set index [ lsearch -exact $args $key ]
-                            set args [ lreplace $args $index [ incr index ] ]
-                        }
-                        -grechecksum {
-                            set ChecksumList $value
-                            set index [ lsearch -exact $args $key ]
-                            set args [ lreplace $args $index [ incr index ] ]
-                        }
+            uplevel $level {
+                IxiaCapi::HeaderCreator IxHead
+                IxiaCapi::PacketBuilder IxPkt 
+            }
+            # ----- Encapsulation -----
+            Deputs [find object]
+            # To reomve -option form parameters from args in case
+            # mis-translated the "" in later command like
+            # -option { -XX abcd } -> -option -XX abcd
+            foreach { key value } $args {
+                set keyNew [string tolower $key]
+                switch -exact -- $keyNew {
+                    -option -
+                    -dhcpoption {
+                        set OpValue $value
+                        set index [ lsearch -exact $args $key ]
+                        set args [ lreplace $args $index [ incr index ] ]
+                    }
+                    -grechecksum {
+                        set ChecksumList $value
+                        set index [ lsearch -exact $args $key ]
+                        set args [ lreplace $args $index [ incr index ] ]
                     }
                 }
-    # Create header and AddPdu
+            }
+            # Create header and AddPdu
 
                 if { [ info exists l2 ] } {
                     switch -exact -- $l2 {
@@ -1047,7 +1042,7 @@ Deputs [find object]
                                 ::IxiaCapi::pdul2_2_3 ChangeType $encapType"
                                 lappend pduList ::IxiaCapi::pdul2_2_3
                             } 
-Deputs "pdulist:$pduList"
+                            Deputs "pdulist:$pduList"
                             uplevel $level "
                             $name AddPdu -name \{$pduList\} "
                         }
@@ -1172,7 +1167,7 @@ Deputs "pdulist:$pduList"
                                 ::IxiaCapi::pdul2_4 ChangeType $encapType"
                                 lappend pduList ::IxiaCapi::pdul2_4
                             } 
-Deputs "pdulist:$pduList"
+                            Deputs "pdulist:$pduList"
                             uplevel $level "
                             $name AddPdu -name \{$pduList\} "
                         }
@@ -1192,13 +1187,11 @@ Deputs "pdulist:$pduList"
                     switch -exact -- $l3 {
                         ipv4 {
                             if { [ info exists l2 ] && ( $l2 == "ethernet" ) } {
-                    Deputs "l3:ipv4 args:$args"
+                                Deputs "l3:ipv4 args:$args"
                                 uplevel $level "
                                 eval IxHead CreateEthHeader $args -name ::IxiaCapi::pdul2 
                                 eval IxHead CreateIPV4Header -IpSrcAddr 1.1.1.1 -IpDstAddr 2.2.2.2 $args -name ::IxiaCapi::pdul3 
                                 ::IxiaCapi::pdul3 ChangeType $encapType"
-								
-								
 								if {[info exists ipprotocol] } {
 								    # set ipprotocol [string tolower $ipprotocol]
 									# puts "$ipprotocol"
@@ -1250,7 +1243,6 @@ Deputs "pdulist:$pduList"
 								}
                                
                             } else {
-							
                                 uplevel $level "
                                 eval IxHead CreateIPV4Header -IpSrcAddr 1.1.1.1 -IpDstAddr 2.2.2.2 $args -name ::IxiaCapi::pdul3 "
                                 uplevel $level "::IxiaCapi::pdul3 ChangeType $encapType"
@@ -1300,7 +1292,7 @@ Deputs "pdulist:$pduList"
 								# }
 								
                             }
-    Deputs "l3 header create success..."
+                            Deputs "l3 header create success..."
                         }
                         ipv6 {
                             if { [ info exists l2 ] && ( $l2 == "ethernet" ) } {
@@ -1366,7 +1358,7 @@ Deputs "pdulist:$pduList"
                         }
                     }
                 }
-Deputs Step40
+                Deputs Step40
                 if { [ info exists l4 ] } {
                     switch -exact -- $l4 {
                         igmp {
@@ -1382,14 +1374,14 @@ Deputs Step40
                             $name AddPdu -name :::IxiaCapi::pdul4 
                         }
                         tcp {
-    Deputs "l4:tcp"
-    Deputs "$name"
+                            Deputs "l4:tcp"
+                            Deputs "$name"
                             uplevel $level "
                             eval IxHead CreateTCPHeader $args -name ::IxiaCapi::pdul4 
                             ::IxiaCapi::pdul4 ChangeType $encapType "
                             Deputs [find object]							
                             $name AddPdu -name ::IxiaCapi::pdul4
-    Deputs "tcp header create success..."
+                            Deputs "tcp header create success..."
                         }
                         udp {
                             uplevel $level "
@@ -1405,16 +1397,12 @@ Deputs Step40
                         }
                         dhcp {
                             if { [ info exists OpValue ] } {
-Deputs "OpValue exist..."
-                                uplevel $level "
-                                eval IxPkt CreateDHCPPkt $args {-name ::IxiaCapi::pdul4 -option \{$OpValue\}}
-                            ::IxiaCapi::pdul4 ChangeType $encapType "                                                           
+                                Deputs "OpValue exist..."
+                                uplevel $level "eval IxPkt CreateDHCPPkt $args {-name ::IxiaCapi::pdul4 -option \{$OpValue\}} ::IxiaCapi::pdul4 ChangeType $encapType"                                                           
                                 $name AddPdu -name :::IxiaCapi::pdul4
                             } else {
-Deputs "OpValue not exist..."
-                                uplevel $level "
-                                eval IxPkt CreateDHCPPkt $args -name ::IxiaCapi::pdul4
-                            ::IxiaCapi::pdul4ChangeType $encapType "                                                           
+                                Deputs "OpValue not exist..."
+                                uplevel $level "eval IxPkt CreateDHCPPkt $args -name ::IxiaCapi::pdul4 ::IxiaCapi::pdul4ChangeType $encapType "                                                           
                                 $name AddPdu -name ::IxiaCapi::pdul4 
                             }
                         }
@@ -1475,14 +1463,16 @@ Deputs "OpValue not exist..."
                 catch { uplevel $level { delete object ::IxiaCapi::pdul4 } }
                 IxiaCapi::Logger::LogIn -message \
                 "$IxiaCapi::s_TrafficEngineCreateStream4 $name"            
-                    return $IxiaCapi::errorcode(0)
+                
+                return $IxiaCapi::errorcode(0)
             }
-Deputs "commit modification..."
+            Deputs "commit modification..."
         } else {
             IxiaCapi::Logger::LogIn -type err -message \
             "$IxiaCapi::s_common1 $IxiaCapi::s_TrafficEngineCreateStream6"\
             -tag $tag
-                    return $IxiaCapi::errorcode(3)
+            
+            return $IxiaCapi::errorcode(3)
         }
         
     }

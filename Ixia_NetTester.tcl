@@ -650,7 +650,7 @@ Deputs "A2W..."
 	return [ GetStandardReturnHeader ]
 }
 
-proc Tester::save_config { { config_file "d:/configfile.ixncfg" } } {
+proc Tester::save_config { { config_file "C:/Tmp/configfile.ixncfg" } } {
     set tag "proc Tester::save_config [info script]"
     Deputs "----- TAG: $tag -----"
 

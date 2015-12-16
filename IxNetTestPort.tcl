@@ -9,7 +9,7 @@
 
 namespace eval IxiaCapi {
     class TestPort {
-        constructor {{chassis 0}  { moduleNo 0 } { portNo 0 } { porthandle 0 }  } { }
+        constructor {{chassis 0}  { moduleNo 0 } { portNo 0 } { porthandle 0 } { portType ethernet } } { }
         method StartTraffic {  args  } {}
         method StopTraffic {  args  } {}
         method StartStaEngine { args } {}
@@ -35,11 +35,11 @@ namespace eval IxiaCapi {
                 
         method GetRealPort { chassis card port } {
             set root    [ixNet getRoot]
-#Deputs "chassis:$chassis"         
+            #Deputs "chassis:$chassis"         
             set realCard $chassis/card:$card
-#Deputs "card:$realCard"
+            #Deputs "card:$realCard"
             set cardList [ixNet getList $chassis card]
-#Deputs "cardList:$cardList"
+            #Deputs "cardList:$cardList"
             set findCard 0
             foreach ca $cardList {
                 eval set ca $ca
@@ -52,9 +52,9 @@ namespace eval IxiaCapi {
                 return [ixNet getNull]
             }
             set realPort $chassis/card:$card/port:$port
-#Deputs "port:$realPort"
+            #Deputs "port:$realPort"
             set portList [ ixNet getList $chassis/card:$card port ]
-#Deputs "portList:$portList"
+            #Deputs "portList:$portList"
             set findPort 0
             foreach po $portList {
                 eval set po $po
@@ -63,7 +63,7 @@ namespace eval IxiaCapi {
                     break
                 }
             }
-#Deputs "findPort:$findPort"
+            #Deputs "findPort:$findPort"
             if { $findPort } {
 			    ixNet exec clearOwnership $chassis/card:$card/port:$port
                 return $chassis/card:$card/port:$port
@@ -90,6 +90,7 @@ namespace eval IxiaCapi {
         public variable Traffic
         public variable ModuleNo
         public variable PortNo
+        public variable PortType
         public variable hPort
         public variable ospfRouterIdList
         public variable handle
@@ -159,9 +160,9 @@ Deputs "port handle to reset: $hPort"
 
     class ETHPort {
         inherit TestPort
-        constructor { {chassis 0}  { slot 0 } { portNo 0 } { porthandle 0 }  } {
-            chain $chassis $slot $portNo $porthandle } {
-        set tag "body ETHPort::ctor [info script]"
+        constructor { {chassis 0}  { slot 0 } { portNo 0 } { porthandle 0 } { portType ethernet } } {
+            chain $chassis $slot $portNo $porthandle $portType } {
+            set tag "body ETHPort::ctor [info script]"
 			Deputs "----- TAG: $tag -----"
             set VlanIntList [ list ]
             set ArpList [ list ]
@@ -172,7 +173,7 @@ Deputs "port handle to reset: $hPort"
             set SubHost 0
             if { $porthandle != 0 } {
                 ixNet setMultiAttr $porthandle \
-                    -type ethernet
+                    -type $portType
                 ixNet commit
             }
         }
@@ -229,6 +230,7 @@ Deputs "port handle to reset: $hPort"
         destructor {}
         public variable hPort
 		public variable PortName
+        public variable PortType
         public variable VlanId
         public variable VlanTag
         public variable VlanPrior
@@ -236,7 +238,7 @@ Deputs "port handle to reset: $hPort"
     }
     
 
-    body TestPort::constructor { {chassis 0}  { moduleNo 0 } { portNo 0 } { porthandle 0 } } {
+    body TestPort::constructor { {chassis 0}  { moduleNo 0 } { portNo 0 } { porthandle 0 } { portType ethernet } } {
         global errorInfo
         global gOffline
         set ModuleNo $moduleNo
@@ -253,6 +255,7 @@ Deputs "port handle to reset: $hPort"
                 return
             }
         }
+        set PortType $portType
         set HostList    [ list ]
         set FilterList  [ list ]
         set m_filterNameList [ list ]
@@ -405,7 +408,7 @@ Deputs "----- TAG: $tag -----"
                 }
             }
         }
-# Make sure the traffic engine is stopped
+        # Make sure the traffic engine is stopped
         if { [ IxiaCapi::Lib::TrafficStopped ] == 0 } {
             IxiaCapi::Logger::LogIn -type err -message \
             "$IxiaCapi::s_common5" -tag $tag
@@ -428,19 +431,19 @@ Deputs "----- TAG: $tag -----"
             }
             if { [ catch {
                 set HostList [ lreplace $HostList $delIndex $delIndex ]
-Deputs "Destroy host: $delHost"
+                Deputs "Destroy host: $delHost"
                 if { [ catch {
                     uplevel 2 " delete object $delHost "
                 } ] } {
-Deputs "$errorInfo"
+                    Deputs "$errorInfo"
                     if { [ catch {
                         uplevel 1 " delete object $delHost "
                     } ] } {
-Deputs "$errorInfo"
+                        Deputs "$errorInfo"
                         delete object $delHost
                     }
                 } else {
-Deputs "Destroy host: $delHost success..."
+                    Deputs "Destroy host: $delHost success..."
                 }
             } ] } {
                 IxiaCapi::Logger::LogIn -type err -message "$errorInfo" -tag $tag
@@ -1396,11 +1399,11 @@ Deputs "Exist : $exist "
     
     body TestPort::CreateRouter { args } {
         global errorInfo
-		set TRUE 1
         
-
         set tag "body TestPort::CreateRouter [info script]"
-Deputs "----- TAG: $tag -----"
+        Deputs "----- TAG: $tag -----"
+        
+        set TRUE 1
         set EType [ list                \
                         OSPFV2ROUTER    \
                         OSPFV3ROUTER    \
@@ -1440,8 +1443,8 @@ Deputs "----- TAG: $tag -----"
 						802DOT1XV6        \
                                             ]
         set defaultRouterId     192.168.1.1
-#param collection
-Deputs "Args:$args "
+        #param collection
+        Deputs "Args:$args "
         foreach { key value } $args {
             set key [string tolower $key]
             switch -exact -- $key {
@@ -1449,7 +1452,7 @@ Deputs "Args:$args "
                 -routername {                    
 				    set value [::IxiaCapi::NamespaceDefine $value]
                     if { [ lsearch -exact $RouterList $value ] < 0 } {
-Deputs Step10
+                        Deputs Step10
                         set name $value
                     } else {
                         IxiaCapi::Logger::LogIn -type err -message \
@@ -1459,20 +1462,20 @@ Deputs Step10
                 }
                 -type -
                 -routertype {
-Deputs "Type arg: $value"
+                    Deputs "Type arg: $value"
                     if { [ lsearch -exact $EType [ string toupper $value ] ] < 0 } {
                         IxiaCapi::Logger::LogIn -type err -message \
                         "$IxiaCapi::s_TestPortCreateRouter2 $EType" -tag $tag
                         return $IxiaCapi::errorcode(1)
                     } else {
                         set type [ string toupper $value ]
-Deputs "Type: $type"
+                        Deputs "Type: $type"
                     }
                 }
                 -routerid {
                     if { [ IxiaCapi::Regexer::IsIPv4Address  $value ] == $TRUE } {
-                            set routerId $value
-Deputs "routerId: $routerId"
+                        set routerId $value
+                        Deputs "routerId: $routerId"
                     } else {
                         IxiaCapi::Logger::LogIn -type err -message \
                         "$IxiaCapi::s_TestPortCreateRouter6 $value" -tag $tag
@@ -1493,7 +1496,7 @@ Deputs "routerId: $routerId"
                 }
             }
         }
-# check the existence of necessary params
+        # check the existence of necessary params
         if { [ info exists name ] == 0 } {
             IxiaCapi::Logger::LogIn -type err -message \
             "$IxiaCapi::s_common1 $IxiaCapi::s_TestPortCreateRouter4" -tag $tag
@@ -1504,31 +1507,30 @@ Deputs "routerId: $routerId"
                 "$IxiaCapi::s_common1 $IxiaCapi::s_TestPortCreateRouter5 $EType" -tag $tag
             return $IxiaCapi::errorcode(3)
         }
-# Check pre-condition
+        # Check pre-condition
         #if { ( [ AgtInvoke AgtRoutingEngine GetState ] == "AGT_ROUTING_RUNNING" ) } {
         #    IxiaCapi::Logger::LogIn -type err -message \
         #    "$IxiaCapi::s_common6" -tag $tag
         #    return $IxiaCapi::errorcode(8)
         #}
-# Check whether this is a port sub-interface
-Deputs "Check sub-interface flag...$this"
+        # Check whether this is a port sub-interface
+        Deputs "Check sub-interface flag...$this"
         set flagSubInt  [ $this isa IxiaCapi::VlanSubInt ]
         if { $flagSubInt } {
             if { [ catch {
                 set vlanTag [ $this cget -VlanTag ]
                 set vlanId  [ $this cget -VlanId ]
             } err ] } {
-Deputs "Read Vlan info error: $err"
+                Deputs "Read Vlan info error: $err"
                 set vlanTag "<undefined>"
                 set vlanId  "<undefined>"
             }
         }
-# Create Router...
+        # Create Router...
         if { [ catch {
         switch $type {
             OSPFV2ROUTER {
                 uplevel "Ospfv2Router $name $this"
-				#uplevel "OspfRouter $name $this $type $routerId"
             }
             OSPFV3ROUTER {
                 uplevel "Ospfv3Router $name $this"
@@ -1761,16 +1763,19 @@ Deputs "RouterId:$routerId"
             switch $type {
                 OSPFV2ROUTER -
                 OSPFV3ROUTER -
-                ISISROUTER -
                 RIPROUTER -
                 PIMROUTER -
                 BGPV4ROUTER -
                 BGPV6ROUTER {
-Deputs "OSPF/ISIS/BGP/RIP/PIM"
+                    Deputs "OSPF/ISIS/BGP/RIP/PIM"
                     uplevel "$name ConfigRouter -RouterId $routerId -Active enable"
                 }
+                ISISROUTER {
+                    Deputs "Configure IsisRouter"
+                    uplevel "$name IsisSetSession -RouterId $routerId -Active enable"
+                }
                 default {
-Deputs "Other protocol..."
+                    Deputs "Other protocol..."
                     uplevel "$name ConfigRouter -Active enable"
                 }
             }
@@ -1805,11 +1810,12 @@ Deputs "Other protocol..."
     }
     
     body TestPort::DestroyRouter { args } {
-        
         global errorInfo
+        
         set tag "body TestPort::DestroyRouter [info script]"
-Deputs "----- TAG: $tag -----"
-# Param collection --        
+        Deputs "----- TAG: $tag -----"
+        
+        # Param collection --        
         foreach { key value } $args {
             set key [string tolower $key]
             switch -exact -- $key {
@@ -1820,56 +1826,52 @@ Deputs "----- TAG: $tag -----"
                 }
             }
         }
-# Check pre-condition
-        #if { ( [ AgtInvoke AgtRoutingEngine GetState ] == "AGT_ROUTING_RUNNING" ) } {
-        #    IxiaCapi::Logger::LogIn -type err -message \
-        #    "$IxiaCapi::s_common6" -tag $tag
-        #    return $IxiaCapi::errorcode(8)
-        #}
-# Make sure the existence of the Name
-    # If positive delete the certain filter
+        
         if { [ catch {
-        set err 0
-        if { [ info exists name ] } {
-            foreach router $name {
-                set index [ lsearch -exact $RouterList $router ]
-
-Deputs "Router list:$RouterList"
-Deputs "index:$index"
-                if { $index < 0 } {
-                    IxiaCapi::Logger::LogIn -type err -message \
-                    "$IxiaCapi::s_TestPortDestroyRouter1 $value" -tag $tag
-                    set err 1
-                } else {
-                    set RouterList [ lreplace $RouterList $index $index ]
-Deputs "Router list:$RouterList"
-Deputs "objects:[find objects]"
-                    if { [ catch { uplevel " delete object $name " } ] } {
-Deputs $errorInfo
+            set err 0
+            if { [ info exists name ] } {
+                foreach router $name {
+                    set index [ lsearch -exact $RouterList $router ]
+                    Deputs "Router list:$RouterList"
+                    Deputs "index:$index"
+                    
+                    if { $index < 0 } {
+                        IxiaCapi::Logger::LogIn -type err -message \
+                        "$IxiaCapi::s_TestPortDestroyRouter1 $value" -tag $tag
+                        set err 1
                     } else {
-                        if { [ catch { uplevel " delete object ${name}_c " } ] } {
-Deputs $errorInfo
+                        set RouterList [ lreplace $RouterList $index $index ]
+                        Deputs "Router list:$RouterList"
+                        Deputs "objects:[find objects]"
+                        if { [ catch { uplevel " delete object $name " } ] } {
+                            Deputs $errorInfo
+                        } else {
+                            if { [ catch { uplevel " delete object ${name}_c " } ] } {
+                                Deputs $errorInfo
+                            }
+                        }
                     }
-                        
-                    }
+                    Deputs "objects:[find objects]"
                 }
-Deputs "objects:[find objects]"
-            }
-        } else {
-    # Or else delete all routers
-            if { [ info exists RouterList ] } {
-                foreach router $RouterList {
-                    if { [ catch { uplevel " delete object $router " } ] } {
-Deputs $errorInfo
-                    } else {
-                         if { [ catch { uplevel " delete object ${router}_c " } ] } {
-Deputs $errorInfo
+            } else {
+                # Or else delete all routers
+                if { [ info exists RouterList ] } {
+                    foreach router $RouterList {
+                        if { [ catch { uplevel 0 " delete object $router " } ] } {
+                            if { [ catch { uplevel 1 " delete object $router " } ] } {
+                                Deputs $errorInfo
+                            }
+                        } else {
+                            if { [ catch { uplevel 0 " delete object ${router}_c " } ] } {
+                                if { [ catch { uplevel 1 " delete object ${router}_c " } ] } {
+                                    Deputs $errorInfo
+                                }
+                            }
+                        }
                     }
-                    }
+                    set RouterList  [ list ]
                 }
-                set RouterList  [ list ]
             }
-        }
         } result ] } {
             IxiaCapi::Logger::LogIn -type err -message "$errorInfo" -tag $tag
             return $IxiaCapi::errorcode(7)
@@ -1885,11 +1887,12 @@ Deputs $errorInfo
     }
     
     body TestPort::StartRouter { args } {
-        
         global errorInfo
+        
         set tag "body TestPort::StartRouter [info script]"
-Deputs "----- TAG: $tag -----"
-# Param collection --        
+        Deputs "----- TAG: $tag -----"
+        
+        # Param collection --        
         foreach { key value } $args {
             set key [string tolower $key]
             switch -exact -- $key {
@@ -1944,12 +1947,13 @@ Deputs "----- TAG: $tag -----"
             return $IxiaCapi::errorcode(0)
         }
     }
+    
     body TestPort::StopRouter { args } {
         
         global errorInfo
         set tag "body TestPort::StopRouter [info script]"
-Deputs "----- TAG: $tag -----"
-# Param collection --        
+        Deputs "----- TAG: $tag -----"
+        # Param collection --        
         foreach { key value } $args {
             set key [string tolower $key]
             switch -exact -- $key {
@@ -2044,12 +2048,13 @@ Deputs "----- TAG: $tag -----"
             return $IxiaCapi::errorcode(0)
         }
     }
-    body ETHPort::GetPortState { args } {
-        
+    body ETHPort::GetPortState { args } {   
         global errorInfo
+        
         set tag "body ETHPort::GetPortState [info script]"
-Deputs "----- TAG: $tag -----"
-# param collection
+        Deputs "----- TAG: $tag -----"
+        
+        # param collection
         foreach { key value } $args {
             set key [string tolower $key]
             switch -exact -- $key {
@@ -2081,41 +2086,72 @@ Deputs "----- TAG: $tag -----"
         }
         
         if { [ catch {
-            if { [ info exists autoNeg ] } {
-                set result [ ixNet getA $hPort/l1Config/ethernet -autoNegotiate ]
-                if { $result == "True" } {
-                    set result 1
-                } else {
-                    set result 0
+            if { $PortType == "ethernet" } {
+                if { [ info exists autoNeg ] } {
+                    set result [ ixNet getA $hPort/l1Config/ethernet -autoNegotiate ]
+                    if { $result == "True" } {
+                        set result 1
+                    } else {
+                        set result 0
+                    }
+                    uplevel 1 "set $autoNeg $result"
                 }
-                uplevel 1 \
-                "set $autoNeg $result"
+                if { [ info exists linkSpeed ] } {
+                    set regstr [ ixNet getA $hPort/l1Config/ethernet -speed ]
+                    Deputs "regstr:$regstr"
+                    if { $regstr == "auto" } {
+                        uplevel 1 "set $linkSpeed AUTO"
+                    } else {
+                        regexp {(10|100|1000)} $regstr match ls
+                            uplevel 1 "set $linkSpeed $ls"
+                    }
+                    Deputs "link speed: $linkSpeed"
+                }
+                if { [ info exists duplexMode ] } {
+                    set regstr [ ixNet getA $hPort/l1Config/ethernet -speed ]
+                    Deputs "regstr:$regstr"
+                    if { $regstr == "auto" } {                    
+                        uplevel 1 "set $duplexMode AUTO"
+                    }
+                    regexp -nocase {(hd|fd)} $regstr  match dm
+                    if { $dm == "hd" } {
+                        uplevel 1 "set $duplexMode HALF"
+                    } else {
+                        uplevel 1 "set $duplexMode FULL"
+                    }
+                    Deputs "duplex mode: $duplexMode"
+                }
+            } elseif { $PortType == "ethernetvm" } {
+                if { [ info exists autoNeg ] } {
+                    uplevel 1 "set $autoNeg 0"
+                }
+                if { [ info exists linkSpeed ] } {
+                    set regstr [ ixNet getA $hPort/l1Config/ethernetvm -speed ]
+                    Deputs "regstr:$regstr"
+                    if { $regstr == "auto" } {
+                        uplevel 1 "set $linkSpeed AUTO"
+                    } else {
+                        regexp {(10|100|1000)} $regstr match ls
+                            uplevel 1 "set $linkSpeed $ls"
+                    }
+                    Deputs "link speed: $linkSpeed"
+                }
+                if { [ info exists duplexMode ] } {
+                    set regstr [ ixNet getA $hPort/l1Config/ethernetvm -speed ]
+                    Deputs "regstr:$regstr"
+                    if { $regstr == "auto" } {                    
+                        uplevel 1 "set $duplexMode AUTO"
+                    }
+                    regexp -nocase {(hd|fd)} $regstr  match dm
+                    if { $dm == "hd" } {
+                        uplevel 1 "set $duplexMode HALF"
+                    } else {
+                        uplevel 1 "set $duplexMode FULL"
+                    }
+                    Deputs "duplex mode: $duplexMode"
+                }
             }
-            if { [ info exists linkSpeed ] } {
-                set regstr [ ixNet getA $hPort/l1Config/ethernet -speed ]
-Deputs "regstr:$regstr"
-                if { $regstr == "auto" } {
-                    uplevel 1 "set $linkSpeed AUTO"
-                } else {
-                    regexp {(10|100|1000)} $regstr match ls
-                        uplevel 1 "set $linkSpeed $ls"
-                }
-Deputs "link speed: $linkSpeed"
-            }
-            if { [ info exists duplexMode ] } {
-                set regstr [ ixNet getA $hPort/l1Config/ethernet -speed ]
-Deputs "regstr:$regstr"
-                if { $regstr == "auto" } {                    
-                    uplevel 1 "set $duplexMode AUTO"
-                }
-                regexp -nocase {(hd|fd)} $regstr  match dm
-                if { $dm == "hd" } {
-                    uplevel 1 "set $duplexMode HALF"
-                } else {
-                    uplevel 1 "set $duplexMode FULL"
-                }
-Deputs "duplex mode: $duplexMode"
-            }
+            
             if { [ info exists linkState ] } {
                 set stateDescription \
                 [ ixNet getA $hPort -state ]
@@ -2135,28 +2171,26 @@ Deputs "duplex mode: $duplexMode"
             return $IxiaCapi::errorcode(7)
         } else {
             return $IxiaCapi::errorcode(0)
-        }
-        
+        } 
     }
     
     body ETHPort::ConfigPort { args } {
-        
         global errorInfo
         
         set tag "body ETHPort::ConfigPort [info script]"
-Deputs "----- TAG: $tag -----"
+        Deputs "----- TAG: $tag -----"
 
         #set EMedia [ list RJ45 GBIC SFP DEFAULT ]
         set EMedia [ list COPPER FIBER ]
         set ESpeed [ list 10 100 1000 ]
         set EDuplex [ list HALF FULL ]
-# Param collection --        
+        # Param collection --        
         foreach { key value } $args {
             set key [string tolower $key]
             switch -exact -- $key {
                 -linkspeed {
                     regexp -nocase {([0-9]+)m?} $value match speed
-Deputs "speed:$speed"
+                    Deputs "speed:$speed"
                     if { [ lsearch -exact $ESpeed $speed ] < 0 } {
                         IxiaCapi::Logger::LogIn -type warn -message \
                         "$IxiaCapi::s_ETHPortConfigPort3 $ESpeed" -tag $tag
@@ -2207,6 +2241,13 @@ Deputs "speed:$speed"
                         set MTU $value
                     } 
                 }
+                -portmode -
+                -ethernetmode {
+                    set portMode $value
+                }
+                -autonegotiationmasterslave {
+                    set AutoNegotiationMasterSlave $value
+                }
                 default {
                     IxiaCapi::Logger::LogIn -type err -message \
                     "$IxiaCapi::s_common1 $key\n\t\
@@ -2218,78 +2259,83 @@ Deputs "speed:$speed"
         }
         
         if { [ catch {
-
-            if { [ info exists autoNeg ] } {
-
-                if { $autoNeg } {
-                    ixNet setA $hPort/l1Config/ethernet \
-                        -autoNegotiate True
-                } else {
-                    ixNet setA $hPort/l1Config/ethernet \
-                        -autoNegotiate False
-                }
-            }
-        } result ] } {
-
-            IxiaCapi::Logger::LogIn -type err -message "$errorInfo" -tag $tag
-            catch { unset autoNeg }
-            return $IxiaCapi::errorcode(7)
-        }
-        if { [ catch {
-            if { [ info exists mediaType ] } {
-
-                ixNet setA $hPort/l1Config/ethernet -media $mediaType
-                ixNet commit
-            }
-        } result ] } {
-
-            IxiaCapi::Logger::LogIn -type err -message "$errorInfo" -tag $tag
-            catch { unset mediaType }
-            return $IxiaCapi::errorcode(7)
-        }
-        if { [ catch {
-            if { [ info exists flowControl ] } {
-                if { $flowControl } {
-                    ixNet setA $hPort/l1Config/ethernet -enabledFlowControl True
-                } else {
-                    ixNet setA $hPort/l1Config/ethernet -enabledFlowControl False
-                }
-            }
-        } result ] } {
-            IxiaCapi::Logger::LogIn -type err -message "$errorInfo" -tag $tag
-            catch { unset flowControl }
-            return $IxiaCapi::errorcode(7)
-        } 
-        if { [ catch {
-            if { [ info exists autoNeg ] } {
-                ixNet setA $hPort/l1Config/ethernet -speed auto
-            } else {
-                if { [ info exists linkSpeed ] } {
-                    set speed [ ixNet getA $hPort/l1Config/ethernet -speed ]
-                    if { $linkSpeed == 1000 } {
-                        ixNet setA $hPort/l1Config/ethernet -speed speed1000
+            if { $PortType == "ethernet" } {
+                if { [ info exists autoNeg ] } {
+                    if { $autoNeg } {
+                        ixNet setA $hPort/l1Config/ethernet \
+                            -autoNegotiate True
                     } else {
-                        if { ($speed == "auto") || ($speed == "speed1000") } {
-                            set duplex fd
-                        } else {
-                            regexp {\d+([fh]d)} $speed match duplex
-                        }
-                        ixNet setA $hPort/l1Config/ethernet -speed speed$linSpeed$duplex
+                        ixNet setA $hPort/l1Config/ethernet \
+                            -autoNegotiate False
                     }
                 }
-                if { [ info exists duplexMode ] } {
-                    set speed [ ixNet getA $hPort/l1Config/ethernet -speed ]
-                    if { [ regexp {(\d+)([fh]d)} $speed match speed duplex ] } {
-                        ixNet setA $hPort/l1Config/ethernet -speed speed$speed$duplex
+                
+                if { [ info exists mediaType ] } {
+                    ixNet setA $hPort/l1Config/ethernet -media $mediaType
+                    ixNet commit
+                }
+    
+                if { [ info exists flowControl ] } {
+                    if { $flowControl } {
+                        ixNet setA $hPort/l1Config/ethernet -enabledFlowControl True
+                    } else {
+                        ixNet setA $hPort/l1Config/ethernet -enabledFlowControl False
+                    }
+                }
+                
+                if { [ info exists autoNeg ] } {
+                    ixNet setA $hPort/l1Config/ethernet -speed auto
+                } else {
+                    if { [ info exists linkSpeed ] } {
+                        set speed [ ixNet getA $hPort/l1Config/ethernet -speed ]
+                        if { $linkSpeed == 1000 } {
+                            ixNet setA $hPort/l1Config/ethernet -speed speed1000
+                        } else {
+                            if { ($speed == "auto") || ($speed == "speed1000") } {
+                                set duplex fd
+                            } else {
+                                regexp {\d+([fh]d)} $speed match duplex
+                            }
+                            ixNet setA $hPort/l1Config/ethernet -speed speed$linkSpeed$duplex
+                        }
+                    }
+                    if { [ info exists duplexMode ] } {
+                        set speed [ ixNet getA $hPort/l1Config/ethernet -speed ]
+                        if { [ regexp {(\d+)([fh]d)} $speed match speed duplex ] } {
+                            ixNet setA $hPort/l1Config/ethernet -speed speed$speed$duplex
+                        }
+                    }
+                }
+            } elseif { $PortType == "ethernetvm" } {
+                if { [ info exists autoNeg ] } {
+                    ixNet setA $hPort/l1Config/ethernetvm -speed auto
+                } else {
+                    if { [ info exists linkSpeed ] } {
+                        set speed [ ixNet getA $hPort/l1Config/ethernetvm -speed ]
+                        if { $linkSpeed == 1000 } {
+                            ixNet setA $hPort/l1Config/ethernetvm -speed speed1000
+                        } else {
+                            if { ($speed == "auto") || ($speed == "speed1000") } {
+                                set duplex fd
+                            } else {
+                                regexp {\d+([fh]d)} $speed match duplex
+                            }
+                            ixNet setA $hPort/l1Config/ethernetvm -speed speed$linkSpeed$duplex
+                        }
+                    }
+                    if { [ info exists duplexMode ] } {
+                        set speed [ ixNet getA $hPort/l1Config/ethernetvm -speed ]
+                        if { [ regexp {(\d+)([fh]d)} $speed match speed duplex ] } {
+                            ixNet setA $hPort/l1Config/ethernetvm -speed speed$speed$duplex
+                        }
                     }
                 }
             }
         } result ] } {
-
             IxiaCapi::Logger::LogIn -type err -message "$errorInfo" -tag $tag
-            catch { unset linkSpeed }
             return $IxiaCapi::errorcode(7)
         }
+        
         return $IxiaCapi::errorcode(0)
     }
     

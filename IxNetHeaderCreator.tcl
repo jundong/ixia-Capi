@@ -41,8 +41,10 @@ namespace eval IxiaCapi {
         global IxiaCapi::fail IxiaCapi::success
         global errorInfo
         global IxiaCapi::TrafficManager
+		
         set tag "body HeaderCreator::CreateHeader [info script]"
-Deputs "----- TAG: $tag -----"
+		Deputs "----- TAG: $tag -----"
+		
         set level 2
         set type APP
         foreach { key value } $args {
@@ -53,7 +55,7 @@ Deputs "----- TAG: $tag -----"
                     #if { [ IxiaCapi::Regexer::ObjectExist \
                     #      $IxiaCapi::ObjectNamespace$value ] == 0 } {
                         #set name $value
-						set name [::IxiaCapi::NamespaceDefine $value]
+					set name [::IxiaCapi::NamespaceDefine $value]
                     #} else {
                     #    IxiaCapi::Logger::LogIn -type err -message \
                     #    "$IxiaCapi::s_HeaderCreatorCreateheader1 $value" -tag $tag
@@ -70,15 +72,14 @@ Deputs "----- TAG: $tag -----"
             }
         }
 
-Deputs "Args: $args"
+		Deputs "Args: $args"
         # if {$pro == "custom" } {
 		    # set type "raw"
 		# }
         if { [ info exists name ] } {
-
             if { [ catch {
                 set command "IxiaCapi::Pdu $name $pro $type"
-Deputs "CMD:$command"
+				Deputs "CMD:$command"
                 #namespace inscope $IxiaCapi::ObjectNamespace $command
                 set relpdu [uplevel $level " eval $command "]
 				Deputs "relpdu: $relpdu"
@@ -90,7 +91,6 @@ Deputs "CMD:$command"
                 lappend pduList $relpdu
             }
         } else {
-
             IxiaCapi::Logger::LogIn -type err -message \
             "$IxiaCapi::s_common1 $IxiaCapi::s_HeaderCreatorCreateheader2"\
             -tag $tag
@@ -252,10 +252,11 @@ Deputs "Pro: $pro"
 	
     body HeaderCreator::CreateEthHeader { args } {
         global IxiaCapi::fail IxiaCapi::success
+		
         set resultCreate    [ eval {CreateHeader -pro Ethernet -type SET} $args ]
-Deputs "Result of Creation : $resultCreate"
+		Deputs "Result of Creation : $resultCreate"
         set resultConfig    [ eval ConfigEthHeader $args ]
-Deputs "Result of Config : $resultConfig"
+		Deputs "Result of Config : $resultConfig"
         if { $resultCreate == $success \
             && $resultConfig <= 1 } {
             return $IxiaCapi::errorcode(0) 

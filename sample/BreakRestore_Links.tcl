@@ -1,7 +1,7 @@
 ######################################################################
 # Functionality: Test Layer 2 stream sending and analysis
 #
-# Create Time: 2010.3.17
+# Create Time: 2015.12.08
 #
 #
 # Topology:

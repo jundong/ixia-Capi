@@ -1,0 +1,400 @@
+12/17/15 12:20:28 AM INFO: ----- TAG: body TestDevice::Ctor C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:28 AM INFO: ----- TAG: body TestDevice::Connect C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:28 AM INFO: Connect to host by IP address... 172.16.174.137 
+12/17/15 12:20:28 AM INFO: Connect localhost ixNetwork Tcl Server  
+12/17/15 12:20:28 AM INFO: Create a new Config 
+12/17/15 12:20:30 AM INFO: chassis:::ixNet::OBJ-/availableHardware/chassis:L346 
+12/17/15 12:20:30 AM INFO: 1 == 1 
+12/17/15 12:20:31 AM INFO: Connection success... 
+ address:172.16.174.137 
+ chassis: ::ixNet::OBJ-/availableHardware/chassis:"172.16.174.137" 
+12/17/15 12:20:31 AM INFO: ----- TAG: body TestDevice::Connect C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:31 AM INFO: Connect to host by IP address... 172.16.174.137 
+12/17/15 12:20:31 AM INFO: Connect localhost ixNetwork Tcl Server  
+12/17/15 12:20:31 AM INFO: Create a new Config 
+12/17/15 12:20:34 AM INFO: chassis:::ixNet::OBJ-/availableHardware/chassis:L347 
+12/17/15 12:20:34 AM INFO: 1 == 1 
+12/17/15 12:20:34 AM INFO: Connection success... 
+ address:172.16.174.137 
+ chassis: ::ixNet::OBJ-/availableHardware/chassis:"172.16.174.137" 
+12/17/15 12:20:34 AM INFO: ----- TAG: body TestDevice::CreateTestPort C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:34 AM INFO: args: -PortLocation 1/1 -PortName port1 -PortType Ethernet 
+12/17/15 12:20:34 AM INFO: newlist: ::port1 
+12/17/15 12:20:34 AM INFO: IxiaCapi::ETHPort ::port1 ::ixNet::OBJ-/availableHardware/chassis:"172.16.174.137" 1 1 0 ethernet 
+12/17/15 12:20:34 AM INFO: ----- TAG: body TestPort::ctor C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:37 AM INFO: Real Port:::ixNet::OBJ-/availableHardware/chassis:"172.16.174.137"/card:1/port:1 
+12/17/15 12:20:39 AM INFO: ----- TAG: body ETHPort::ctor C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:39 AM INFO: port handle:::ixNet::OBJ-/vport:1	name:::port1 
+12/17/15 12:20:39 AM INFO: ----- TAG: body TestPortMgr::AddTestPort C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:39 AM INFO: Port creation success... Ethernet 
+12/17/15 12:20:39 AM INFO: ----- TAG: body TestPort::CreateRouter C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:39 AM INFO: Args:-RouterName IsisRouter1 -RouterType IsisRouter -routerid 10.10.10.10  
+12/17/15 12:20:39 AM INFO: newlist: ::IsisRouter1 
+12/17/15 12:20:39 AM INFO: Step10 
+12/17/15 12:20:39 AM INFO: Type arg: IsisRouter 
+12/17/15 12:20:39 AM INFO: Type: ISISROUTER 
+12/17/15 12:20:39 AM INFO: Judgement: ipv4 address format 
+12/17/15 12:20:39 AM INFO: Is Ipv4 address... 
+12/17/15 12:20:39 AM INFO: routerId: 10.10.10.10 
+12/17/15 12:20:39 AM INFO: Check sub-interface flag...::port1 
+12/17/15 12:20:39 AM INFO: ----- TAG: body IsisRouter::ctor C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:39 AM INFO: ----- TAG: body IsisSession::constructor C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:39 AM INFO: port:::port1 
+12/17/15 12:20:39 AM INFO: port handle: ::ixNet::OBJ-/vport:1 
+12/17/15 12:20:39 AM INFO: initial port... 
+12/17/15 12:20:39 AM INFO: ----- TAG: body IsisSession::reborn C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:39 AM INFO: hPort:::ixNet::OBJ-/vport:1 
+12/17/15 12:20:40 AM INFO: handle:::ixNet::OBJ-/vport:1/protocols/isis/router:1 
+12/17/15 12:20:40 AM INFO: port interface:::ixNet::OBJ-/vport:1/interface:1 
+12/17/15 12:20:40 AM INFO: rb_interface:::ixNet::OBJ-/vport:1/protocols/isis/router:1/interface:1 
+12/17/15 12:20:41 AM INFO: Step10 
+12/17/15 12:20:41 AM INFO: RouterId:10.10.10.10 
+12/17/15 12:20:41 AM INFO: Configure IsisRouter 
+12/17/15 12:20:41 AM INFO: ----- TAG: body IsisRouter::IsisSetSession C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:41 AM INFO: -routerid 
+12/17/15 12:20:41 AM INFO: -router_id 
+12/17/15 12:20:41 AM INFO: 10.10.10.10 
+12/17/15 12:20:41 AM INFO: -active 
+12/17/15 12:20:41 AM INFO: -active 
+12/17/15 12:20:41 AM INFO: enable 
+12/17/15 12:20:41 AM INFO: ----- TAG: body IsisSession::config C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:41 AM INFO: Args:-router_id 10.10.10.10 -active enable  
+12/17/15 12:20:41 AM INFO: Router create success... ::IsisRouter1 
+12/17/15 12:20:41 AM INFO: ----- TAG: body TestPort::CreateRouter C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:41 AM INFO: Args:-RouterName IsisRouter2 -RouterType IsisRouter -routerid 11.11.11.11  
+12/17/15 12:20:41 AM INFO: newlist: ::IsisRouter2 
+12/17/15 12:20:41 AM INFO: Step10 
+12/17/15 12:20:41 AM INFO: Type arg: IsisRouter 
+12/17/15 12:20:41 AM INFO: Type: ISISROUTER 
+12/17/15 12:20:41 AM INFO: Judgement: ipv4 address format 
+12/17/15 12:20:41 AM INFO: Is Ipv4 address... 
+12/17/15 12:20:41 AM INFO: routerId: 11.11.11.11 
+12/17/15 12:20:41 AM INFO: Check sub-interface flag...::port1 
+12/17/15 12:20:41 AM INFO: ----- TAG: body IsisRouter::ctor C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:41 AM INFO: ----- TAG: body IsisSession::constructor C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:41 AM INFO: port:::port1 
+12/17/15 12:20:41 AM INFO: port handle: ::ixNet::OBJ-/vport:1 
+12/17/15 12:20:41 AM INFO: initial port... 
+12/17/15 12:20:41 AM INFO: ----- TAG: body IsisSession::reborn C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:41 AM INFO: hPort:::ixNet::OBJ-/vport:1 
+12/17/15 12:20:42 AM INFO: handle:::ixNet::OBJ-/vport:1/protocols/isis/router:2 
+12/17/15 12:20:42 AM INFO: rb_interface:::ixNet::OBJ-/vport:1/protocols/isis/router:2/interface:1 
+12/17/15 12:20:42 AM INFO: Step10 
+12/17/15 12:20:42 AM INFO: RouterId:11.11.11.11 
+12/17/15 12:20:42 AM INFO: Configure IsisRouter 
+12/17/15 12:20:42 AM INFO: ----- TAG: body IsisRouter::IsisSetSession C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:42 AM INFO: -routerid 
+12/17/15 12:20:42 AM INFO: -router_id 
+12/17/15 12:20:42 AM INFO: 11.11.11.11 
+12/17/15 12:20:42 AM INFO: -active 
+12/17/15 12:20:42 AM INFO: -active 
+12/17/15 12:20:42 AM INFO: enable 
+12/17/15 12:20:42 AM INFO: ----- TAG: body IsisSession::config C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:42 AM INFO: Args:-router_id 11.11.11.11 -active enable  
+12/17/15 12:20:43 AM INFO: Router create success... ::IsisRouter1 ::IsisRouter2 
+12/17/15 12:20:43 AM INFO: ----- TAG: body IsisRouter::IsisSetSession C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:43 AM INFO: -addressfamily 
+12/17/15 12:20:43 AM INFO: -ip_version 
+12/17/15 12:20:43 AM INFO: IPV4 
+12/17/15 12:20:43 AM INFO: -ipv4addr 
+12/17/15 12:20:43 AM INFO: -ipv4_addr 
+12/17/15 12:20:43 AM INFO: 1.1.1.1 
+12/17/15 12:20:43 AM INFO: -gatewayaddr 
+12/17/15 12:20:43 AM INFO: -ipv4_gw 
+12/17/15 12:20:43 AM INFO: 1.1.1.2 
+12/17/15 12:20:43 AM INFO: -areaid 
+12/17/15 12:20:43 AM INFO: -areaid 
+12/17/15 12:20:43 AM INFO: 000001 
+12/17/15 12:20:43 AM INFO: -systemid 
+12/17/15 12:20:43 AM INFO: -sys_id 
+12/17/15 12:20:43 AM INFO: 00:00:01:00:00:03 
+12/17/15 12:20:43 AM INFO: -macaddr 
+12/17/15 12:20:43 AM INFO: -mac_addr 
+12/17/15 12:20:43 AM INFO: 00:00:01:00:00:02 
+12/17/15 12:20:43 AM INFO: -routinglevel 
+12/17/15 12:20:43 AM INFO: -level 
+12/17/15 12:20:43 AM INFO: L2 
+12/17/15 12:20:43 AM INFO: -ipv4prefixlen 
+12/17/15 12:20:43 AM INFO: -ipv4_prefix_len 
+12/17/15 12:20:43 AM INFO: 24 
+12/17/15 12:20:43 AM INFO: -ipv6addr 
+12/17/15 12:20:43 AM INFO: -ipv6_addr 
+12/17/15 12:20:43 AM INFO: 2000::2 
+12/17/15 12:20:43 AM INFO: -ipv6prefixlen 
+12/17/15 12:20:43 AM INFO: -ipv6_prefix_len 
+12/17/15 12:20:43 AM INFO: 64 
+12/17/15 12:20:43 AM INFO: -ipv6gatewayaddr 
+12/17/15 12:20:43 AM INFO: -ipv6_gw 
+12/17/15 12:20:43 AM INFO: 2000::11 
+12/17/15 12:20:43 AM INFO: -areaid2 
+12/17/15 12:20:43 AM INFO: -areaid2 
+12/17/15 12:20:43 AM INFO: 000002 
+12/17/15 12:20:43 AM INFO: -areaid3 
+12/17/15 12:20:43 AM INFO: -areaid3 
+12/17/15 12:20:43 AM INFO: 000003 
+12/17/15 12:20:43 AM INFO: -routerid 
+12/17/15 12:20:43 AM INFO: -router_id 
+12/17/15 12:20:43 AM INFO: 1.2.1.1 
+12/17/15 12:20:43 AM INFO: -flagwidemetric 
+12/17/15 12:20:43 AM INFO: -flag_wide_metric 
+12/17/15 12:20:43 AM INFO: true 
+12/17/15 12:20:43 AM INFO: -flagrestarthelper 
+12/17/15 12:20:43 AM INFO: -flag_restart_helper 
+12/17/15 12:20:43 AM INFO: true 
+12/17/15 12:20:43 AM INFO: -holdtimer 
+12/17/15 12:20:43 AM INFO: -hold_timer 
+12/17/15 12:20:43 AM INFO: 20 
+12/17/15 12:20:43 AM INFO: -iihinterval 
+12/17/15 12:20:43 AM INFO: -iih_interval 
+12/17/15 12:20:43 AM INFO: 5 
+12/17/15 12:20:43 AM INFO: -metricmode 
+12/17/15 12:20:43 AM INFO: -metric_mode 
+12/17/15 12:20:43 AM INFO: NARROW_AND_WIDE 
+12/17/15 12:20:43 AM INFO: -psnpinterval 
+12/17/15 12:20:43 AM INFO: -psnp_interval 
+12/17/15 12:20:43 AM INFO: 17 
+12/17/15 12:20:43 AM INFO: -testlinklocaladdr 
+12/17/15 12:20:43 AM INFO: -Test_link_local_addr 
+12/17/15 12:20:43 AM INFO: 2000::4 
+12/17/15 12:20:43 AM INFO: -l2routerpriority 
+12/17/15 12:20:43 AM INFO: -l2_router_priority 
+12/17/15 12:20:43 AM INFO: 3 
+12/17/15 12:20:43 AM INFO: -l1routerpriority 
+12/17/15 12:20:43 AM INFO: -l1_router_priority 
+12/17/15 12:20:43 AM INFO: 4 
+12/17/15 12:20:43 AM INFO: -active 
+12/17/15 12:20:43 AM INFO: -active 
+12/17/15 12:20:43 AM INFO: true 
+12/17/15 12:20:43 AM INFO: -metric 
+12/17/15 12:20:43 AM INFO: -metric 
+12/17/15 12:20:43 AM INFO: 7 
+12/17/15 12:20:43 AM INFO: -localmac 
+12/17/15 12:20:43 AM INFO: -local_mac 
+12/17/15 12:20:43 AM INFO: 00:00:00:11:01:10 
+12/17/15 12:20:43 AM INFO: -localmacmodifier 
+12/17/15 12:20:43 AM INFO: -local_mac_modifier 
+12/17/15 12:20:43 AM INFO: 00:00:00:00:00:03 
+12/17/15 12:20:43 AM INFO: ----- TAG: body IsisSession::config C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:43 AM INFO: Args:-ip_version IPV4 -ipv4_addr 1.1.1.1 -ipv4_gw 1.1.1.2 -areaid 000001 -sys_id 00:00:01:00:00:03 -mac_addr 00:00:01:00:00:02 -level L2 -ipv4_prefix_len 24 -ipv6_addr 2000::2 -ipv6_prefix_len 64 -ipv6_gw 2000::11 -areaid2 000002 -areaid3 000003 -router_id 1.2.1.1 -flag_wide_metric true -flag_restart_helper true -hold_timer 20 -iih_interval 5 -metric_mode NARROW_AND_WIDE -psnp_interval 17 -Test_link_local_addr 2000::4 -l2_router_priority 3 -l1_router_priority 4 -active true -metric 7 -local_mac 00:00:00:11:01:10 -local_mac_modifier 00:00:00:00:00:03  
+12/17/15 12:20:45 AM INFO: sys_id: 00:00:01:00:00:03 
+12/17/15 12:20:46 AM INFO: interface:::ixNet::OBJ-/vport:1/interface:1 mac_addr:00:00:01:00:00:02 
+12/17/15 12:20:46 AM INFO: ----- TAG: proc Tester::save_config C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:48 AM INFO: ----- TAG: body IsisRouter::IsisSetSession C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:48 AM INFO: -addressfamily 
+12/17/15 12:20:48 AM INFO: -ip_version 
+12/17/15 12:20:48 AM INFO: IPV4 
+12/17/15 12:20:48 AM INFO: -ipv4addr 
+12/17/15 12:20:48 AM INFO: -ipv4_addr 
+12/17/15 12:20:48 AM INFO: 1.1.1.2 
+12/17/15 12:20:48 AM INFO: -gatewayaddr 
+12/17/15 12:20:48 AM INFO: -ipv4_gw 
+12/17/15 12:20:48 AM INFO: 1.1.1.1 
+12/17/15 12:20:48 AM INFO: -areaid 
+12/17/15 12:20:48 AM INFO: -areaid 
+12/17/15 12:20:48 AM INFO: 000001 
+12/17/15 12:20:48 AM INFO: -systemid 
+12/17/15 12:20:48 AM INFO: -sys_id 
+12/17/15 12:20:48 AM INFO: 00:00:01:00:00:02 
+12/17/15 12:20:48 AM INFO: -macaddr 
+12/17/15 12:20:48 AM INFO: -mac_addr 
+12/17/15 12:20:48 AM INFO: 00:00:01:00:00:02 
+12/17/15 12:20:48 AM INFO: -routinglevel 
+12/17/15 12:20:48 AM INFO: -level 
+12/17/15 12:20:48 AM INFO: L2 
+12/17/15 12:20:48 AM INFO: ----- TAG: body IsisSession::config C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:48 AM INFO: Args:-ip_version IPV4 -ipv4_addr 1.1.1.2 -ipv4_gw 1.1.1.1 -areaid 000001 -sys_id 00:00:01:00:00:02 -mac_addr 00:00:01:00:00:02 -level L2  
+12/17/15 12:20:48 AM INFO: sys_id: 00:00:01:00:00:02 
+12/17/15 12:20:48 AM INFO: interface:::ixNet::OBJ-/vport:1/interface:1 mac_addr:00:00:01:00:00:02 
+12/17/15 12:20:49 AM INFO: ----- TAG: body IsisRouter::IsisCreateRouteBlock C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:49 AM INFO: newlist: ::IsisBlock1 
+12/17/15 12:20:49 AM INFO: -blockname 
+12/17/15 12:20:49 AM INFO: -block_name 
+12/17/15 12:20:49 AM INFO: IsisBlock1 
+12/17/15 12:20:49 AM INFO: -systemid 
+12/17/15 12:20:49 AM INFO: -sys_id 
+12/17/15 12:20:49 AM INFO: 01:01:01:01:01:01 
+12/17/15 12:20:49 AM INFO: -numaddress 
+12/17/15 12:20:49 AM INFO: -num 
+12/17/15 12:20:49 AM INFO: 20 
+12/17/15 12:20:49 AM INFO: ----- TAG: body RouteBlock::config C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:49 AM INFO: Args:-block_name IsisBlock1 -sys_id 01:01:01:01:01:01 -num 20  
+12/17/15 12:20:49 AM INFO: ----- TAG: body IsisSession::set_route C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:49 AM INFO: Args:-route_block ::IsisBlock1  
+12/17/15 12:20:49 AM INFO: ----- TAG: body EmulationObject::enable C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:49 AM INFO: ----- TAG: body IsisRouter::IsisSetRouteBlock C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:49 AM INFO: newlist: ::IsisBlock1 
+12/17/15 12:20:49 AM INFO: -blockname 
+12/17/15 12:20:49 AM INFO: -block_name 
+12/17/15 12:20:49 AM INFO: IsisBlock1 
+12/17/15 12:20:49 AM INFO: -firstaddress 
+12/17/15 12:20:49 AM INFO: -start 
+12/17/15 12:20:49 AM INFO: 200.0.0.100 
+12/17/15 12:20:49 AM INFO: ----- TAG: body RouteBlock::config C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:49 AM INFO: Args:-block_name IsisBlock1 -start 200.0.0.100  
+12/17/15 12:20:49 AM INFO: Judgement: ipv4 address format 
+12/17/15 12:20:49 AM INFO: Is Ipv4 address... 
+12/17/15 12:20:49 AM INFO: ----- TAG: body IsisSession::set_route C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:49 AM INFO: Args:-route_block ::IsisBlock1  
+12/17/15 12:20:50 AM INFO: ----- TAG: body EmulationObject::enable C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:50 AM INFO: ----- TAG: body IsisRouter::IsisRetrieveRouteBlock C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:50 AM INFO: newlist: ::IsisBlock1 
+12/17/15 12:20:50 AM INFO: -blockname 
+12/17/15 12:20:50 AM INFO: -block_name 
+12/17/15 12:20:50 AM INFO: IsisBlock1 
+12/17/15 12:20:50 AM INFO: ----- TAG: body IsisSession::set_route C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:50 AM INFO: Args:-route_block ::IsisBlock1  
+12/17/15 12:20:50 AM INFO: ----- TAG: body IsisRouter::IsisListRouteBlock C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:50 AM INFO: -blocknamelist 
+12/17/15 12:20:50 AM INFO: -block_name_list 
+12/17/15 12:20:50 AM INFO: routerNameList 
+12/17/15 12:20:50 AM INFO: ----- TAG: body IsisSession::get_route_block C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:50 AM INFO: ----- TAG: body IsisRouter::IsisRetrieveRouteBlock C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:50 AM INFO: newlist: ::IsisBlock1 
+12/17/15 12:20:50 AM INFO: -blockname 
+12/17/15 12:20:50 AM INFO: -block_name 
+12/17/15 12:20:50 AM INFO: IsisBlock1 
+12/17/15 12:20:50 AM INFO: -active 
+12/17/15 12:20:50 AM INFO: -active 
+12/17/15 12:20:50 AM INFO: activeFlag 
+12/17/15 12:20:50 AM INFO: ----- TAG: body IsisSession::set_route C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:50 AM INFO: Args:-route_block ::IsisBlock1  
+12/17/15 12:20:50 AM INFO: ----- TAG: body IsisRouter::IsisCreateTopRouter C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:50 AM INFO: newlist: ::rtr1 
+12/17/15 12:20:50 AM INFO: -systemid 
+12/17/15 12:20:50 AM INFO: -sys_id 
+12/17/15 12:20:50 AM INFO: 00:00:00:00:00:11 
+12/17/15 12:20:50 AM INFO: -routinglevel 
+12/17/15 12:20:50 AM INFO: -level 
+12/17/15 12:20:50 AM INFO: L2 
+12/17/15 12:20:50 AM INFO: ----- TAG: body RouteBlock::config C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:51 AM INFO: Args:-sys_id 00:00:00:00:00:11 -level L2  
+12/17/15 12:20:51 AM INFO: ----- TAG: body IsisSession::set_top_route C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:51 AM INFO: Args:-sys_id 00:00:00:00:00:11 -level L2 -route_name ::rtr1  
+12/17/15 12:20:51 AM INFO: ----- TAG: body IsisRouter::IsisCreateTopRouter C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:51 AM INFO: newlist: ::rtr2 
+12/17/15 12:20:51 AM INFO: -systemid 
+12/17/15 12:20:51 AM INFO: -sys_id 
+12/17/15 12:20:51 AM INFO: 00:00:00:00:00:22 
+12/17/15 12:20:51 AM INFO: -routinglevel 
+12/17/15 12:20:51 AM INFO: -level 
+12/17/15 12:20:51 AM INFO: L2 
+12/17/15 12:20:51 AM INFO: ----- TAG: body RouteBlock::config C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:51 AM INFO: Args:-sys_id 00:00:00:00:00:22 -level L2  
+12/17/15 12:20:51 AM INFO: ----- TAG: body IsisSession::set_top_route C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:51 AM INFO: Args:-sys_id 00:00:00:00:00:22 -level L2 -route_name ::rtr2  
+12/17/15 12:20:52 AM INFO: ----- TAG: body IsisRouter::IsisCreateTopRouter C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:52 AM INFO: newlist: ::rtr3 
+12/17/15 12:20:52 AM INFO: -systemid 
+12/17/15 12:20:52 AM INFO: -sys_id 
+12/17/15 12:20:52 AM INFO: 00:00:00:00:00:33 
+12/17/15 12:20:52 AM INFO: -routinglevel 
+12/17/15 12:20:52 AM INFO: -level 
+12/17/15 12:20:52 AM INFO: L2 
+12/17/15 12:20:52 AM INFO: ----- TAG: body RouteBlock::config C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:52 AM INFO: Args:-sys_id 00:00:00:00:00:33 -level L2  
+12/17/15 12:20:52 AM INFO: ----- TAG: body IsisSession::set_top_route C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:52 AM INFO: Args:-sys_id 00:00:00:00:00:33 -level L2 -route_name ::rtr3  
+12/17/15 12:20:53 AM INFO: ----- TAG: body IsisRouter::IsisCreateTopRouterLink C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:53 AM INFO: -linkname 
+12/17/15 12:20:53 AM INFO: -link_name 
+12/17/15 12:20:53 AM INFO: link1 
+12/17/15 12:20:53 AM INFO: -connectedname 
+12/17/15 12:20:53 AM INFO: -connected_name 
+12/17/15 12:20:53 AM INFO: rtr2 
+12/17/15 12:20:53 AM INFO: -narrowmetric 
+12/17/15 12:20:53 AM INFO: -narrow_metric 
+12/17/15 12:20:53 AM INFO: 1 
+12/17/15 12:20:53 AM INFO: -widemetric 
+12/17/15 12:20:53 AM INFO: -wide_metric 
+12/17/15 12:20:53 AM INFO: 1 
+12/17/15 12:20:53 AM INFO: ----- TAG: body RouteBlock::config C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:53 AM INFO: Args:-link_name link1 -connected_name rtr2 -narrow_metric 1 -wide_metric 1  
+12/17/15 12:20:53 AM INFO: ----- TAG: body IsisSession::set_top_route C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:53 AM INFO: Args:-link_name link1 -connected_name rtr2 -narrow_metric 1 -wide_metric 1 -route_name rtr1  
+12/17/15 12:20:54 AM INFO: ----- TAG: body IsisRouter::IsisCreateTopRouterLink C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:54 AM INFO: -linkname 
+12/17/15 12:20:54 AM INFO: -link_name 
+12/17/15 12:20:54 AM INFO: link2 
+12/17/15 12:20:54 AM INFO: -connectedname 
+12/17/15 12:20:54 AM INFO: -connected_name 
+12/17/15 12:20:54 AM INFO: rtr3 
+12/17/15 12:20:54 AM INFO: -narrowmetric 
+12/17/15 12:20:54 AM INFO: -narrow_metric 
+12/17/15 12:20:54 AM INFO: 1 
+12/17/15 12:20:54 AM INFO: -widemetric 
+12/17/15 12:20:54 AM INFO: -wide_metric 
+12/17/15 12:20:54 AM INFO: 1 
+12/17/15 12:20:54 AM INFO: ----- TAG: body RouteBlock::config C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:54 AM INFO: Args:-link_name link2 -connected_name rtr3 -narrow_metric 1 -wide_metric 1  
+12/17/15 12:20:54 AM INFO: ----- TAG: body IsisSession::set_top_route C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:54 AM INFO: Args:-link_name link2 -connected_name rtr3 -narrow_metric 1 -wide_metric 1 -route_name rtr1  
+12/17/15 12:20:54 AM INFO: ----- TAG: body ETHPort::StartArp C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:20:54 AM INFO: ----- TAG: body TestPort::StartRouter C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:21:05 AM INFO: ----- TAG: body IsisRouter::IsisAdvertiseRouteBlock C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:21:05 AM INFO: ----- TAG: body IsisSession::advertise_route C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:21:05 AM INFO: Args:  
+12/17/15 12:21:05 AM INFO: hRouteBlock : ::IsisBlock1 
+12/17/15 12:21:05 AM INFO: hRouteBlock : ::rtr1 
+12/17/15 12:21:05 AM INFO: hRouteBlock : ::rtr2 
+12/17/15 12:21:05 AM INFO: hRouteBlock : ::rtr3 
+12/17/15 12:21:05 AM INFO: hRouteBlock : rtr1 
+12/17/15 12:21:15 AM INFO: ----- TAG: body BgpRouter::IsisWithdrawRouteBlock C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:21:15 AM INFO: newlist: ::IsisBlock1 
+12/17/15 12:21:15 AM INFO: ----- TAG: body IsisSession::withdraw_route C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:21:15 AM INFO: Args:  
+12/17/15 12:21:16 AM INFO: ----- TAG: body TestPort::StopRouter C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:22:00 AM INFO: ----- TAG: CleanupTest ----- 
+12/17/15 12:22:00 AM INFO: obj:::IsisRouter1_c ::IxiaCapi::PortManager ::IsisRouter2_c ::rtr1 ::rtr2 ::rtr3 ::IsisRouter1 ::IsisRouter2 ::IsisBlock1 ::port1 ::IxiaCapi::TrafficManager ::chassis1 
+12/17/15 12:22:00 AM INFO: delete:::IsisRouter1_c 
+12/17/15 12:22:00 AM INFO: Manager continue...::IxiaCapi::PortManager 
+12/17/15 12:22:00 AM INFO: delete:::IsisRouter2_c 
+12/17/15 12:22:00 AM INFO: delete:::rtr1 
+12/17/15 12:22:00 AM INFO: delete:::rtr2 
+12/17/15 12:22:00 AM INFO: delete:::rtr3 
+12/17/15 12:22:00 AM INFO: delete:::IsisRouter1 
+12/17/15 12:22:00 AM INFO: delete:::IsisRouter2 
+12/17/15 12:22:00 AM INFO: delete:::IsisBlock1 
+12/17/15 12:22:00 AM INFO: delete:::port1 
+12/17/15 12:22:00 AM INFO: ----- TAG: body TestPort::destructor C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:22:00 AM INFO: root:::ixNet::OBJ-/ 
+12/17/15 12:22:00 AM INFO: ----- TAG: body TestPortMgr::DeleteTestPort C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:22:02 AM INFO: ----- TAG: body TestPort::DestroyStaengine C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:22:02 AM INFO: Statistic engine destroy success... 
+12/17/15 12:22:02 AM INFO: ----- TAG: body TestPort::DestroyFilter C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:22:02 AM INFO: root:::ixNet::OBJ-/ 
+12/17/15 12:22:02 AM INFO: Step10 
+12/17/15 12:22:02 AM INFO: Destroy filter success... 
+12/17/15 12:22:02 AM INFO: ----- TAG: body TestPort::DestroyHost C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:22:03 AM INFO: root:::ixNet::OBJ-/ 
+12/17/15 12:22:03 AM INFO: Host destroy success... 
+	  Host list:  
+12/17/15 12:22:03 AM INFO: ----- TAG: body TestPort::DestroyRouter C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:22:03 AM INFO: object "::IsisRouter1" not found
+    while executing
+"delete object ::IsisRouter1 "
+    ("uplevel" body line 1)
+    invoked from within
+"DbgNub_uplevelCmd DbgNub_uplevelCmd $args"
+    invoked from within
+"uplevel 1 " delete object $router " " 
+12/17/15 12:22:03 AM INFO: object "::IsisRouter2" not found
+    while executing
+"delete object ::IsisRouter2 "
+    ("uplevel" body line 1)
+    invoked from within
+"DbgNub_uplevelCmd DbgNub_uplevelCmd $args"
+    invoked from within
+"uplevel 1 " delete object $router " " 
+12/17/15 12:22:03 AM INFO: Destroy router success... 
+12/17/15 12:22:03 AM INFO: Remove port success... ::ixNet::OBJ-/vport:1 
+12/17/15 12:22:03 AM INFO: delete:::chassis1 
+12/17/15 12:22:03 AM INFO: ----- TAG: body TestDevice::destructor C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:22:03 AM INFO: ----- TAG: body TestDevice::DestroyTestPort C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:22:03 AM INFO: remove ::port1 
+12/17/15 12:22:03 AM INFO: ----- TAG: body TestPortMgr::DeleteTestPort C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:22:03 AM INFO: ----- TAG: body TestPortMgr::GetPortHandle C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:22:03 AM INFO: Port destroy success... 
+	  Port List :  
+12/17/15 12:22:03 AM INFO: ----- TAG: body TestDevice::Disonnect C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/17/15 12:22:06 AM INFO: Close connection success... ::ixNet::OBJ-/availableHardware/chassis:"172.16.174.137" 
+12/17/15 12:22:06 AM INFO: ----- TAG: body TestPortMgr::Reset C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 

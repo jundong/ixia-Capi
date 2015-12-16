@@ -86,13 +86,12 @@ Deputs Step40
             foreach { key value } $args {
                 set key [string tolower $key]
 				if { [info exists argslist($key) ] } {
-			Deputs $key
-			Deputs $argslist($key)
-			Deputs $value
+					Deputs $key
+					Deputs $argslist($key)
+					Deputs $value
 					lappend newargs $argslist($key)
 					lappend newargs $value
 				}
-                
             }
         }
     }

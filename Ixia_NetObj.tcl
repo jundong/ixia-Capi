@@ -439,6 +439,7 @@ class RouteBlock {
 	public variable step
 	public variable prefix_len
 	public variable type
+    public variable sys_id
     public variable origin
     public variable nexthop
     public variable med
@@ -454,8 +455,11 @@ class RouteBlock {
     public variable user_label
 	public variable protocol
 	public variable as_path
-    
-    
+    public variable flag_te
+    public variable flag_multi_topology
+    public variable flag_advetisted
+    public variable flag_attached_bit
+    public variable flag_overload_bit
 	
 	constructor {} {
 		set num 1
@@ -463,6 +467,7 @@ class RouteBlock {
 		set prefix_len 24
 		set start 100.0.0.1
 		set type ""
+        set sys_id "00:00:00:00:00:01"
         set origin ""
 		set nexthop ""
 		set med ""
@@ -484,11 +489,12 @@ class RouteBlock {
 body RouteBlock::config { args } {
     global errorInfo
     global errNumber
+    
     set tag "body RouteBlock::config [info script]"
-Deputs "----- TAG: $tag -----"
-	
-#param collection
-Deputs "Args:$args "
+    Deputs "----- TAG: $tag -----"
+        
+    #param collection
+    Deputs "Args:$args "
     foreach { key value } $args {
         set key [string tolower $key]
         switch -exact -- $key {
@@ -554,11 +560,13 @@ Deputs "Args:$args "
 			-as_path {
                 set as_path $value
             }
+            -systemid {
+                set sys_id $value
+            }
         }
     }
 	
     return [GetStandardReturnHeader]
-
 }
 
 class Tlv {

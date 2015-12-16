@@ -1,7 +1,7 @@
 ######################################################################
 # 脚本功能:测试LDP协议仿真功能
 #
-# 完成时间: 2007.6.19
+# 完成时间: 2015.12.08
 #
 #
 # 拓扑描述:
@@ -33,16 +33,18 @@ proc WaitKeyboardInput {} {
     }
 }
 
-    #设置Chassis的基本参数，包括IP地址，端口的数量等等
-set chassisAddr 10.98.3.12
-set islot 7
-set portList {1 2} ;#端口的排列顺序是port1, port2
+#设置Chassis的基本参数，包括IP地址，端口的数量等等
+set chassisAddr 172.16.174.137
+set slotList {1 2}
+set portList {1 1} ;#The port list is port1, port2
 
 if { [catch {    
     
-    cd ../Source
+    #cd ../Source
+    lappend auto_path "C:/Ixia/Workspace/ixia-Capi"
     #加载HLAPI Lib
-   source ./pkgIndex.tcl
+    #source ./pkgIndex.tcl
+    package require IxiaCAPI
     puts "START TESTING...."
  
     SetLogOption -Debug Enable
@@ -53,11 +55,11 @@ if { [catch {
 
     # 开始预留端口
     for {set i 0} {$i <[llength $portList]} {incr i} {
-        chassis1 CreateTestPort -PortLocation $islot/[lindex $portList $i] -PortName port[expr $i+1] -PortType Ethernet
+        chassis1 CreateTestPort -PortLocation [lindex $slotList $i]/[lindex $portList $i] -PortName port[expr $i+1] -PortType EthernetVM
     }
     
-    port1 ConfigPort -LinkSpeed 10G -PortMode LAN  -DuplexMode FULL 
-    port2 ConfigPort -LinkSpeed 10G -PortMode LAN -DuplexMode FULL 
+    port1 ConfigPort -LinkSpeed 10G -DuplexMode FULL 
+    port2 ConfigPort -LinkSpeed 10G -DuplexMode FULL 
     
     after 10000
     
@@ -71,7 +73,7 @@ if { [catch {
     port1 CreateTraffic -TrafficName traffic1
     traffic1 CreateProfile -Name profile1 -TrafficLoad 10 -TrafficLoadUnit percent  
     traffic1 CreateStream -StreamName stream1 -FrameLen 256 -ProfileName profile1 \
-        -L2 ethernet -EthDst 00:00:10:E1:00:08 -EthSrc 00:00:10:E1:00:09
+        -L2 ethernet  -EthDst 00:00:10:E1:00:08 -EthSrc 00:00:10:E1:00:09
     traffic1 CreateStream -StreamName stream2 -FrameLen 500 -ProfileName profile1 \
         -L2 ethernet -L3 IPv4 -L4 Udp -IpSrcIpAddr 192.168.0.1 -IpDstIpAddr 192.168.5.7 -udpsrcport 2000 -udpdstport 3000
     traffic1 ConfigStream -StreamName stream1 -L2 ethernet -L3 IPv4 -EthDst 00:00:10:E1:01:08 -EthSrc 00:00:11:E1:00:09

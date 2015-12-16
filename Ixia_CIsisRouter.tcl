@@ -10,7 +10,7 @@
 # 创建时间: 2009.03.05
 #
 # 修改记录： 
-#   
+#   1. ConfigRouter -> IsisSetSession
 # 版权所有：Ixia
 #====================================================================
 
@@ -63,7 +63,6 @@ itcl::class IsisRouter {
     public variable m_isisIPToInterFaceID 
     public variable m_isisRTNameToInterFaceID
 
-    
     inherit Router
     constructor {portobj routertype routerid } \
     {Router::constructor $portobj $routertype $routerid} {
@@ -84,7 +83,6 @@ itcl::class IsisRouter {
         #set m_intfId [lindex [ixNet getList $m_vportId interface] 0]
         #puts "m_intfId  '$m_intfId'"
         set m_intfIdList [ixNet getList $m_vportId interface]
-        #puts "m_intfIdList: $m_intfIdList"
 
         ixNet setAttribute $m_vportId/protocols/isis -enabled True
         set m_ixRouterId [ixNet add $m_vportId/protocols/isis router]
@@ -93,13 +91,11 @@ itcl::class IsisRouter {
         set m_ixRouterId [ixNet remapIds $m_ixRouterId]        
     }
 
-    
-    
     destructor {
     }
     
     ;#以下声明要实现的方法,即具体的API.
-    public method ConfigRouter
+    public method IsisSetSession
     public method GetRouter
     public method Enable
     public method Disable
@@ -118,7 +114,6 @@ itcl::class IsisRouter {
     public method RemoveTopNetwork
     public method RemoveTopRouter
     #################################################
-    
     
     public method CreateRouteBlock
     public method ConfigRouteBlock
@@ -144,8 +139,8 @@ itcl::class IsisRouter {
 
 #PASS
 #====================================================================
-# 函数名称:ConfigRouter by Roger 2009.3
-# 函数编写: 杨卓 
+# 函数名称:IsisSetSession by Judo 2015.12
+# 函数编写: Judo
 # 功能描述:创建Isis Router
 #
 # 输入参数:
@@ -176,8 +171,8 @@ itcl::class IsisRouter {
 #L1RouterPriority	L1路由器的优先级	可选            暂不支持 只读
 #RoutingLevel	        路由器的层次	可选                    支持   这个就是is-type
 ##                      举例: 1 , 2 , 1+2 即level1 , level2, level1+2
-#AreaId1 	        区域ID	可选                            有疑问 即Area Address,在Advanced Routing Settings中的 Area选项.
-#AreaId2	        区域ID	可选                            有疑问
+#AreaId2 	        区域ID	可选                            有疑问 即Area Address,在Advanced Routing Settings中的 Area选项.
+#AreaId3	        区域ID	可选                            有疑问
 #Active	                该协议仿真功能enable or disable	可选    支持
 #                        根据要求,所有Router默认状态都必须是Disable的,如果要启用,则必须使用Enable函数,所以在用户
 #                       ConfigRouter的时候无论他输入的是Enable还是Disable,这里都是Disable.
@@ -206,13 +201,12 @@ itcl::class IsisRouter {
 #
 #
 # 语法描述:                                                         
-#    IsisRouter ConfigRouter –IpAddr 192.1.1.2 –PrefixLen 24 –AreaID 00 –SysID aaaaaaaaaaaa –Level L1                                    
+#    IsisRouter IsisSetSession –IpAddr 192.1.1.2 –PrefixLen 24 –AreaID 00 –SysID aaaaaaaaaaaa –Level L1                                    
 # 返回值：                                                          
 #    成功0，失败1；                         
 #====================================================================
-itcl::body IsisRouter::ConfigRouter {args} {
-        
-    ixDebugPuts "Enter proc IsisRouter::ConfigRouter...\n"
+itcl::body IsisRouter::IsisSetSession {args} { 
+    ixDebugPuts "Enter proc IsisRouter::IsisSetSession...\n"
     #这个函数的作用是根据用户的要求 "输入不区分大小写",所以将所有的args的输入都转化为小写的.
     set args     [ixConvertAllToLowerCase $args]
     #这个语句的作用是获取当前的过程名.
@@ -226,18 +220,39 @@ itcl::body IsisRouter::ConfigRouter {args} {
     }
     #这里首先设定参数默认值
     set addressFamily "ipv4"
-    set ipv4Addr "20.3.17.2"
-    set flagWideMetric "False"
-    set holdTimer 0
+    set ipv4Addr "192.85.1.3"
+    set ipv4GatewayAddr "192.85.1.1"
+    set ipv4PrefixLen "24"
+    set ipv6Addr "2000::2"
+    set ipv6GatewayAddr "2000::1"
+    set ipv6PrefixLen "64"
+    set testLinkLocalAddr "2000::2"
+    set macAddr "00:00:00:11:01:01"
+    set localMacModifier "00:00:00:00:00:01"
     
+    set areaId 000001
+    set areaId2 000002
+    set areaId3 000003
+    set routingLevel "L1/L2"
+    set routerId ""
+    
+    set flagRestartHelper false
+    set flagWideMetric true
+    set holdTimer 20
+    set iihInterval 5
+    set psnpInterval 2
+    set maxPacketSize 1492
+    set l1RouterPriority 0
+    set l2RouterPriority 0
+    set Active true
+    set Metric 1
     
     #这里是读入所有的args的值,并重新命名临时变量.
     set tmpList    [lrange $args 0 end]
     set idxxx      0
     set tmpllength [llength $tmpList]
 
-
-#以下这一段判断是否所有的必选参数都在args中,如果没有,则报错退出.
+    #以下这一段判断是否所有的必选参数都在args中,如果没有,则报错退出.
     set essAgs {-addressfamily -ipv4addr -ipv6addr}
     set argsFlag [CheckEssentialArgs $tmpList $essAgs]
     if {$argsFlag == 1} {
@@ -246,51 +261,51 @@ itcl::body IsisRouter::ConfigRouter {args} {
         return $::FAILURE            
     }
 
-
-
-    
     while { $tmpllength > 0  } {
         set cmdx [lindex $args $idxxx]
         set argx [lindex $args [expr $idxxx + 1]]
-
-
-    
         case $cmdx      {
-             -addressfamily {set addressFamily $argx}             
-             -ipv4addr      {set ipv4Addr $argx}
-             -ipv4prefixlen {set ipv4PrefixLen $argx}
-             -ipv6addr      {set ipv6Addr $argx}
-             -ipv6prefixlen {set ipv6PrefixLen $argx}
-             -areaid        {set areaId $argx}
-             -systemid      {set systemId $argx}
-             -flagwidemetric {set flagWideMetric $argx}
-             -flagrestarthelper {set flagRestartHelper $argx}
-             -flagte        {set flagTe $argx}
-             -routerid      {set routerId $argx}
-             -flagdropsutlsp {set flagDropSutLsp $argx}
-             -holdtimer     {set holdTimer $argx}
-             -iihinterval   {set iihInterval $argx}
-             -maxpacketsize {set maxPacketSize $argx}
-             -routinglevel  {set routingLevel $argx}
-             -active        {set Active $argx}
-             -authtype      {set authType $argx}
-             -authpassword  {set authPassword $argx}
-             -metric        {set Metric $argx}
-             
-             
-             
-             default     {
-                          puts "Error : cmd option $cmdx does not exist"
-                         }
+            -addressfamily      {set addressFamily $argx}             
+            -ipv4addr           {set ipv4Addr $argx}
+            -gatewayaddr        {set ipv4GatewayAddr $argx}
+            -ipv4prefixlen      {set ipv4PrefixLen $argx}
+            -ipv6addr           {set ipv6Addr $argx}
+            -ipv6gatewayaddr    {set ipv6GatewayAddr $argx}
+            -ipv6prefixlen      {set ipv6PrefixLen $argx}
+            -macaddr            {set macAddr $argx}
+            -localmac           {set localMac $argx}
+            -localmacmodifier   {set localMacModifier $argx}
+            -testlinklocaladdr  {set testLinkLocalAddr $argx}
+            -localmac           {set macAddr $argx}
+            -areaid             {set areaId $argx}
+            -areaid2            {set areaId2 $argx}
+            -areaid3            {set areaId3 $argx}
+            -systemid           {set systemId $argx}
+            -flagwidemetric     {set flagWideMetric $argx}
+            -flagrestarthelper  {set flagRestartHelper $argx}
+            -flagte             {set flagTe $argx}
+            -routerid           {set routerId $argx}
+            -flagdropsutlsp     {set flagDropSutLsp $argx}
+            -psnpinterval       {set psnpInterval $argx}
+            -holdtimer          {set holdTimer $argx}
+            -iihinterval        {set iihInterval $argx}
+            -maxpacketsize      {set maxPacketSize $argx}
+            -routinglevel       {set routingLevel $argx}
+            -l2routerpriority   {set l2RouterPriority $argx}
+            -l1routerpriority   {set l1RouterPriority $argx}
+            -active             {set Active $argx}
+            -authtype           {set authType $argx}
+            -authpassword       {set authPassword $argx}
+            -metric             {set Metric $argx}
+            -metricmode         {}
+            default     {
+                puts "Error : cmd option $cmdx does not exist"
+            }
         }
         incr idxxx  +2
         incr tmpllength -2
-        }
+    }
 
-        
-        
-    
-    
     set sg_router $m_ixRouterId
     set m_isisIPToInterFaceID($ipv4Addr,RID) $m_ixRouterId
     set routerName $IxiaCapi::tmpRouterObjectName
@@ -304,49 +319,45 @@ itcl::body IsisRouter::ConfigRouter {args} {
     ixNet setAttribute $sg_router -domainTransmitPassword {}
     if {$authType == "no_authentication"} {    
     } elseif {$authType ==  "area_authentication" } {
-            ixNet setAttribute $sg_router -areaAuthType password
-            ixNet setAttribute $sg_router -areaReceivedPasswordList [list $authPassword]
-            ixNet setAttribute $sg_router -areaTransmitPassword $authPassword
+        ixNet setAttribute $sg_router -areaAuthType password
+        ixNet setAttribute $sg_router -areaReceivedPasswordList [list $authPassword]
+        ixNet setAttribute $sg_router -areaTransmitPassword $authPassword
     } elseif {$authType ==  "domain_authentication" } {
-            ixNet setAttribute $sg_router -domainAuthType password
-            ixNet setAttribute $sg_router -domainReceivedPasswordList [list $authPassword]
-            ixNet setAttribute $sg_router -domainTransmitPassword $authPassword
+        ixNet setAttribute $sg_router -domainAuthType password
+        ixNet setAttribute $sg_router -domainReceivedPasswordList [list $authPassword]
+        ixNet setAttribute $sg_router -domainTransmitPassword $authPassword
     }
-
-
 
     ixNet setAttribute $sg_router -enableAttached True
     ixNet setAttribute $sg_router -enableAutoLoopback True
     if {$flagDropSutLsp == "false"} {
-    ixNet setAttribute $sg_router -enableDiscardLearnedLsps False    
+        ixNet setAttribute $sg_router -enableDiscardLearnedLsps False    
     }
 
     if {$flagRestartHelper == "true"} {
-    ixNet setAttribute $sg_router -enableHitlessRestart True
-    ixNet setAttribute $sg_router -restartMode helperRouter 
-    ixNet setAttribute $sg_router -restartTime 30 
-    ixNet setAttribute $sg_router -restartVersion version4 
+        ixNet setAttribute $sg_router -enableHitlessRestart True
+        ixNet setAttribute $sg_router -restartMode helperRouter 
+        ixNet setAttribute $sg_router -restartTime 30 
+        ixNet setAttribute $sg_router -restartVersion version4 
     }
     if {$flagTe == "true"} {
-    ixNet setAttribute $sg_router -teEnable True 
-    ixNet setAttribute $sg_router -teRouterId $routerId    
+        ixNet setAttribute $sg_router -teEnable True 
+        ixNet setAttribute $sg_router -teRouterId $routerId    
     }
 
     ixNet setAttribute $sg_router -enableIgnoreRecvMd5 True
     ixNet setAttribute $sg_router -enableOverloaded False
     ixNet setAttribute $sg_router -enablePartitionRepair False
     if {$flagWideMetric == "true"} {
-    ixNet setAttribute $sg_router -enableWideMetric True   
+        ixNet setAttribute $sg_router -enableWideMetric True   
     }
     #根据要求,所有Router默认状态都必须是Disable的,如果要启用,则必须使用Enable函数,所以在用户
     #ConfigRouter的时候无论他输入的是Enable还是Disable,这里都是Disable.
     if {$Active == "true"} {
-    ixNet setAttribute $sg_router -enabled True    
+        ixNet setAttribute $sg_router -enabled True    
     } else {
-    ixNet setAttribute $sg_router -enabled False            
+        ixNet setAttribute $sg_router -enabled False            
     }
-    
-
 
     ixNet setAttribute $sg_router -lspLifeTime 1200
     ixNet setAttribute $sg_router -lspMaxSize  $maxPacketSize
@@ -356,10 +367,7 @@ itcl::body IsisRouter::ConfigRouter {args} {
     ixNet commit
     set sg_router [lindex [ixNet remapIds $sg_router] 0]
     set ixNetSG_Stack(2) $sg_router
-
     set m_isisRouter $sg_router
-
-    
     
     #下面这一段是为ISIS创建一个路由接口,并把这个路由接口对应到已经创建实际的IP Interfaces上去.
     set sg_interface [ixNet add $ixNetSG_Stack(2) interface]
@@ -402,25 +410,23 @@ itcl::body IsisRouter::ConfigRouter {args} {
         }
     }
     
-    
-    ;#如果用户选择使用IPv4的接口,则必须把IPv6的接口信息删除.因为在创建HOST的时候,同时会创建IPv6和v4的接口信息
-    ;# 而当用户选择IPv6的接口来使用,则Ixia会自动选择IPv6,就不用删除IPv4的接口了.
+    #如果用户选择使用IPv4的接口,则必须把IPv6的接口信息删除.因为在创建HOST的时候,同时会创建IPv6和v4的接口信息
+    # 而当用户选择IPv6的接口来使用,则Ixia会自动选择IPv6,就不用删除IPv4的接口了.
     if  {$addressFamily == "ipv4"} {
         set v6Int [ixNet getList $m_intfId ipv6]
         ixNet remove $v6Int
         ixNet commit
     }
     
-    
     #ixNet setAttribute $sg_interface -interfaceId $m_intfId
     #ixNet setAttribute $sg_interface -interfaceIp 20.3.17.2
     #ixNet setAttribute $sg_interface -interfaceIpMask 255.255.255.0
     if {$routingLevel == 1} {
-    ixNet setAttribute $sg_interface -level level1    
+        ixNet setAttribute $sg_interface -level level1    
     } elseif {$routingLevel == 2} {
-    ixNet setAttribute $sg_interface -level level2    
+        ixNet setAttribute $sg_interface -level level2    
     } else {
-    ixNet setAttribute $sg_interface -level level1Level2        
+        ixNet setAttribute $sg_interface -level level1Level2        
     }
 
     ixNet setAttribute $sg_interface -level1DeadTime 30
@@ -431,9 +437,7 @@ itcl::body IsisRouter::ConfigRouter {args} {
     ixNet setAttribute $sg_interface -networkType broadcast
     ixNet commit
     set sg_interface [lindex [ixNet remapIds $sg_interface] 0]
-
-    
-} ;# end BgpRouter::ConfigRouter
+} ;# end IsisRouter::IsisSetSession
 
 
 #====================================================================
@@ -506,10 +510,9 @@ itcl::body IsisRouter::ConfigRouter {args} {
 #   systemId is 64 01 00 01 00 00
 #====================================================================
 itcl::body IsisRouter::GetRouter {args} {
-        #
-        #    puts "BlockName: $blockName"
-        #set sg_routeRange $m_isisBlockArray($blockName)        
-        #puts "FirstRoute: [ixNet getAttribute $sg_routeRange -firstRoute]"
+    #puts "BlockName: $blockName"
+    #set sg_routeRange $m_isisBlockArray($blockName)        
+    #puts "FirstRoute: [ixNet getAttribute $sg_routeRange -firstRoute]"
     ixDebugPuts "Enter proc IsisRouter::GetRouter...\n"
     #这个函数的作用是根据用户的要求 "输入不区分大小写",所以将所有的args的输入都转化为小写的.
     set args     [ixConvertAllToLowerCase $args]
@@ -1962,41 +1965,36 @@ itcl::body IsisRouter::CreateRouteBlock {args} {
         return $::FAILURE            
     }
     
-    
     while { $tmpllength > 0  } {
         set cmdx [lindex $args $idxxx]
         set argx [lindex $args [expr $idxxx + 1]]
-
-        case $cmdx      {
-             -blockname      {set blockName $argx}
-             -routepooltype      {set routePoolType $argx}
-             -firstaddress      {set firstAddress $argx}
-             -prefixlen      {set prefixLen $argx}
-             -numaddress        {set numAddress $argx}
-             
-             default     {
-                          puts "Error : cmd option $cmdx does not exist"
-                         }
+        case $cmdx {
+            -blockname         {set blockName $argx}
+            -routepooltype     {set routePoolType $argx}
+            -firstaddress      {set firstAddress $argx}
+            -prefixlen         {set prefixLen $argx}
+            -numaddress        {set numAddress $argx}
+            default {
+                puts "Error : cmd option $cmdx does not exist"
+            }
         }
         incr idxxx  +2
         incr tmpllength -2
-        }
+    }
     
     set sg_routeRange [ixNet add $m_isisRouter routeRange]
     set m_isisBlockArray($blockName)  $sg_routeRange
     #puts "m_isisBlockArray($blockName)= $m_isisBlockArray($blockName)"
-        ixNet setAttribute $sg_routeRange -enabled False 
-        ixNet setAttribute $sg_routeRange -firstRoute $firstAddress 
-        ixNet setAttribute $sg_routeRange -isRedistributed False 
-        ixNet setAttribute $sg_routeRange -maskWidth $prefixLen 
-        ixNet setAttribute $sg_routeRange -metric 0
-        ixNet setAttribute $sg_routeRange -numberOfRoutes $numAddress
-        ixNet setAttribute $sg_routeRange -routeOrigin False 
-        ixNet setAttribute $sg_routeRange -type $routePoolType
-        ixNet commit
-        set sg_routeRange [lindex [ixNet remapIds $sg_routeRange] 0]
-
-
+    ixNet setAttribute $sg_routeRange -enabled False 
+    ixNet setAttribute $sg_routeRange -firstRoute $firstAddress 
+    ixNet setAttribute $sg_routeRange -isRedistributed False 
+    ixNet setAttribute $sg_routeRange -maskWidth $prefixLen 
+    ixNet setAttribute $sg_routeRange -metric 0
+    ixNet setAttribute $sg_routeRange -numberOfRoutes $numAddress
+    ixNet setAttribute $sg_routeRange -routeOrigin False 
+    ixNet setAttribute $sg_routeRange -type $routePoolType
+    ixNet commit
+    set sg_routeRange [lindex [ixNet remapIds $sg_routeRange] 0]
 }
 
 #====================================================================
@@ -2040,8 +2038,6 @@ itcl::body IsisRouter::CheckEssentialArgs {tmpList essArgs} {
 #      成功禁止 isis router 则返回1，否则返回0；                    
 #====================================================================
 itcl::body IsisRouter::ConfigRouteBlock {args} {
-
-
     ixDebugPuts "Enter proc IsisRouter::ConfigRouteBlock...\n"
     #这个函数的作用是根据用户的要求 "输入不区分大小写",所以将所有的args的输入都转化为小写的.
     set args     [ixConvertAllToLowerCase $args]
@@ -2062,7 +2058,6 @@ itcl::body IsisRouter::ConfigRouteBlock {args} {
     set prefixLen 24
     set numAddress 10
     
-    
     #这里是读入所有的args的值,并重新命名临时变量.
     set tmpList    [lrange $args 0 end]
     set idxxx      0
@@ -2080,20 +2075,19 @@ itcl::body IsisRouter::ConfigRouteBlock {args} {
     while { $tmpllength > 0  } {
         set cmdx [lindex $args $idxxx]
         set argx [lindex $args [expr $idxxx + 1]]
-
-        case $cmdx      {
-             -blockname      {set blockName $argx}
-             -firstaddress      {set firstAddress $argx}
-             -prefixlen      {set prefixLen $argx}
-             -numaddress        {set numAddress $argx}
-             
-             default     {
-                          puts "Error : cmd option $cmdx does not exist"
-                         }
+        case $cmdx {
+            -blockname         {set blockName $argx}
+            -firstaddress      {set firstAddress $argx}
+            -prefixlen         {set prefixLen $argx}
+            -numaddress        {set numAddress $argx}
+            
+            default {
+                puts "Error : cmd option $cmdx does not exist"
+            }
         }
         incr idxxx  +2
         incr tmpllength -2
-        }
+    }
     
     set sg_routeRange $m_isisBlockArray($blockName)
     ixNet setAttribute $sg_routeRange -enabled False 
@@ -2105,12 +2099,7 @@ itcl::body IsisRouter::ConfigRouteBlock {args} {
     ixNet setAttribute $sg_routeRange -routeOrigin False 
     ixNet commit
     set sg_routeRange [lindex [ixNet remapIds $sg_routeRange] 0]
-
-
 }
-
-
-
 
 #通过
 #====================================================================
@@ -2125,8 +2114,6 @@ itcl::body IsisRouter::ConfigRouteBlock {args} {
 #                       
 #====================================================================
 itcl::body IsisRouter::GetRouteBlock {args} {
-
-
     ixDebugPuts "Enter proc IsisRouter::GetRouteBlock...\n"
     #这个函数的作用是根据用户的要求 "输入不区分大小写",所以将所有的args的输入都转化为小写的.
     set args     [ixConvertAllToLowerCase $args]
@@ -2198,8 +2185,6 @@ itcl::body IsisRouter::GetRouteBlock {args} {
 #                       
 #====================================================================
 itcl::body IsisRouter::DeleteRouteBlock {args} {
-
-
     ixDebugPuts "Enter proc IsisRouter::DeleteRouteBlock...\n"
     #这个函数的作用是根据用户的要求 "输入不区分大小写",所以将所有的args的输入都转化为小写的.
     set args     [ixConvertAllToLowerCase $args]
@@ -2269,8 +2254,6 @@ itcl::body IsisRouter::DeleteRouteBlock {args} {
 #                       
 #====================================================================
 itcl::body IsisRouter::ListRouteBlock {args} {
-
-
     ixDebugPuts "Enter proc IsisRouter::ListRouteBlock...\n"
     #这个函数的作用是根据用户的要求 "输入不区分大小写",所以将所有的args的输入都转化为小写的.
     set args     [ixConvertAllToLowerCase $args]
@@ -2630,10 +2613,9 @@ itcl::body IsisRouter::StopFlapRouters {} {
     puts "Stop Flapping Routes"
     set gridList [ixNet getList $m_ixRouterId networkRange]
     foreach gridId $gridList {
-            ixNet setAttribute $gridId  -enabled False
-            ixNet commit    
-        }
-
+        ixNet setAttribute $gridId  -enabled False
+        ixNet commit    
+    }
 }
 
 #Pass
@@ -3094,7 +3076,6 @@ itcl::body IsisRouter::GetRouterStats {args} {
 #    成功0，失败1；                         
 #====================================================================
 itcl::body IsisRouter::GraceRestartAction {args} {
-        
     ixDebugPuts "Enter proc IsisRouter::GraceRestartAction...\n"
     #这个函数的作用是根据用户的要求 "输入不区分大小写",所以将所有的args的输入都转化为小写的.
     set args     [ixConvertAllToLowerCase $args]

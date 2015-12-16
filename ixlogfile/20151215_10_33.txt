@@ -1,0 +1,142 @@
+12/15/15 10:33:07 AM INFO: ----- TAG: body TestDevice::Ctor C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/15/15 10:33:07 AM INFO: ----- TAG: body TestDevice::Connect C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/15/15 10:33:07 AM INFO: Connect to host by IP address... 172.16.174.137 
+12/15/15 10:33:07 AM INFO: Connect localhost ixNetwork Tcl Server  
+12/15/15 10:33:08 AM INFO: Create a new Config 
+12/15/15 10:33:10 AM INFO: chassis:::ixNet::OBJ-/availableHardware/chassis:L49 
+12/15/15 10:33:10 AM INFO: 1 == 1 
+12/15/15 10:33:10 AM INFO: Connection success... 
+ address:172.16.174.137 
+ chassis: ::ixNet::OBJ-/availableHardware/chassis:"172.16.174.137" 
+12/15/15 10:33:10 AM INFO: ----- TAG: body TestDevice::Connect C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/15/15 10:33:10 AM INFO: Connect to host by IP address... 172.16.174.137 
+12/15/15 10:33:10 AM INFO: Connect localhost ixNetwork Tcl Server  
+12/15/15 10:33:10 AM INFO: Create a new Config 
+12/15/15 10:33:13 AM INFO: chassis:::ixNet::OBJ-/availableHardware/chassis:L50 
+12/15/15 10:33:13 AM INFO: 1 == 1 
+12/15/15 10:33:13 AM INFO: Connection success... 
+ address:172.16.174.137 
+ chassis: ::ixNet::OBJ-/availableHardware/chassis:"172.16.174.137" 
+12/15/15 10:33:13 AM INFO: ----- TAG: body TestDevice::CreateTestPort C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/15/15 10:33:13 AM INFO: args: -PortLocation 1/1 -PortName port1 -PortType Ethernet 
+12/15/15 10:33:13 AM INFO: newlist: ::port1 
+12/15/15 10:33:13 AM INFO: IxiaCapi::ETHPort ::port1 ::ixNet::OBJ-/availableHardware/chassis:"172.16.174.137" 1 1 0 ethernet 
+12/15/15 10:33:13 AM INFO: ----- TAG: body TestPort::ctor C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/15/15 10:33:15 AM INFO: Real Port:::ixNet::OBJ-/availableHardware/chassis:"172.16.174.137"/card:1/port:1 
+12/15/15 10:33:18 AM INFO: ----- TAG: body ETHPort::ctor C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/15/15 10:33:18 AM INFO: port handle:::ixNet::OBJ-/vport:1	name:::port1 
+12/15/15 10:33:18 AM INFO: ----- TAG: body TestPortMgr::AddTestPort C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/15/15 10:33:18 AM INFO: Port creation success... Ethernet 
+12/15/15 10:33:18 AM INFO: ----- TAG: body TestPort::CreateRouter C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/15/15 10:33:18 AM INFO: Args:-RouterName IsisRouter1 -RouterType IsisRouter -routerid 10.10.10.10  
+12/15/15 10:33:18 AM INFO: newlist: ::IsisRouter1 
+12/15/15 10:33:18 AM INFO: Step10 
+12/15/15 10:33:18 AM INFO: Type arg: IsisRouter 
+12/15/15 10:33:18 AM INFO: Type: ISISROUTER 
+12/15/15 10:33:18 AM INFO: Judgement: ipv4 address format 
+12/15/15 10:33:18 AM INFO: Is Ipv4 address... 
+12/15/15 10:33:18 AM INFO: routerId: 10.10.10.10 
+12/15/15 10:33:18 AM INFO: Check sub-interface flag...::port1 
+12/15/15 10:33:18 AM INFO: ----- TAG: body IsisRouter::ctor C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/15/15 10:33:18 AM INFO: ----- TAG: body IsisSession::constructor C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/15/15 10:33:18 AM INFO: port:::port1 
+12/15/15 10:33:18 AM INFO: port handle: ::ixNet::OBJ-/vport:1 
+12/15/15 10:33:18 AM INFO: initial port... 
+12/15/15 10:33:18 AM INFO: ----- TAG: body IsisSession::reborn C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/15/15 10:33:18 AM INFO: hPort:::ixNet::OBJ-/vport:1 
+12/15/15 10:33:18 AM INFO: handle:::ixNet::OBJ-/vport:1/protocols/isis/router:1 
+12/15/15 10:33:18 AM INFO: port interface:::ixNet::OBJ-/vport:1/interface:1 
+12/15/15 10:33:19 AM INFO: rb_interface:::ixNet::OBJ-/vport:1/protocols/isis/router:1/interface:1 
+12/15/15 10:33:19 AM INFO: Step10 
+12/15/15 10:33:19 AM INFO: RouterId:10.10.10.10 
+12/15/15 10:33:19 AM INFO: OSPF/ISIS/BGP/RIP/PIM 
+12/15/15 10:33:19 AM INFO: ----- TAG: body IsisRouter::ConfigRouter C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/15/15 10:33:19 AM INFO: ----- TAG: body IsisSession::config C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/15/15 10:33:19 AM INFO: Args:  
+12/15/15 10:33:19 AM INFO: sys_id: 64:01:00:01:00:00 
+12/15/15 10:33:19 AM INFO: Router create success... ::IsisRouter1 
+12/15/15 10:33:19 AM INFO: ----- TAG: body TestPort::CreateRouter C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/15/15 10:33:19 AM INFO: Args:-RouterName IsisRouter2 -RouterType IsisRouter -routerid 11.11.11.11  
+12/15/15 10:33:19 AM INFO: newlist: ::IsisRouter2 
+12/15/15 10:33:19 AM INFO: Step10 
+12/15/15 10:33:19 AM INFO: Type arg: IsisRouter 
+12/15/15 10:33:19 AM INFO: Type: ISISROUTER 
+12/15/15 10:33:19 AM INFO: Judgement: ipv4 address format 
+12/15/15 10:33:19 AM INFO: Is Ipv4 address... 
+12/15/15 10:33:19 AM INFO: routerId: 11.11.11.11 
+12/15/15 10:33:19 AM INFO: Check sub-interface flag...::port1 
+12/15/15 10:33:19 AM INFO: ----- TAG: body IsisRouter::ctor C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/15/15 10:33:19 AM INFO: ----- TAG: body IsisSession::constructor C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/15/15 10:33:19 AM INFO: port:::port1 
+12/15/15 10:33:19 AM INFO: port handle: ::ixNet::OBJ-/vport:1 
+12/15/15 10:33:19 AM INFO: initial port... 
+12/15/15 10:33:19 AM INFO: ----- TAG: body IsisSession::reborn C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/15/15 10:33:19 AM INFO: hPort:::ixNet::OBJ-/vport:1 
+12/15/15 10:33:19 AM INFO: handle:::ixNet::OBJ-/vport:1/protocols/isis/router:2 
+12/15/15 10:33:20 AM INFO: rb_interface:::ixNet::OBJ-/vport:1/protocols/isis/router:2/interface:1 
+12/15/15 10:33:20 AM INFO: Step10 
+12/15/15 10:33:20 AM INFO: RouterId:11.11.11.11 
+12/15/15 10:33:20 AM INFO: OSPF/ISIS/BGP/RIP/PIM 
+12/15/15 10:33:20 AM INFO: ----- TAG: body IsisRouter::ConfigRouter C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/15/15 10:33:20 AM INFO: ----- TAG: body IsisSession::config C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/15/15 10:33:20 AM INFO: Args:  
+12/15/15 10:33:20 AM INFO: sys_id: 64:01:00:01:00:00 
+12/15/15 10:33:20 AM INFO: sys_id: 64:01:00:01:00:01 
+12/15/15 10:33:20 AM INFO: Router create success... ::IsisRouter1 ::IsisRouter2 
+12/15/15 10:36:47 AM INFO: ----- TAG: CleanupTest ----- 
+12/15/15 10:36:47 AM INFO: obj:::IsisRouter1_c ::IxiaCapi::PortManager ::IsisRouter2_c ::IsisRouter1 ::IsisRouter2 ::port1 ::IxiaCapi::TrafficManager ::chassis1 
+12/15/15 10:36:47 AM INFO: delete:::IsisRouter1_c 
+12/15/15 10:36:47 AM INFO: Manager continue...::IxiaCapi::PortManager 
+12/15/15 10:36:47 AM INFO: delete:::IsisRouter2_c 
+12/15/15 10:36:47 AM INFO: delete:::IsisRouter1 
+12/15/15 10:36:47 AM INFO: delete:::IsisRouter2 
+12/15/15 10:36:47 AM INFO: delete:::port1 
+12/15/15 10:36:47 AM INFO: ----- TAG: body TestPort::destructor C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/15/15 10:36:47 AM INFO: root:::ixNet::OBJ-/ 
+12/15/15 10:36:47 AM INFO: ----- TAG: body TestPortMgr::DeleteTestPort C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/15/15 10:36:49 AM INFO: ----- TAG: body TestPort::DestroyStaengine C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/15/15 10:36:49 AM INFO: Statistic engine destroy success... 
+12/15/15 10:36:49 AM INFO: ----- TAG: body TestPort::DestroyFilter C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/15/15 10:36:49 AM INFO: root:::ixNet::OBJ-/ 
+12/15/15 10:36:49 AM INFO: Step10 
+12/15/15 10:36:49 AM INFO: Destroy filter success... 
+12/15/15 10:36:49 AM INFO: ----- TAG: body TestPort::DestroyHost C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/15/15 10:36:50 AM INFO: root:::ixNet::OBJ-/ 
+12/15/15 10:36:50 AM INFO: Host destroy success... 
+	  Host list:  
+12/15/15 10:36:50 AM INFO: ----- TAG: body TestPort::DestroyRouter C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/15/15 10:36:50 AM INFO: object "::IsisRouter1" not found
+    while executing
+"delete object ::IsisRouter1 "
+    ("uplevel" body line 1)
+    invoked from within
+"DbgNub_uplevelCmd { delete object ::IsisRouter1 }"
+    ("uplevel" body line 1)
+    invoked from within
+"DbgNub_uplevelCmd DbgNub_uplevelCmd $args"
+    invoked from within
+"uplevel " delete object $router " " 
+12/15/15 10:36:50 AM INFO: object "::IsisRouter2" not found
+    while executing
+"delete object ::IsisRouter2 "
+    ("uplevel" body line 1)
+    invoked from within
+"DbgNub_uplevelCmd { delete object ::IsisRouter2 }"
+    ("uplevel" body line 1)
+    invoked from within
+"DbgNub_uplevelCmd DbgNub_uplevelCmd $args"
+    invoked from within
+"uplevel " delete object $router " " 
+12/15/15 10:36:50 AM INFO: Destroy router success... 
+12/15/15 10:36:50 AM INFO: Remove port success... ::ixNet::OBJ-/vport:1 
+12/15/15 10:36:50 AM INFO: delete:::chassis1 
+12/15/15 10:36:50 AM INFO: ----- TAG: body TestDevice::destructor C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/15/15 10:36:50 AM INFO: ----- TAG: body TestDevice::DestroyTestPort C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/15/15 10:36:50 AM INFO: remove ::port1 
+12/15/15 10:36:50 AM INFO: ----- TAG: body TestPortMgr::DeleteTestPort C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/15/15 10:36:50 AM INFO: ----- TAG: body TestPortMgr::GetPortHandle C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/15/15 10:36:50 AM INFO: Port destroy success... 
+	  Port List :  
+12/15/15 10:36:50 AM INFO: ----- TAG: body TestDevice::Disonnect C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 
+12/15/15 10:36:56 AM INFO: Close connection success... ::ixNet::OBJ-/availableHardware/chassis:"172.16.174.137" 
+12/15/15 10:36:56 AM INFO: ----- TAG: body TestPortMgr::Reset C:/Ixia/Workspace/ixia-Capi/sample/Routing_ISIS.tcl ----- 

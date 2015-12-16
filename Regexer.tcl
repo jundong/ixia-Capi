@@ -597,6 +597,7 @@ Deputs "ipStep:$ipStep"
 		if { [file extension $path] == ".xml" } {
 			set path [string replace $path [expr [string length $path] - 4] end ".ixncfg"]
 		}
+
 		Tester::save_config $path
 	}
 	

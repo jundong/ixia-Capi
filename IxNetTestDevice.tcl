@@ -29,6 +29,7 @@ namespace eval IxiaCapi {
         
         private variable chassis
         private variable PortList
+        
         method ListPorts {} {
             puts $PortList            
         }
@@ -330,6 +331,7 @@ Deputs "----- TAG: $tag -----"
         set tag "body TestDevice::CreateTestPort [info script]"
 		Deputs "----- TAG: $tag -----"
 		Deputs "args: $args"
+        
 		# Param collection
         foreach { key value } $args {
             set key [string tolower $key]
@@ -393,10 +395,13 @@ Deputs "----- TAG: $tag -----"
 		# Type mapping
         set type [string tolower $type]
         switch -exact -- $type {
-            ethernetvm -
+            ethernetvm {
+                set command "IxiaCapi::ETHPort $name $chassis $moduleNo $portNo 0 $type"
+                set type EthernetVM 
+            }
             ethernet -
             eth {
-                set command "IxiaCapi::ETHPort $name $chassis $moduleNo $portNo"
+                set command "IxiaCapi::ETHPort $name $chassis $moduleNo $portNo 0 $type"
                 set type Ethernet
             }
             pos -

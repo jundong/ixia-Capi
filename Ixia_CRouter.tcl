@@ -52,7 +52,6 @@ itcl::class Router {
         set m_this      [namespace tail $this]
         set m_namespace [namespace qualifiers $this]
         #set IxiaCapi::namespaceArray($m_this,namespace) $m_namespace
-        
     }
     
     destructor {

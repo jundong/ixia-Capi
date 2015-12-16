@@ -421,8 +421,8 @@ Deputs "vport:$vport"
         global errorInfo
         
         set tag "body Stream::AddPdu [info script]"
-Deputs "----- TAG: $tag -----"
-Deputs "args: $args"
+        Deputs "----- TAG: $tag -----"
+        Deputs "args: $args"
         foreach { key value } $args {
             set key [string tolower $key]
             switch -exact -- $key {
@@ -440,80 +440,76 @@ Deputs "args: $args"
             $IxiaCapi::s_StreamAddPdu2" -tag $tag
                         return $IxiaCapi::errorcode(3)                        
         } else {
-Deputs "name list: $nameList"
+            Deputs "name list: $nameList"
         }
 
         set err 0
         set index 0
 		set fgindex 0
         foreach name $nameList {
-# Read type protocol message
-
+            # Read type protocol message
             if { [ catch {
-
                 set protocol [ uplevel 1 " $name cget -protocol " ]
-Deputs "Pro: $protocol "
+                Deputs "Pro: $protocol "
 
                 set type [ string toupper [ uplevel 1 " $name cget -type " ] ]
                 if { ( $protocol == "custom" ) && ( $fgindex == 0 ) } {
                     set type SET
-					
                 }
-Deputs "Type $type "
+                Deputs "Type $type "
             } ] } {
-Deputs "Objects:[find obj]"
+                Deputs "Objects:[find obj]"
                 IxiaCapi::Logger::LogIn -type err -message "$IxiaCapi::s_common1 \
                 $IxiaCapi::s_StreamAddPdu1 $name" -tag $tag
                 set err 1
                 continue
             } else {
                 set proStack [ GetProtocolTemp $protocol ]
-Deputs "protocol stack: $proStack"
+                Deputs "protocol stack: $proStack"
             }
-# Set or Append pdu protocols
+            # Set or Append pdu protocols
             if { [ catch {
-
                 set stack  [ lindex [ ixNet getList $hStream stack ] 0 ]
-Deputs "type:$type"
+                Deputs "type:$type"
                 set needMod 1
                 switch -exact -- $type {
                     SET {
-Deputs "stream:$hStream"
+                        Deputs "stream:$hStream"
                         set stackList [ ixNet getList $hStream stack ]
-Deputs "Stack list:$stackList"
+                        Deputs "Stack list:$stackList"
                         while { 1 } {
                             set stackList [ ixNet getList $hStream stack ]
-Deputs "Stack list after removal:$stackList"
+                            Deputs "Stack list after removal:$stackList"
                             if { [ llength $stackList ] == 2 } {
                                 break
                             }
                             ixNet exec remove [ lindex $stackList [ expr [ llength $stackList ] - 2  ] ]
                         }
-Deputs "Stack ready to add:$stackList"
+                        Deputs "Stack ready to add:$stackList"
                         ixNet exec append [ lindex $stackList 0 ] $proStack
                         ixNet exec remove [ lindex $stackList 0 ]
                         set stack  [ lindex [ ixNet getList $hStream stack ] 0 ]
                         set stackLevel 1
                     }
                     APP {
-Deputs "stream:$hStream"
+                        Deputs "stream:$hStream"
                         set stackList [ ixNet getList $hStream stack ]
-Deputs "Stack list:$stackList"
+                        Deputs "Stack list:$stackList"
                         set appendHeader [ lindex $stackList [expr $stackLevel - 1] ]
-Deputs "appendHeader:$appendHeader"
-Deputs "stack to be added: $proStack"
+                        Deputs "appendHeader:$appendHeader"
+                        Deputs "stack to be added: $proStack"
                         ixNet exec append $appendHeader $proStack
                         set stack [lindex [ ixNet getList $hStream stack ] $stackLevel]
-Deputs "stack:$stack"
+                        Deputs "stack:$stack"
                         incr stackLevel
-Deputs "stackLevel:$stackLevel"
+                        Deputs "stackLevel:$stackLevel"
                         #set stack ${hStream}/stack:\"[ string tolower $protocol ]-${stackLevel}\"
                     }
                     MOD {
                         set index 0
-Deputs "protocol:$protocol"
+                        Deputs "protocol:$protocol"
                         foreach pro [ ixNet getList $hStream stack ] {
-Deputs "pro:$pro"
+                            Deputs "pro:$pro"
                             if { [ regexp -nocase $protocol $pro ] } {
                                 if { [ regexp -nocase "${pro}\[a-z\]+" $stack ] == 0 } {
                                     break
@@ -529,13 +525,12 @@ Deputs "pro:$pro"
                 catch {
                     set stack [ ixNet remapIds $stack ]
                 }
-Deputs "Stack:$stack"
+                Deputs "Stack:$stack"
                 set appendHeader $stack
-Deputs "Stack list:[ ixNet getList $hStream stack ]"
+                Deputs "Stack list:[ ixNet getList $hStream stack ]"
             } ] } {
-
                 IxiaCapi::Logger::LogIn -type err -message "$errorInfo" -tag $tag
-Deputs "error occured..."
+                Deputs "error occured..."
                 set err 1
                 continue
             }
@@ -544,47 +539,39 @@ Deputs "error occured..."
                 incr index
                 continue
             }
-# Modify fields
+            # Modify fields
             if { [ catch {
 			    if {$protocol == "custom"} {
 				    set raw [ uplevel 1 " $name cget -raw " ]
-	Deputs "raw: $raw"
+                    Deputs "raw: $raw"
 					set raw [ List2Str $raw ]
-	Deputs "raw: $raw"
+                    Deputs "raw: $raw"
 					#set customStack [ lindex [ ixNet getList $hStream stack ] 0 ]
 					set customStack $stack
-	Deputs "customStack:$customStack"
+                    Deputs "customStack:$customStack"
 					set fieldList [ ixNet getList $customStack field ]
-	#Deputs "fieldList: $fieldList"
+                    #Deputs "fieldList: $fieldList"
 					set rawLen [expr [string length $raw] * 4]
-	Deputs "rawLen:$rawLen"
+                    Deputs "rawLen:$rawLen"
 					ixNet setA [ lindex $fieldList 0 ] -singleValue $rawLen
-					
 					ixNet commit
 				    if { [ regexp -nocase {^0x} $raw ] } {
-	
 					    ixNet setA [ lindex $fieldList 1 ] -singleValue $raw
 				    } else {
-	
 					    ixNet setA [ lindex $fieldList 1 ] -singleValue 0x$raw
 				    }
-					ixNet commit
-					
-					
+					ixNet commit	
 				} else {
-
                     set fieldModes [ uplevel 1 " $name cget -fieldModes " ]
                     set fields [ uplevel 1 " $name cget -fields " ]
                     set fieldConfigs [ uplevel 1 " $name cget -fieldConfigs " ]
                     set optional [ uplevel 1 " $name cget -optionals " ]
                     set autos [ uplevel 1 " $name cget -autos " ]
-Deputs "name list len: [llength $nameList]"
+                    Deputs "name list len: [llength $nameList]"
                     if { [ lsearch -exact $fields "etherType" ] < 0 } {
                         if { [ llength $nameList ] == 1 } {
-
-Deputs "protocol:$protocol"
+                            Deputs "protocol:$protocol"
                             if { [ string tolower $protocol ] == "ethernet" } {
-
                                 lappend fieldModes Fixed
                                 lappend fields     etherType
                                 lappend fieldConfigs 0x88b5
@@ -593,7 +580,6 @@ Deputs "protocol:$protocol"
                             }
                         } else {
                             if { [ string tolower $protocol ] == "ethernet" } {
-
                                 lappend fieldModes Reservedf
                                 lappend fields     etherType
                                 lappend fieldConfigs 0
@@ -602,19 +588,22 @@ Deputs "protocol:$protocol"
                             }
                         }
                     }
-Deputs "PDU:\n\tModes:$fieldModes\n\tFields:$fields\n\tConfigs:$fieldConfigs\n\tOptional:$optional\n\tAutos:$autos"
+                
                     foreach mode $fieldModes field $fields conf $fieldConfigs\
                         opt $optional auto $autos {
-Deputs "stack:$stack"
-Deputs "field:$field"
+                        Deputs "stack:$stack"
+                        Deputs "field:$field"
                         set obj [ GetField $stack $field ]
-Deputs "Field object: $obj"
+                        Deputs "Field object: $obj"
+                        
+                        if { $obj == "" } {
+                            continue
+                        }
 
                         if { [ info exists opt ] } {
                             if { $opt == "" } { continue }
                             if { $opt } {
 							    ixNet setA $obj -activeFieldChoice True
-								 
                                 ixNet setA $obj -optionalEnabled True
                                 continue
                             }
@@ -622,15 +611,11 @@ Deputs "Field object: $obj"
                             continue
                         }
                         if { [ info exists auto ] } {
-
                             if { $auto == "" } { continue }
-
                             if { $auto } {
-
                                 ixNet setA $obj -auto True
                                 continue
-                            } else {
-                            
+                            } else {                     
                                 ixNet setA $obj -auto False
                             }
                         } else {
@@ -638,48 +623,48 @@ Deputs "Field object: $obj"
                         }
                         if { [ info exists mode ] == 0 || [ info exists field ] == 0 ||\
                             [ info exists conf ] == 0 } {
-Deputs "continue"
+                            Deputs "continue"
                             continue
                         }
-Deputs "Mode:$mode"
+                        Deputs "Mode:$mode"
                         switch -exact $mode {
                             Fixed {
-Deputs "Fixed:$protocol\t$field\t$conf"
+                                Deputs "Fixed:$protocol\t$field\t$conf"
                                 ixNet setMultiAttrs $obj \
                                 -valueType singleValue \
                                 -singleValue $conf
                             }
                             List {
-Deputs "List:$protocol\t$field\t$conf"
+                                Deputs "List:$protocol\t$field\t$conf"
                                 ixNet setMultiAttrs $obj \
                                 -valueType valueList
                                 -valueList $conf
                             }
                             Segment {
-#                            set offset [ AgtInvoke AgtPduHeader GetFieldBitOffset \
-#                                $hPdu $protocol 1 $field ]
-#Deputs "Offset: $offset"
-#                            AgtInvoke AgtRawPdu SetPduBytes $hPdu \
-#                                [ expr $offset / 8 ] [ string length $conf ] $conf
+                                #set offset [ AgtInvoke AgtPduHeader GetFieldBitOffset \
+                                #   $hPdu $protocol 1 $field ]
+                                #Deputs "Offset: $offset"
+                                #AgtInvoke AgtRawPdu SetPduBytes $hPdu \
+                                #   [ expr $offset / 8 ] [ string length $conf ] $conf
                             }
                             Reserved {
-Deputs "Reserved...continue"
+                                Deputs "Reserved...continue"
                                 continue
                             }
                             Incrementing -
                             Decrementing {
                                 set mode [string range $mode 0 8]
                                 set mode [string tolower $mode]
-Deputs "Mode:$mode\tProtocol:$protocol\tConfig:$conf"
+                                Deputs "Mode:$mode\tProtocol:$protocol\tConfig:$conf"
                                 set start [lindex $conf 1]
                                 set count [lindex $conf 2]
                                 set step  [lindex $conf 3]
-Deputs "obj:$obj mode: $mode start:$start count:$count step:$step"
+                                Deputs "obj:$obj mode: $mode start:$start count:$count step:$step"
                                 ixNet setMultiAttrs $obj \
-                                -valueType $mode \
-                                -countValue $count \
-                                -stepValue $step \
-                                -startValue $start
+                                    -valueType $mode \
+                                    -countValue $count \
+                                    -stepValue $step \
+                                    -startValue $start
                             }
                             Commit {
                                 ixNet setMultiAttrs $obj \
@@ -692,12 +677,11 @@ Deputs "obj:$obj mode: $mode start:$start count:$count step:$step"
                     }
                 }
 		    }] } {
-
                 IxiaCapi::Logger::LogIn -type err -message "$errorInfo" -tag $tag
-Deputs "error occured..."
+                Deputs "error occured..."
                 set err 1
                 IxiaCapi::Logger::LogIn -type warn -message \
-                "$IxiaCapi::s_StreamAddPdu3 $name" -tag $tag
+                    "$IxiaCapi::s_StreamAddPdu3 $name" -tag $tag
                 continue
             } else {
                 IxiaCapi::Logger::LogIn -message "$IxiaCapi::s_StreamAddPdu4 $name"
@@ -707,29 +691,28 @@ Deputs "error occured..."
         }
 
         if { [ catch {
-
             ixNet commit
         } ] } {
             IxiaCapi::Logger::LogIn -type err -message "$errorInfo" -tag $tag
-                    return $IxiaCapi::errorcode(7)
+            
+            return $IxiaCapi::errorcode(7)
         }
 		
 		ixNet setA $hTrafficItem/tracking -trackBy sourceDestPortPair0
-                ixNet commit
+        ixNet commit
 		
 		ixNet setM $hStream/framePayload \
 			-customRepeat true \
 			-type custom \
 			-customPattern "00"
 		
-
         if { $err } {
             return $IxiaCapi::errorcode(4)                        
         }
+        
         return $IxiaCapi::errorcode(0)                        
     }
-    
-    
+
     body Stream::ClearPdu {} {
         global IxiaCapi::fail IxiaCapi::success
         if { [ catch {
