@@ -1488,6 +1488,9 @@ Deputs "Exist : $exist "
 					set hostinfo [ $hostname cget -hostInfo ]
                     #set hostname $value
                 }
+                -flagping {
+                    set flagping $value
+                }
                 default {
                     IxiaCapi::Logger::LogIn -type err -message \
                     "$IxiaCapi::s_common1 $key\n\t\

@@ -272,6 +272,7 @@ namespace eval IxiaCapi {
 		method IsisCreateTopRouter {args} {
             set tag "body IsisRouter::IsisCreateTopRouter [info script]"
 			Deputs "----- TAG: $tag -----"
+            
             foreach { key value } $args {
                 set key [string tolower $key]
 				switch -exact -- $key {
@@ -285,17 +286,18 @@ namespace eval IxiaCapi {
 			puts $newargs
             RouteBlock $blocknamename
             eval $blocknamename config $newargs
-            eval $objName set_top_route "$newargs -route_name $blocknamename"
+            eval $objName set_top_route -route_name $blocknamename -network_type router $newargs 
 		}
 		
 		method IsisCreateTopRouterLink {args} {
             set tag "body IsisRouter::IsisCreateTopRouterLink [info script]"
 			Deputs "----- TAG: $tag -----"
+            
             foreach { key value } $args {
                 set key [string tolower $key]
 				switch -exact -- $key {
 					-routername {
-					    set blocknamename $value			
+					    set blocknamename [::IxiaCapi::NamespaceDefine $value]		
 					}
 				}
 			}
@@ -303,9 +305,71 @@ namespace eval IxiaCapi {
 			puts $objName 
 			puts $newargs
             eval $blocknamename config $newargs
-            eval $objName set_top_route "$newargs -route_name $blocknamename"
+            eval $objName set_top_route -route_name $blocknamename -network_type router $newargs
 		}
-		
+        
+        ############################################################################
+        #APIName: IsisAdvertiseLinks
+        #
+        #Description: 
+        #
+        #Input:          (1) -LinkNameList LinkNameList:Mandatory parameters
+        #
+        #Output: 0/1
+        #
+        #Coded by: Judo Xu
+        ############################################################################
+        method IsisAdvertiseLinks {args} { 
+            set tag "body IsisRouter::IsisAdvertiseLinks [info script]"
+			Deputs "----- TAG: $tag -----"
+            
+            set linknamelist [list]
+            foreach { key value } $args {
+                set key [string tolower $key]
+				switch -exact -- $key {
+					-linknamelist {
+                        foreach linkname $value {
+                            lappend linknamelist [::IxiaCapi::NamespaceDefine $linkname]
+                        }
+					}
+				}
+			}
+			if { [ llength $linknamelist ] } {
+                eval $objName advertise_route -link_name_list $linknamelist
+			} 
+        }
+        
+        ############################################################################
+        #APIName: IsisWithdrawLinks
+        #
+        #Description: 
+        #
+        #Input:          (1) -LinkNameList LinkNameList:Mandatory parameters
+        #
+        #Output: 0/1
+        #
+        #Coded by: Judo Xu
+        ############################################################################
+        method IsisWithdrawLinks {args} { 
+            set tag "body IsisRouter::IsisWithdrawLinks [info script]"
+			Deputs "----- TAG: $tag -----"
+            
+            set linknamelist [list]
+            foreach { key value } $args {
+                set key [string tolower $key]
+				switch -exact -- $key {
+					-linknamelist {
+                        foreach linkname $value {
+                            lappend linknamelist [::IxiaCapi::NamespaceDefine $linkname]
+                        }
+					}
+				}
+			}
+			if { [ llength $linknamelist ] } {
+                eval $objName withdraw_route -link_name_list $linknamelist
+			} 
+        }
+
 		destructor {}
     } 
 }

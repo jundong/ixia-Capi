@@ -17,9 +17,8 @@ class BgpSession {
     inherit RouterEmulationObject
        
     constructor { port } {
-
 		set tag "body BgpSession::ctor [info script]"
-Deputs "----- TAG: $tag -----"
+		Deputs "----- TAG: $tag -----"
 		set portObj [ GetObject $port ]
 		Deputs "portObj: $portObj"
 		set handle ""
@@ -30,7 +29,7 @@ Deputs "----- TAG: $tag -----"
 		global errNumber
 		
 		set tag "body BgpSession::reborn [info script]"
-Deputs "----- TAG: $tag -----"
+		Deputs "----- TAG: $tag -----"
 
 		if { [ catch {
 			set hPort   [ $portObj cget -handle ]
@@ -67,7 +66,7 @@ Deputs "----- TAG: $tag -----"
 		
 			ixNet commit
 			set interface [ ixNet remapIds $interface ]
-Deputs "interface:$interface"			
+			Deputs "interface:$interface"			
 			ixNet setM $interface \
 				-enabled True
 			ixNet commit
@@ -127,13 +126,15 @@ body BgpSession::config { args } {
     global errorInfo
     global errNumber
     set tag "body BgpSession::config [info script]"
-Deputs "----- TAG: $tag -----"
+	Deputs "----- TAG: $tag -----"
 	
 	set ip_version ipv4
 	set loopback_ipv4_gw 1.1.1.1
+	set bgpType "IBGP"
+	set ipv4_gw 192.85.1.1
 
-#param collection
-Deputs "Args:$args "
+	#param collection
+	Deputs "Args:$args "
     foreach { key value } $args {
         set key [string tolower $key]
         switch -exact -- $key {

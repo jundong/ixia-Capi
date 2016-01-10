@@ -326,11 +326,9 @@ body IsisSession::config { args } {
 	}
 
     if { [ info exists sys_id ] } {
-		while { [ ixNet getF $hPort/protocols/isis router -systemId "[ split $sys_id : ]"  ] != "" } {
-			Deputs "sys_id: $sys_id"		
+		while { [ ixNet getF $hPort/protocols/isis router -systemId "[ split $sys_id : ]"  ] != "" } {	
 			set sys_id [ IncrMacAddr $sys_id "00:00:00:00:00:01" ]
-		}
-		Deputs "sys_id: $sys_id"		
+		}	
 	    ixNet setA $handle -systemId $sys_id
     }
 
@@ -443,6 +441,7 @@ body IsisSession::set_top_route { args } {
             }
             -nei_ipv4_addr {
             	set nei_ipv4_addr $value
+                puts "**********nei_ipv4_addr: $nei_ipv4_addr"
             }
             -nei_ipv6_addr {
             	set nei_ipv6_addr $value
@@ -493,7 +492,11 @@ body IsisSession::set_top_route { args } {
                 set routeBlock($rb,handle) $hNetworkRange
                 lappend routeBlock(obj) $rb
             }
-			
+            
+            if { [ info exists link_name ] } {
+                set routeBlock($link_name,handle) $hNetworkRange
+            } 
+            
             if { [ info exists flag_advetisted ] } {
                 ixNet setAttribute $hNetworkRange -enabled $flag_advetisted
             }
@@ -559,6 +562,7 @@ body IsisSession::set_top_route { args } {
                         -teUnreservedBandWidth {0 0 0 0 0 0 0 0}          
                 }
             }
+            
             ixNet commit
 		}
 	}
@@ -628,27 +632,36 @@ body IsisSession::advertise_route { args } {
     global errNumber
     set tag "body IsisSession::advertise_route [info script]"
 	Deputs "----- TAG: $tag -----"
-
 	#param collection
 	Deputs "Args:$args "
+
     foreach { key value } $args {
         set key [string tolower $key]
         switch -exact -- $key {
             -route_block {
             	set route_block $value
             }
+            -link_name_list {
+            	set link_name_list $value
+            }
         }
     }
-	
+            
 	if { [ info exists route_block ] } {
 		ixNet setA $routeBlock($route_block,handle) \
 			-enabled True
+	} elseif { [ info exists link_name_list ] } {
+        foreach ln $link_name_list {
+            if { [ info exists $routeBlock($ln,handle) ] } {
+                ixNet setAttribute $routeBlock($ln,handle) -enabled True
+            }
+        }
 	} else {
 		foreach hRouteBlock $routeBlock(obj) {
 			Deputs "hRouteBlock : $hRouteBlock"		
 			ixNet setA $routeBlock($hRouteBlock,handle) -enabled True
 		}
-	}
+    }
 	ixNet commit
     
 	return [GetStandardReturnHeader]
@@ -668,17 +681,27 @@ body IsisSession::withdraw_route { args } {
             -route_block {
             	set route_block $value
             }
+            -link_name_list {
+            	set link_name_list $value
+            }
         }
     }
 	
 	if { [ info exists route_block ] } {
 		ixNet setA $routeBlock($route_block,handle) \
 			-enabled False
+	}  elseif { [ info exists link_name_list ] } {
+        foreach ln $link_name_list {
+            if { [ info exists $routeBlock($ln,handle) ] } {
+                ixNet setAttribute $routeBlock($ln,handle) -enabled True
+            }
+        }
 	} else {
 		foreach hRouteBlock $routeBlock(obj) {
-			ixNet setA $routeBlock($hRouteBlock,handle) -enabled False
+			Deputs "hRouteBlock : $hRouteBlock"		
+			ixNet setA $routeBlock($hRouteBlock,handle) -enabled True
 		}
-	}
+    }
 	ixNet commit
 	
 	return [GetStandardReturnHeader]
@@ -688,7 +711,7 @@ body IsisSession::get_route_info { args } {
     global errorInfo
     global errNumber
 	
-    set tag "body IsisSession::set_route [info script]"
+    set tag "body IsisSession::get_route_info [info script]"
 	Deputs "----- TAG: $tag -----"
 
 	#param collection

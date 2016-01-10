@@ -9,30 +9,28 @@ namespace eval IxiaCapi {
 		public variable blockNameList
         constructor {} {
             set tag "body BgpRouter::ctor [info script]"
-Deputs "----- TAG: $tag -----"
-                                  
+			Deputs "----- TAG: $tag -----"                     
         }
         
         method ConfigRouter { args } {
             set tag "body BgpRouter::ConfigRouter [info script]"
-Deputs "----- TAG: $tag -----"
+			Deputs "----- TAG: $tag -----"
            
             eval ProtocolConvertObject::convert $args
 			puts $objName 
 			puts $newargs
-            eval $objName config $newargs
-			     
+            eval $objName config $newargs  
         }
         
         method CreateRouteBlock { args } {
             set tag "body BgpRouter::CreateRouteBlock [info script]"
-Deputs "----- TAG: $tag -----"
+			Deputs "----- TAG: $tag -----"
+			puts "CreateRouteBlock: $args"
             foreach { key value } $args {
                 set key [string tolower $key]
 				switch -exact -- $key {
 					-blockname {
-					    set blocknamename [::IxiaCapi::NamespaceDefine $value]
-												
+					    set blocknamename [::IxiaCapi::NamespaceDefine $value]				
 					}
 				}
 			}
@@ -43,18 +41,16 @@ Deputs "----- TAG: $tag -----"
 			lappend blockNameList $blocknamename
             eval $blocknamename config $newargs
             eval $objName set_route -route_block  $blocknamename
-			     
         }
         
         method ConfigRouteBlock { args } {
             set tag "body BgpRouter::ConfigRouteBlock [info script]"
-Deputs "----- TAG: $tag -----"
+			Deputs "----- TAG: $tag -----"
             foreach { key value } $args {
                 set key [string tolower $key]
 				switch -exact -- $key {
 					-blockname {
-					    set blocknamename [::IxiaCapi::NamespaceDefine $value]
-												
+					    set blocknamename [::IxiaCapi::NamespaceDefine $value]					
 					}
 				}
 			}
@@ -63,29 +59,36 @@ Deputs "----- TAG: $tag -----"
 			puts $newargs  			
             eval $blocknamename config $newargs
             eval $objName set_route -route_block $blocknamename
-			     
         }
         
         method StartRouter {} {
             set tag "body BgpRouter::StartRouter [info script]"
-Deputs "----- TAG: $tag -----"
+			Deputs "----- TAG: $tag -----"
             eval $objName start
-            
         }
         method StopRouter {} {
             set tag "body BgpRouter::StopRouter [info script]"
-Deputs "----- TAG: $tag -----"
+			Deputs "----- TAG: $tag -----"
             eval $objName stop
         }
+		method Enable {} {
+            set tag "body BgpRouter::Enable [info script]"
+			Deputs "----- TAG: $tag -----"
+            eval "$objName enable"
+		}
+		method Disable {} {
+            set tag "body BgpRouter::Disable [info script]"
+			Deputs "----- TAG: $tag -----"
+            eval "$objName disable"
+		}
         method AdvertiseRouteBlock { args } {
             set tag "body BgpRouter::AdvertiseRouteBlock [info script]"
-Deputs "----- TAG: $tag -----"
+			Deputs "----- TAG: $tag -----"
             foreach { key value } $args {
                 set key [string tolower $key]
 				switch -exact -- $key {
 					-blockname {
-					    set blocknamename [::IxiaCapi::NamespaceDefine $value]
-												
+					    set blocknamename [::IxiaCapi::NamespaceDefine $value]						
 					}
 				}
 			}
@@ -97,13 +100,12 @@ Deputs "----- TAG: $tag -----"
         }
         method WithdrawRouteBlock { args } {
             set tag "body BgpRouter::WithdrawRouteBlock [info script]"
-Deputs "----- TAG: $tag -----"
+			Deputs "----- TAG: $tag -----"
             foreach { key value } $args {
                 set key [string tolower $key]
 				switch -exact -- $key {
 					-blockname {
-					    set blocknamename [::IxiaCapi::NamespaceDefine $value]
-												
+					    set blocknamename [::IxiaCapi::NamespaceDefine $value]						
 					}
 				}
 			}
@@ -116,17 +118,15 @@ Deputs "----- TAG: $tag -----"
        
         method GetRouterStats {} {
             set tag "body BgpRouter::GetRouterStats [info script]"
-Deputs "----- TAG: $tag -----"
+			Deputs "----- TAG: $tag -----"
             eval $objName get_detailed_stats
         }
         method GetHostResults {} {
             set tag "body BgpRouter::GetHostResults [info script]"
-Deputs "----- TAG: $tag -----"
+			Deputs "----- TAG: $tag -----"
             eval $objName get_detailed_stats
         }
-        destructor {} 
-        
-      
+		destructor {}
     }
 	
 	class BgpV4Router {
@@ -134,14 +134,12 @@ Deputs "----- TAG: $tag -----"
         
         constructor { Port { routerId null } } {
             set tag "body BgpV4Router::ctor [info script]"
-Deputs "----- TAG: $tag -----"
+			Deputs "----- TAG: $tag -----"
             set className BgpSession
             BgpSession ${this}_c  $Port
             if { $routerId != "null" } {
                ${this}_c config -router_id $routerId
             }
-            
-            
             set objName ${this}_c
             set argslist(-peertype)                  -type
             set argslist(-routerid)                  -router_id
@@ -178,17 +176,25 @@ Deputs "----- TAG: $tag -----"
 			set argslist(-aggregator_ipaddress)                    -agg_ip
 			set argslist(-originator_id)                    -originator_id
 			set argslist(-communities)                    -communities
-			#set argslist(-flaglabel)                    -flag_label
-			#set argslist(-labelmode)                    -label_mode
-			#set argslist(-userlabel)                    -user_label
-			
-			
-			
-           
-           
         }
 		
-		
+		method BgpV4SetSession { args } {
+            set tag "body BgpV4Router::BgpV4SetSession [info script]"
+			Deputs "----- TAG: $tag -----"
+			
+			eval "ConfigRouter $args"
+		}
+		method BgpV4CreateRouteBlock { args } {
+            set tag "body BgpV4Router::BgpV4SetSession [info script]"
+			Deputs "----- TAG: $tag -----"
+			
+			eval "CreateRouteBlock $args"
+		}
+		method BgpV4Enable {} {
+            set tag "body BgpV4Router::BgpV4Enable [info script]"
+			Deputs "----- TAG: $tag -----"
+			eval Enable
+		}
 	}
 	
 	class BgpV6Router {
@@ -196,7 +202,7 @@ Deputs "----- TAG: $tag -----"
         
         constructor { Port { routerId null } } {
             set tag "body BgpV6Router::ctor [info script]"
-Deputs "----- TAG: $tag -----"
+			Deputs "----- TAG: $tag -----"
             set className BgpSession
             BgpSession ${this}_c  $Port
 			${this}_c config -ip_version ipv6
@@ -244,14 +250,25 @@ Deputs "----- TAG: $tag -----"
 			#set argslist(-flaglabel)                    -flag_label
 			#set argslist(-labelmode)                    -label_mode
 			#set argslist(-userlabel)                    -user_label
-			
-			
-			
-           
-           
         }
 		
-		
+		method BgpV6SetSession { args } {
+            set tag "body BgpV6Router::BgpV6SetSession [info script]"
+			Deputs "----- TAG: $tag -----"
+			
+			eval "ConfigRouter $args"
+		}
+		method BgpV6CreateRouteBlock { args } {
+            set tag "body BgpV6Router::BgpV6CreateRouteBlock [info script]"
+			Deputs "----- TAG: $tag -----"
+			
+			eval "CreateRouteBlock $args"
+		}
+		method BgpV6Enable {} {
+            set tag "body BgpV6Router::BgpV6Enable [info script]"
+			Deputs "----- TAG: $tag -----"
+			eval Enable
+		}
 	}
     
     

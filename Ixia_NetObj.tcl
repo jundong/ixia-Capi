@@ -23,8 +23,8 @@
 class NetObject {
     public variable handle
     method unconfig {} {
-    set tag "body NetObject::unconfig [info script]"
-Deputs "----- TAG: $tag -----"
+        set tag "body NetObject::unconfig [info script]"
+        Deputs "----- TAG: $tag -----"
 		catch {
 			ixNet remove $handle
 			ixNet commit
@@ -35,7 +35,6 @@ Deputs "----- TAG: $tag -----"
 }
 
 class EmulationObject {
-    
     inherit NetObject
     public variable portObj
     public variable hPort
@@ -43,7 +42,7 @@ class EmulationObject {
 
 	method start {} {
 		set tag "body EmulationObject::start [info script]"
-Deputs "----- TAG: $tag -----"
+        Deputs "----- TAG: $tag -----"
 		catch {
 			foreach h $handle {
 				ixNet exec start $h
@@ -54,7 +53,7 @@ Deputs "----- TAG: $tag -----"
 	
 	method stop {} {
 		set tag "body EmulationObject::stop [info script]"
-Deputs "----- TAG: $tag -----"
+        Deputs "----- TAG: $tag -----"
 		catch {
 			foreach h $handle {
 				ixNet exec stop $h
@@ -65,9 +64,10 @@ Deputs "----- TAG: $tag -----"
 	
 	method enable {} {
 		set tag "body EmulationObject::enable [info script]"
-Deputs "----- TAG: $tag -----"
+        Deputs "----- TAG: $tag -----"
 		catch {
-			ixNet setA $handle -enabled True
+			puts "**************ixNet setA $handle -enabled True"
+            ixNet setA $handle -enabled True
 			ixNet commit
 		}
 		return [ GetStandardReturnHeader ]
@@ -75,8 +75,7 @@ Deputs "----- TAG: $tag -----"
 	
 	method disable {} {
 		set tag "body EmulationObject::disable [info script]"
-Deputs "----- TAG: $tag -----"
-		puts "+++ $handle"
+        Deputs "----- TAG: $tag -----"
 		catch {
 			ixNet setA $handle -enabled False
 			ixNet commit
@@ -466,7 +465,7 @@ class RouteBlock {
 		set step 1
 		set prefix_len 24
 		set start 100.0.0.1
-		set type ""
+		set type "ipv4"
         set sys_id "00:00:00:00:00:01"
         set origin ""
 		set nexthop ""

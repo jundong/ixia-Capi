@@ -8,14 +8,13 @@ namespace eval IxiaCapi {
         public variable className
         constructor { Port { routerId null } } {
             set tag "body Ospfv2Router::ctor [info script]"
-Deputs "----- TAG: $tag -----"
+            Deputs "----- TAG: $tag -----"
 
             set className Ospfv2Session
             Ospfv2Session ${this}_c  $Port
             if { $routerId != "null" } {
                ${this}_c config -terouter_id $routerId
             }
-            
             
             set objName ${this}_c
 			set argslist(-routerid)                -router_id
