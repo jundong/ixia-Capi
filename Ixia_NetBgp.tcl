@@ -117,9 +117,11 @@ class BgpSession {
 	method advertise_route { args } {}
 	method withdraw_route { args } {}
 	method wait_session_up { args } {}
-	
+	method remove_route_block { args } {
+    }
 	public variable routeBlock 
     public variable bgpType
+    public variable ip_version
 }
 
 body BgpSession::config { args } {
@@ -128,10 +130,8 @@ body BgpSession::config { args } {
     set tag "body BgpSession::config [info script]"
 	Deputs "----- TAG: $tag -----"
 	
-	set ip_version ipv4
 	set loopback_ipv4_gw 1.1.1.1
 	set bgpType "IBGP"
-	set ipv4_gw 192.85.1.1
 
 	#param collection
 	Deputs "Args:$args "
@@ -174,8 +174,8 @@ body BgpSession::config { args } {
 			-ipv4_addr {
 				set ipv4_addr $value
 			}
-			-ipv4_gw {
-				set ipv4_gw $value
+			-ip_gw {
+				set ip_gw $value
 			}
 			-type {
 			    if { $value == "IBGP" } {
@@ -204,17 +204,23 @@ body BgpSession::config { args } {
     }
 	
 	if { $handle == "" } {
-		reborn $ip_version
+        reborn $ip_version
 	}
 	
 	if { [ info exists ipv4_addr ] } {
-Deputs "ipv4: [ixNet getL $interface ipv4]"	
-Deputs "interface:$interface"
-		ixNet setA $interface/ipv4 -ip $ipv4_addr
+        Deputs "interface:$interface"
+        ixNet setA $handle -localIpAddress $ipv4_addr
+        set int [ixNet getL $interface ipv4]
+		ixNet setA $int -ip $ipv4_addr
+        
+        if { [ info exists ip_gw ] } {
+            ixNet setA $int -gateway $ip_gw		
+        } else {
+            ixNet setA $int -gateway "192.85.1.1"
+        }
+        ixNet commit
 	}
-	if { [ info exists ipv4_gw ] } {
-		ixNet setA $interface/ipv4 -gateway $ipv4_gw		
-	}
+    
 	if { [ info exists loopback_ipv4_addr ] } {
 		
 	}
@@ -222,16 +228,16 @@ Deputs "interface:$interface"
 		ixNet setA $handle -type $type
 	}
     if { [ info exists afi ] } {
-Deputs "not implemented parameter: afi"
+        Deputs "not implemented parameter: afi"
     }
     if { [ info exists sub_afi ] } {
-Deputs "not implemented parameter: safi"
+        Deputs "not implemented parameter: safi"
     }
     if { [ info exists as ] } {
     	ixNet setA $handle -localAsNumber $as
     }
     if { [ info exists dut_ip ] } {
-Deputs "dut_ip:$dut_ip"	
+        Deputs "dut_ip:$dut_ip"	
     	ixNet setA $handle -dutIpAddress $dut_ip
 		ixNet commit
     }
@@ -253,7 +259,16 @@ Deputs "dut_ip:$dut_ip"
 		ixNet setA $handle -bgpId $bgp_id
 	}
 	if { [ info exists ipv6_addr ] } {
-		ixNet setA $handle -localIpAddress $ipv6_addr
+        Deputs "interface:$interface"
+        ixNet setA $handle -localIpAddress $ipv6_addr
+        set int [lindex [ixNet getL $interface ipv6] 0]
+		ixNet setA $int -ip $ipv6_addr
+        if { [ info exists ip_gw ] } {
+            ixNet setA $int -gateway $ip_gw
+        } else {
+            ixNet setA $int -gateway "2000::1"
+        }
+        ixNet commit
 	}
 	if { [ info exists loopback_ipv4_addr ] } {
 		Host $this.loopback $portObj
@@ -263,9 +278,9 @@ Deputs "dut_ip:$dut_ip"
 			-ipv4_prefix_len 32 \
 			-ipv4_gw $loopback_ipv4_gw
 		set loopbackInt [ $this.loopback cget -handle ] 
-Deputs "loopback int:$loopbackInt"
+        Deputs "loopback int:$loopbackInt"
 		set viaInt [ lindex $interface end ]
-Deputs "via interface:$viaInt"
+        Deputs "via interface:$viaInt"
 		ixNet setA $loopbackInt/unconnected \
 			-connectedVia $viaInt
 		ixNet commit
@@ -275,24 +290,19 @@ Deputs "via interface:$viaInt"
 			-interfaceType "Protocol Interface" \
 			-interfaces [ lindex $interface end ]
 		ixNet commit
-
 	}
-	
 	
 	ixNet commit
     return [GetStandardReturnHeader]	
 	
 }
 
-body BgpSession::set_route { args } {
-
-    global errorInfo
-    global errNumber
-    set tag "body BgpSession::set_route [info script]"
-Deputs "----- TAG: $tag -----"
-
-#param collection
-Deputs "Args:$args "
+body BgpSession::remove_route_block { args } {
+    set tag "body BgpSession::remove_route_block [info script]"
+    Deputs "----- TAG: $tag -----"
+    
+    #param collection
+    Deputs "Args:$args "
     foreach { key value } $args {
         set key [string tolower $key]
         switch -exact -- $key {
@@ -303,7 +313,34 @@ Deputs "Args:$args "
     }
 	
 	if { [ info exists route_block ] } {
+		foreach rb $route_block {
+            if { [ info exists routeBlock($rb,handle) ] } {
+                ixNet remove $routeBlock($rb,handle)
+                Deputs "*************ixNet remove $routeBlock($rb,handle)"
+                ixNet commit
+                delete object $rb
+            }
+        }
+    }
+}
+body BgpSession::set_route { args } {
+    global errorInfo
+    global errNumber
+    set tag "body BgpSession::set_route [info script]"
+    Deputs "----- TAG: $tag -----"
+    
+    #param collection
+    Deputs "Args:$args "
+    foreach { key value } $args {
+        set key [string tolower $key]
+        switch -exact -- $key {
+            -route_block {
+            	set route_block $value
+            }
+        }
+    }
 	
+	if { [ info exists route_block ] } {
 		foreach rb $route_block {
 			set num 		[ $rb cget -num ]
 			set step 		[ $rb cget -step ]
@@ -456,10 +493,10 @@ body BgpSession::advertise_route { args } {
     global errorInfo
     global errNumber
     set tag "body BgpSession::advertise_route [info script]"
-Deputs "----- TAG: $tag -----"
+    Deputs "----- TAG: $tag -----"
 
-#param collection
-Deputs "Args:$args "
+    #param collection
+    Deputs "Args:$args "
     foreach { key value } $args {
         set key [string tolower $key]
         switch -exact -- $key {
@@ -474,13 +511,13 @@ Deputs "Args:$args "
 			-enabled True
 	} else {
 		foreach hRouteBlock $routeBlock(obj) {
-Deputs "hRouteBlock : $hRouteBlock"		
+            Deputs "hRouteBlock : $hRouteBlock"		
 			ixNet setA $routeBlock($hRouteBlock,handle) -enabled True
 		}
 	}
 	ixNet commit
+    
 	return [GetStandardReturnHeader]
-
 }
 
 body BgpSession::withdraw_route { args } {

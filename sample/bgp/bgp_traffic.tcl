@@ -38,6 +38,16 @@ if { [catch {
     bgproute1 BgpV4CreateRouteBlock -BlockName block1 -AddressFamily ipv4 -FirstRoute 192.1.1.0 -PrefixLen 32 -RouteNum 2 \
               -NEXTHOP 192.85.1.3 -AS_PATH {1 2}
     
+    port1 CreateTraffic -TrafficName traffic1
+    traffic1 CreateProfile -Name profile1 -TrafficLoad 10 -TrafficLoadUnit fps  
+    traffic1 CreateStream -StreamName stream3 -FrameLen 64 -srcPoolName bgproute2 -dstPoolName block1 -streamType bgp -ProfileName profile1      
+    #流量应用profile
+    traffic1 ApplyProfileToPort profile1 profile
+    
+    #创建Statistics1-Statistics4统计对象
+    port1 CreateStaEngine -StaEngineName Statistics1 -StaType Statistics
+    port2 CreateStaEngine -StaEngineName Statistics2 -StaType Statistics
+
     #step5：使能BGP进程Active                                                                                       
     bgproute1 BgpV4Enable
     bgproute2 BgpV4Enable
@@ -46,6 +56,25 @@ if { [catch {
     port1 StartRouter
     port2 StartRouter
     after 30000
+    
+    #清除TestCenter端口计数 
+    Statistics1 CleanPortStats  
+    Statistics2 CleanPortStats
+          
+    #启动流量同时使能ARP学习
+    port1 StartTraffic -FlagArp true
+
+    #持续打流10秒后停止发送流量
+    after 10000
+    
+    port1 StopTraffic
+     
+    #停流5秒后检查端口统计   
+    after 5000
+          
+    #获取端口统计计数
+    Statistics1 GetPortStats -RxSignature RxSignature4
+    Statistics2 GetPortStats -TxSignature TxSignature3
     
     #step7：进行路由宣告与撤销
     set repeatNum 2

@@ -17,6 +17,7 @@ namespace eval IxiaCapi {
         method CreateStream { args } {}
         method DestroyStream { args } {}
         method ConfigStream { args } {}
+        method ApplyProfileToPort { name type } {}
         destructor {}
         
         private variable hPort
@@ -262,7 +263,7 @@ namespace eval IxiaCapi {
         set level 1
         Deputs "----- TAG: $tag -----"
         Deputs " args: $args "
-        set EType   [ list NORMAL DHCPV4 DHCPV6 PPPOXV4 PPPOXV6 802DOT1XV4 802DOT1XV6 PPPOX  ]
+        set EType   [ list NORMAL DHCPV4 DHCPV6 PPPOXV4 PPPOXV6 802DOT1XV4 802DOT1XV6 PPPOX BGP OSPF ISIS]
         set Type NORMAL
         # Param collection --
         foreach { key value } $args {
@@ -415,7 +416,10 @@ namespace eval IxiaCapi {
             }
 			802DOT1XV4 -
             DHCPV4 -
-            PPPOXV4 {
+            PPPOXV4 -
+            BGP -
+            OSPF -
+            ISIS {
                 # Make sure the necessary variable has been assigned --
                 if { [ info exists name ] } {
                     # Check the existence of the stream to be created
@@ -443,7 +447,19 @@ namespace eval IxiaCapi {
 							set command " IxiaCapi::Stream $name $hPort $PortObj "
                         }
                         if {[ info exists srcPoolName ] && [ info exists dstPoolName ]} {
-                            set command "$command -streamtype ipv4 -srcpoolname $srcPoolName -dstpoolname $dstPoolName"
+                            if { [ $srcPoolName isa IxiaCapi::Ospfv3Router ] || [ $dstPoolName isa IxiaCapi::Ospfv3Router ] } {
+                                set command "$command -streamtype ipv6 -srcpoolname $srcPoolName -dstpoolname $dstPoolName"
+                            } elseif { [ $srcPoolName isa IxiaCapi::BgpV6Router ] || [ $dstPoolName isa IxiaCapi::BgpV6Router ] } {
+                                set command "$command -streamtype ipv6 -srcpoolname $srcPoolName -dstpoolname $dstPoolName"
+                            } elseif { [ $srcPoolName isa IxiaCapi::IsisRouter ] } {
+                                if { [ string tolower [ $srcPoolName cget -addressfamily ] ] == "ipv4" } {
+                                    set command "$command -streamtype ipv4 -srcpoolname $srcPoolName -dstpoolname $dstPoolName"
+                                } else {
+                                    set command "$command -streamtype ipv6 -srcpoolname $srcPoolName -dstpoolname $dstPoolName"
+                                }
+                            } else {
+                                set command "$command -streamtype ipv4 -srcpoolname $srcPoolName -dstpoolname $dstPoolName"
+                            }
                         }
                     } result ] } {
                         IxiaCapi::Logger::LogIn -type err -message "$errorInfo" -tag $tag

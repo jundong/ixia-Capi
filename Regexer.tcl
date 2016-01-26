@@ -617,26 +617,51 @@ Deputs "ipStep:$ipStep"
 	}
 	
 	proc ixConvertBool { value } {
-    set value [ string tolower $value ]
-    if { ( $value == "enable" ) || ( $value == "success" ) || ( $value == "true" )  } {
-        set value "true"
-    }
-    if { ( $value == "disable" ) || ( $value == "fail" ) || ( $value == "false" )  } {
-        set value "false"
-    }
-    if { $value == 1 || $value == 0 } {
-        return $value
-    } else {
-        if { [ info exists [string tolower $value] ] == 0 } {
-            return $value
+        set value [ string tolower $value ]
+        if { ( $value == "enable" ) || ( $value == "success" ) || ( $value == "true" )  } {
+            set value "true"
         }
-        eval { set trans } $[string tolower $value]
-        if { $trans == "true" || $trans == "false" } {
-            return $trans
+        if { ( $value == "disable" ) || ( $value == "fail" ) || ( $value == "false" )  } {
+            set value "false"
+        }
+        if { $value == 1 || $value == 0 } {
+            return $value
         } else {
-            return $value
+            if { [ info exists [string tolower $value] ] == 0 } {
+                return $value
+            }
+            eval { set trans } $[string tolower $value]
+            if { $trans == "true" || $trans == "false" } {
+                return $trans
+            } else {
+                return $value
+            }
         }
     }
-}
+
+    #==================================================
+    # 函数名称:                                                         
+    #    ixNumber2Ipmask                                                        
+    # 描述:                                                               
+    #    将10进制掩码转换为*.*.*.*格式                                   
+    # 参数:                                                          
+    # 语法描述:                                                         
+    #     ixNumber2Ipmask 24                           
+    # 返回值：                                                          
+    #    IP掩码格式；                        
+    #==================================================
+    proc ixNumber2Ipmask {number} {
+        if {[regexp {\d+.\d+.\d+.\d+} $number]} {
+            return $number
+        } else {
+        set maskend [expr (255<<(8-[expr $number%8]))%256]
+        set zero [expr 4-(($number+7)/8)]
+        if {[expr $number%8]!=0} {
+          return [string repeat 255. [expr $number/8]]$maskend[string repeat .0 $zero]
+        } else {
+          return [string repeat 255. [expr [expr $number/8]-1]]255[string repeat .0 $zero]
+        } 
+        }
+    }
 
 }

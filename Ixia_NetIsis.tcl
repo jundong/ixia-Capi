@@ -25,6 +25,7 @@ class IsisSession {
     
 	public variable mac_addr
 	public variable routeBlock
+    public variable addressfamily
 }
 
 body IsisSession::reborn {} {
@@ -82,6 +83,8 @@ body IsisSession::constructor { port } {
     set tag "body IsisSession::constructor [info script]"
     Deputs "----- TAG: $tag -----"
 	
+    set addressfamily ipv4
+    
     global errNumber
     
     #-- enable protocol
@@ -184,6 +187,7 @@ body IsisSession::config { args } {
 			}
 			-ip_version {
 				set ip_version $value
+                set addressfamily $value
 			}
 			-level {
 				set level $value
@@ -328,63 +332,77 @@ body IsisSession::config { args } {
     if { [ info exists sys_id ] } {
 		while { [ ixNet getF $hPort/protocols/isis router -systemId "[ split $sys_id : ]"  ] != "" } {	
 			set sys_id [ IncrMacAddr $sys_id "00:00:00:00:00:01" ]
-		}	
+		}
 	    ixNet setA $handle -systemId $sys_id
+        ixNet commit
     }
 
     if { [ info exists network_type ] } {
 	    ixNet setA $rb_interface -networkType $network_type
+        ixNet commit
     }
 
     if { [ info exists discard_lsp ] } {
     	ixNet setA $handle -enableDiscardLearnedLsps $discard_lsp
+        ixNet commit
     }
 
     if { [ info exists metric ] } {
 	    ixNet setA $rb_interface -metric $metric
+        ixNet commit
     }
 
     if { [ info exists hello_interval ] } {
 	    ixNet setA $rb_interface -level1HelloTime $hello_interval
+        ixNet commit
     }
 
     if { [ info exists dead_interval ] } {
 	    ixNet setA $rb_interface -level1DeadTime $dead_interval
+        ixNet commit
     }
 
     if { [ info exists vlan_id ] } {
 	    set vlan [ixNet getL $interface vlan]
 	    ixNet setA $vlan -vlanId $vlan_id
+        ixNet commit
     }
 
     if { [ info exists lsp_refreshtime ] } {
     	ixNet setA $handle -lspRefreshRate $lsp_refreshtime
+        ixNet commit
     }
 
     if { [ info exists lsp_lifetime ] } {
     	ixNet setA $handle -lspLifeTime $lsp_lifetime
+        ixNet commit
     }
 
 	if { [ info exists router_id ] } {
     	ixNet setM $handle -teEnable true \
 			-teRouterId $router_id
+        ixNet commit
     }
 
 	if { [ info exists areaid ] } {
 	    if { [ info exists areaid2 ] } {
 		    if { [ info exists areaid3 ] } {
-			    ixNet setA $handle -areaAddressList [list $areaid $areaid2 $areaid3]    
+			    ixNet setA $handle -areaAddressList [list $areaid $areaid2 $areaid3]
+                ixNet commit
 			} else {
 			    ixNet setA $handle -areaAddressList [list $areaid $areaid2 ]
+                ixNet commit
 			}
 		} else {
 		    ixNet setA $handle -areaAddressList [list $areaid ]
+            ixNet commit
 		}			
     }
 
 	if { [ info exists mac_addr ] } {
 		Deputs "interface:$interface mac_addr:$mac_addr"
 		ixNet setA $interface/ethernet -macAddress $mac_addr
+        ixNet commit
 	}
     ixNet commit
     
@@ -614,8 +632,10 @@ body IsisSession::set_route { args } {
 				-maskWidth $prefix_len 
 			ixNet commit
             
-            ixNet setA $handle -systemId $sys_id
-            ixNet commit
+            if { $sys_id != "" } {
+                ixNet setA $handle -systemId $sys_id
+                ixNet commit
+            }
             
 			$rb configure -handle $hRouteBlock
 			$rb configure -portObj $portObj

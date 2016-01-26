@@ -586,6 +586,7 @@ Deputs "args: $args"
         set tag "body TestPort::StartTraffic [info script]"
         Deputs "----- TAG: $tag -----"
         set clearStats 1
+        set flagArp true
         # Param collection --        
         foreach { key value } $args {
             set key [string tolower $key]
@@ -611,6 +612,15 @@ Deputs "args: $args"
                         IxiaCapi::Logger::LogIn -type warn -message \
                         "$IxiaCapi::s_TestPortStartTraffic10" -tag $tag
                     }
+                }
+                -flagarp {
+                    set trans [ IxiaCapi::Regexer::BoolTrans $value ]
+                    if { $trans == 1 || $trans == 0 } {
+                        set flagArp $trans
+                    } else {
+                        IxiaCapi::Logger::LogIn -type warn -message \
+                        "$IxiaCapi::s_TestPortStartTraffic10" -tag $tag
+                    } 
                 }
                 default {
                     IxiaCapi::Logger::LogIn -type err -message \
@@ -758,6 +768,13 @@ Deputs "args: $args"
             }
         }
 		
+        if { [ info exists flagArp ] } {
+            if { $flagArp } {
+                ixNet setM $root/globals/interfaces -arpOnLinkup $flagArp -nsOnLinkup $flagArp
+                ixNet commit
+            }
+        }
+        
 		if { $restartCaptureJudgement } {
 			catch { 
 				Deputs "start capture..."
@@ -1764,14 +1781,20 @@ Deputs "Exist : $exist "
         if { [ info exists routerId ] } {
 Deputs "RouterId:$routerId"
             switch $type {
-                OSPFV2ROUTER -
-                OSPFV3ROUTER -
                 RIPROUTER -
                 PIMROUTER -
                 BGPV4ROUTER -
                 BGPV6ROUTER {
-                    Deputs "OSPF/ISIS/BGP/RIP/PIM"
+                    Deputs "BGP/RIP/PIM"
                     uplevel "$name ConfigRouter -RouterId $routerId -Active enable"
+                }
+                OSPFV2ROUTER {
+                    Deputs "Configure Ospfv2Router"
+                    uplevel "$name Ospfv2SetSession -RouterId $routerId -Active enable"
+                }
+                OSPFV3ROUTER {
+                    Deputs "Configure Ospfv3Router"
+                    uplevel "$name Ospfv3SetSession -RouterId $routerId -Active enable"
                 }
                 ISISROUTER {
                     Deputs "Configure IsisRouter"
@@ -3393,12 +3416,22 @@ Deputs "Other protocol..."
         } else {
     # default value of Router ID --
             switch $type {
-                OSPFV2ROUTER -
-                ISISROUTER -
                 RIPROUTER -
                 PIMROUTER -
                 BGPV4ROUTER {
                     uplevel "$name ConfigRouter -RouterId $defaultRouterId  -Active enable"
+                }
+                OSPFV2ROUTER {
+                    Deputs "Configure Ospfv2Router"
+                    uplevel "$name Ospfv2SetSession -RouterId $defaultRouterId -Active enable"
+                }
+                OSPFV3ROUTER {
+                    Deputs "Configure Ospfv3Router"
+                    uplevel "$name Ospfv3SetSession -RouterId $defaultRouterId -Active enable"
+                }
+                ISISROUTER {
+                    Deputs "Configure IsisRouter"
+                    uplevel "$name IsisSetSession -RouterId $defaultRouterId -Active enable"
                 }
                 default {
                     uplevel "$name ConfigRouter -Active enable"

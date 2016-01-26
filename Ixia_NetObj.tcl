@@ -66,7 +66,6 @@ class EmulationObject {
 		set tag "body EmulationObject::enable [info script]"
         Deputs "----- TAG: $tag -----"
 		catch {
-			puts "**************ixNet setA $handle -enabled True"
             ixNet setA $handle -enabled True
 			ixNet commit
 		}
@@ -466,7 +465,7 @@ class RouteBlock {
 		set prefix_len 24
 		set start 100.0.0.1
 		set type "ipv4"
-        set sys_id "00:00:00:00:00:01"
+        set sys_id ""
         set origin ""
 		set nexthop ""
 		set med ""
@@ -559,7 +558,8 @@ body RouteBlock::config { args } {
 			-as_path {
                 set as_path $value
             }
-            -systemid {
+            -systemid -
+            -sys_id {
                 set sys_id $value
             }
         }

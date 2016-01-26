@@ -14,16 +14,20 @@ namespace eval IxiaCapi {
         #public variable argslist
         public variable objName
         public variable className
+        public variable addressfamily
        
 		constructor { Port { routerId null } } {
             set tag "body IsisRouter::ctor [info script]"
 			Deputs "----- TAG: $tag -----"
-
+            
+            set addressfamily ipv4
+            
             set className IsisSession
             IsisSession ${this}_c  $Port
             if { $routerId != "null" } {
                #${this}_c config -router_id $routerId
             }
+            set handle [ ${this}_c cget -handle ]
             
             set objName ${this}_c
             set argslist(-areaid)                  -areaid
@@ -90,6 +94,7 @@ namespace eval IxiaCapi {
 			puts $objName 
 			puts $newargs
             eval $objName config $newargs
+            set addressfamily [ $objName cget -addressfamily ]
         }
         
         method IsisCreateRouteBlock { args } {
@@ -370,6 +375,16 @@ namespace eval IxiaCapi {
 			} 
         }
 
-		destructor {}
+		method IsisEnable {} {
+            set tag "body IsisRouter::IsisEnable [info script]"
+			Deputs "----- TAG: $tag -----"
+            eval $objName enable
+        }
+		method IsisDisable {} {
+            set tag "body IsisRouter::IsisDisable [info script]"
+			Deputs "----- TAG: $tag -----"
+            eval $objName disable
+        }
+        destructor {}
     } 
 }

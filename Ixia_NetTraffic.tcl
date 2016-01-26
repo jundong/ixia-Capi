@@ -646,7 +646,7 @@ Deputs "Args:$args "
 		  }
 		  -pdu {
 			 set pdu $value
-Deputs "pdu:$pdu"
+            Deputs "pdu:$pdu"
 		  }
 		  -pdu_index {
 			set pdu_index $value
@@ -851,9 +851,9 @@ Deputs "pdu:$pdu"
     #-- quick stream and advanced stream
     if { [ info exists src ] && [ info exists dst ] } {
 	   if { [ IsIPv4Address $src ] && [ IsIPv4Address $dst ] } {
-#-- quick stream IPv4
-Deputs "Traffic type:quick stream IPv4"
-		  #-- Create quick stream
+            #-- quick stream IPv4
+            Deputs "Traffic type:quick stream IPv4"
+            #-- Create quick stream
 			##--add judgement for traffic reconfig
 			if { ( [ info exists highLevelStream ] == 0 ) || ( [ llength $highLevelStream ] == 0 ) } {
 				CreateRawStream $enable_sig
@@ -870,9 +870,9 @@ Deputs "Traffic type:quick stream IPv4"
 		  ixNet setA $dstIpField -singleValue $dst
 		  ixNet commit
 	   } elseif { [ IsIPv6Address $src ] && [ IsIPv6Address $dst ] } {
-#-- quick stream IPv6
-Deputs "Traffic type:quick stream IPv6"
-		  #-- Create quick stream
+            #-- quick stream IPv6
+            Deputs "Traffic type:quick stream IPv6"
+            #-- Create quick stream
 			##--add judgement for traffic reconfig
 			if { ( [ info exists highLevelStream ] == 0 ) || ( [ llength $highLevelStream ] == 0 ) } {
 				CreateRawStream 
@@ -889,31 +889,31 @@ Deputs "Traffic type:quick stream IPv6"
 		  ixNet setA $dstIpField -singleValue $dst
 		  ixNet commit            
 	   } else {
-Deputs "objects:[find objects]"
+        Deputs "objects:[find objects]"
 		set srcHandle [ list ]
-Deputs "src list:$src"		
+        Deputs "src list:$src"		
 		foreach srcEndpoint $src {
-# Deputs "src:$srcEndpoint"
+            # Deputs "src:$srcEndpoint"
 			set srcObj [ GetObject $srcEndpoint ]
-# Deputs "srcObj:$srcObj"			
+            # Deputs "srcObj:$srcObj"			
 			if { $srcObj == "" } {
-			Deputs "illegal object...$srcObj"
+                Deputs "illegal object...$srcObj"
 				set srcObj $portObj
-			# error "$errNumber(1) key:src value:$src (Not an object)"                
+                # error "$errNumber(1) key:src value:$src (Not an object)"                
 			}
 			if { ( [ $srcObj isa Port ] == 0 ) && ( [ $srcObj isa EmulationObject ] == 0 ) && ( [ $srcObj isa Host ] == 0 ) } {
-			Deputs "illegal object...$src"
-			 error "$errNumber(1) key:src value:$src (Not a port or emulation object)"                
+                Deputs "illegal object...$src"
+                error "$errNumber(1) key:src value:$src (Not a port or emulation object)"                
 			}
 			if { [ $srcObj isa Port ] } {
-			Deputs Step110
+                Deputs Step110
 				set srcHandle [ concat $srcHandle "[ $srcObj cget -handle ]/protocols" ]
 			} elseif { [ $srcObj isa RouteBlock ] } {
-Deputs "route block:$srcObj"
+                Deputs "route block:$srcObj"
 				if { [ $srcObj cget -protocol ] == "bgp" } {
 					set routeBlockHandle [ $srcObj cget -handle ]
 					set hBgp [ ixNet getP $routeBlockHandle ]
-Deputs "bgp route block:$hBgp"
+                    Deputs "bgp route block:$hBgp"
 					if { [ catch {
 						set rangeCnt [ llength [ ixNet getL $hBgp routeRange ] ]
 					} ] } {
@@ -926,7 +926,7 @@ Deputs "bgp route block:$hBgp"
 						set routeBlockHandle \
 						[ string replace $routeBlockHandle \
 						$startIndex $endIndex $p.0 ]
-	Deputs "route block handle:$routeBlockHandle"		
+                        Deputs "route block handle:$routeBlockHandle"		
 					} else {
 						set routeBlockHandle [ $srcObj cget -hPort ]/protocols/bgp
 					}
@@ -947,22 +947,24 @@ Deputs "bgp route block:$hBgp"
 					set trafficType "ipv6"
 				} 
 				set srcHandle [ concat $srcHandle [ $srcObj cget -handle ] ]
-			} elseif { [ $srcObj isa VcLsp ] } {
-				set trafficType "ethernetVlan"
-				set srcHandle [ concat $srcHandle [ $srcObj cget -handle ] ]
 			} else {
-			Deputs Step120
-				set srcHandle [ concat $srcHandle [ $srcObj cget -handle ] ]
+                Deputs Step120
+                if { [ $srcObj isa BgpRouter ] } {
+                    set srcHandle [ concat $srcHandle [ixNet getP [ ixNet getP [ $srcObj cget -handle ]]] ]
+                } else {
+                    set srcHandle [ concat $srcHandle [ $srcObj cget -handle ] ]
+                }
+                Deputs "*************dst obj:$srcHandle"
 			}
 		}
-Deputs "src handle:$srcHandle"
+        Deputs "src handle:$srcHandle"
 
 		set dstHandle [ list ]
-Deputs "dst list:$dst"		
+        Deputs "dst list:$dst"		
 		foreach dstEndpoint $dst {
-# Deputs "dst:$dstEndpoint"
+            # Deputs "dst:$dstEndpoint"
 			set dstObj [ GetObject $dstEndpoint ]
-# Deputs "dstObj:$dstObj"			
+            # Deputs "dstObj:$dstObj"			
 			if { $dstObj == "" } {
 			Deputs "illegal object...$dstEndpoint"
 			 error "$errNumber(1) key:dst value:$dst"                
@@ -973,13 +975,13 @@ Deputs "dst list:$dst"
 			}
 			Deputs Step100
 			if { [ $dstObj isa Port ] } {
-			Deputs Step130
+                Deputs Step130
 				set dstHandle [ concat $dstHandle "[ $dstObj cget -handle ]/protocols" ]
 			} elseif { [ $dstObj isa RouteBlock ] } {
 				if { [ $dstObj cget -protocol ] == "bgp" } {
 					set routeBlockHandle [ $dstObj cget -handle ]
 					set hBgp [ ixNet getP $routeBlockHandle ]
-Deputs "bgp route block:$hBgp"
+                    Deputs "bgp route block:$hBgp"
 					if { [ catch {
 						set rangeCnt [ llength [ ixNet getL $hBgp routeRange ] ]
 					} ] } {
@@ -1007,7 +1009,12 @@ Deputs "route block handle:[$dstObj cget -handle]"
 			} elseif { [ $dstObj isa MulticastGroup ] } {
 				set dstHandle [ concat $dstHandle [ $dstObj cget -handle ] ]
 			} else {
-				set dstHandle [ concat $dstHandle [ $dstObj cget -handle ] ]
+                if { [ $srcObj isa BgpRouter ] } {
+                    set dstHandle [ concat $dstHandle [ixNet getP [ ixNet getP [ $srcObj cget -handle ]]] ]
+                } else {
+                    set dstHandle [ concat $dstHandle [ $srcObj cget -handle ] ]
+                }
+                Deputs "*************dst obj:$dstHandle"
 			}
 		}
 #-- advanced stream Ports/Emulations
@@ -1080,8 +1087,8 @@ Deputs "handle:$handle"
 		  set highLevelStream [ ixNet getL $handle configElement ]
 Deputs "highLevelStream:$highLevelStream"
 		  set endpointSet [ ixNet remapIds $endpointSet ]
-Deputs "ep:$endpointSet"
-Deputs Step190
+            Deputs "ep:$endpointSet"
+            Deputs Step190
 	   }
 		set flag_modify_adv 1
 	} else {
@@ -1894,7 +1901,7 @@ Deputs "Step270"
 			}
 			
 			if { $regenerate } {
-Deputs "Step280"			
+                Deputs "Step280"			
 				ixNet exec generate $handle
 				ixNet commit
 			}

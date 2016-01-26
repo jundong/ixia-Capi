@@ -23,6 +23,7 @@ namespace eval IxiaCapi {
 		method SetPortName { name } {
 		    set statPortName $name
 		}
+        method CleanPortStats {} { ixNet exec clearStats }
         method destructor {}
         
         private variable hPort

@@ -10,7 +10,6 @@
 namespace eval IxiaCapi {
     
     class Stream {
-        
         constructor { portHandle portname  args } {}
         method Config { args } {}
         method AddPdu { args } {}
@@ -51,7 +50,7 @@ namespace eval IxiaCapi {
             set valid 0
             set type $pduType
             set protocol $pduPro
-Deputs "type:$type\tprotocol:$protocol"
+            Deputs "type:$type\tprotocol:$protocol"
             return $this
         }
         method ConfigPdu { args } {}
@@ -74,7 +73,7 @@ Deputs "type:$type\tprotocol:$protocol"
             lappend optionals $optional
             lappend autos $auto
             set valid 1
-Deputs "fields:$fields optionals:$optionals autos:$autos"
+            Deputs "fields:$fields optionals:$optionals autos:$autos"
         }
         # Fixed | List | Segment ( set a segment of bits from the beginning of certain field )
         # | Incrementing | Decrementing | Reserved ( for option and auto now )
@@ -98,9 +97,6 @@ Deputs "fields:$fields optionals:$optionals autos:$autos"
         }
     }
     
-
-    
-    
     body Stream::constructor { port portname  args } {
         global errorInfo IxiaCapi::true IxiaCapi::false
         set tag "body Stream::Ctor [info script]"
@@ -110,7 +106,7 @@ Deputs "fields:$fields optionals:$optionals autos:$autos"
         set flagCommit 1
         set profileName "null"
 		set PortObj $portname
-Deputs "----- TAG: $tag -----"
+        Deputs "----- TAG: $tag -----"
         Deputs "Args:$args "
         foreach { key value } $args {
             set key [string tolower $key]
@@ -131,17 +127,17 @@ Deputs "----- TAG: $tag -----"
             }
         }
         if { ( $profileName == "vpn" ) || ( $profileName == "device" ) } {
-#AgtDebugOn
-Deputs "vpn or device invoking..."
-#AgtDebugOff
+            #AgtDebugOn
+            Deputs "vpn or device invoking..."
+            #AgtDebugOff
             return
         }
         set vport $port
-Deputs "vport:$vport"
+        Deputs "vport:$vport"
         if { [ catch {
-# Create stream at an undefined profile    
+            # Create stream at an undefined profile    
             if { $profileName == "null" } {
-			Deputs "profileName is null"
+                Deputs "profileName is null"
                 set profileName [TrafficManager GetProfileByIndex 0]
 				Deputs "profileName :trafficmanager get $profileName"
             }
@@ -154,7 +150,7 @@ Deputs "vport:$vport"
             set root [ixNet getRoot]
             set handle [ixNet add $root/traffic trafficItem]
             ixNet setM $handle \
-            -name $this
+                -name $this
             ixNet commit
             
             ixNet setA $root/traffic/statistics/l1Rates -enabled True
@@ -174,39 +170,62 @@ Deputs "vport:$vport"
                 set pdu_index 1
                 
                 set srcHandle [ list ]
-        Deputs "src list:$src"		
+                Deputs "src list:$src"		
                 foreach srcEndpoint $src {
-        # Deputs "src:$srcEndpoint"
+                    # Deputs "src:$srcEndpoint"
                     set srcObj [ GetObject $srcEndpoint ]
-        # Deputs "srcObj:$srcObj"			
+                    # Deputs "srcObj:$srcObj"			
                     if { $srcObj == "" } {
-                    Deputs "illegal object...$srcObj"
+                        Deputs "illegal object...$srcObj"
                         set srcObj $portObj
-                    # error "$errNumber(1) key:src value:$src (Not an object)"                
+                        # error "$errNumber(1) key:src value:$src (Not an object)"                
                     }
                     
                    if { [ $srcObj isa RouteBlock ] } {
-        Deputs "route block:$srcObj"
+                        Deputs "route block:$srcObj"
                         if { [ $srcObj cget -protocol ] == "bgp" } {
                             set routeBlockHandle [ $srcObj cget -handle ]
                             set hBgp [ ixNet getP $routeBlockHandle ]
-        Deputs "bgp route block:$hBgp"
+                            Deputs "bgp route block:$hBgp"
                             if { [ catch {
                                 set rangeCnt [ llength [ ixNet getL $hBgp routeRange ] ]
                             } ] } {
                                 set rangeCnt [ llength [ ixNet getL $hBgp vpnRouteRange ] ]
                             }
-                            if { $rangeCnt > 1 } {
+                            if { $rangeCnt > 0 } {
                                 set p [ ixNet getP $routeBlockHandle ]
                                 set startIndex [ string first $p $routeBlockHandle ]
                                 set endIndex [ expr $startIndex + [ string length $p ] - 1 ]
                                 set routeBlockHandle \
                                 [ string replace $routeBlockHandle \
                                 $startIndex $endIndex $p.0 ]
-            Deputs "route block handle:$routeBlockHandle"		
+                                Deputs "route block handle:$routeBlockHandle"		
                             } else {
                                 set routeBlockHandle [ $srcObj cget -hPort ]/protocols/bgp
                             }
+                            set srcHandle [ concat $srcHandle $routeBlockHandle ]
+                        } elseif { [ $dstObj cget -protocol ] == "isis" } {
+                            #set routeBlockHandle [ $dstObj cget -handle ]
+                            #set hIsis [ ixNet getP $routeBlockHandle ]
+                            #Deputs "ISIS route block:$hIsis"
+                            #if { [ catch {
+                            #    set rangeCnt [ llength [ ixNet getL $hIsis routeRange ] ]
+                            #} ] } {
+                            #    set rangeCnt [ llength [ ixNet getL $hIsis vpnRouteRange ] ]
+                            #}
+                            #
+                            #if { $rangeCnt > 0 } {
+                            #    set p [ ixNet getP $routeBlockHandle ]
+                            #    set startIndex [ string first $p $routeBlockHandle ]
+                            #    set endIndex [ expr $startIndex + [ string length $p ] - 1 ]
+                            #    set routeBlockHandle \
+                            #    [ string replace $routeBlockHandle \
+                            #    $startIndex $endIndex $p.0 ]
+                            #    Deputs "route block handle:$routeBlockHandle"		
+                            #} else {
+                            #    set routeBlockHandle [ $dstObj cget -hPort ]/protocols/isis
+                            #}
+                            set routeBlockHandle [ $dstObj cget -hPort ]/protocols/isis
                             set srcHandle [ concat $srcHandle $routeBlockHandle ]
                         } else {
                             set srcHandle [ concat $srcHandle [ $srcObj cget -handle ] ]
@@ -234,59 +253,94 @@ Deputs "vport:$vport"
                             set trafficType "ipv6"
                         } 
                         set srcHandle [ concat $srcHandle [ $srcObj cget -handle ] ]
-                    } elseif { [ $srcObj isa VcLsp ]   } {
-                        set trafficType "ethernetVlan"
-                        set srcHandle [ concat $srcHandle [ $srcObj cget -handle ] ]
+                    } elseif { [ $srcObj isa IxiaCapi::BgpRouter ] } {
+                        set srcHandle [ concat $srcHandle [ixNet getP [ ixNet getP [ $srcObj cget -handle ]]] ]
+                    } elseif { [ $srcObj isa IxiaCapi::Ospfv2Router ] } {
+                        set srcHandle [ concat $srcHandle [ixNet getP [ ixNet getP [ $srcObj cget -handle ]]] ]
+                    } elseif { [ $srcObj isa IxiaCapi::Ospfv3Router ] } {
+                        set srcHandle [ concat $srcHandle [ixNet getP [ ixNet getP [ $srcObj cget -handle ]]] ]
+                    } elseif { [ $srcObj isa SimulatedSummaryRoute ] } {
+                        #set srcHandle [ concat $srcHandle [ixNet getP [ ixNet getP [ ixNet getP [ $srcObj cget -trafficObj ] ] ] ] ]
+                        set srcHandle [ concat $srcHandle [ $srcObj cget -trafficObj ] ]
+                    } elseif { [ $srcObj isa SimulatedExternalRoute ] } {
+                        #set srcHandle [ concat $srcHandle [ixNet getP [ ixNet getP [ ixNet getP [ $srcObj cget -hUserlsa ] ] ] ] ]
+                        set srcHandle [ concat $srcHandle [ $srcObj cget -hUserlsa ] ]
+                    } elseif { [ $srcObj isa SimulatedRouter ] } {
+                        #set srcHandle [ concat $srcHandle [ixNet getP [ ixNet getP [ ixNet getP [ $srcObj cget -trafficObj ] ] ] ] ]
+                        set srcHandle [ concat $srcHandle [ $srcObj cget -trafficObj ] ]
+                    } elseif { [ $srcObj isa IxiaCapi::IsisRouter ] } {
+                        set srcHandle [ concat $srcHandle [ixNet getP [ ixNet getP [ $srcObj cget -handle ]]] ]
                     } else {
-                    Deputs Step120
                         set srcHandle [ concat $srcHandle [ $srcObj cget -handle ] ]
                     }
                 }
-        Deputs "src handle:$srcHandle"
+                Deputs "src handle:$srcHandle"
 
-                set dstHandle [ list ]
-        Deputs "dst list:$dst"		
+                set dstHandle [ list ]	
                 foreach dstEndpoint $dst {
-        # Deputs "dst:$dstEndpoint"
+                    # Deputs "dst:$dstEndpoint"
                     set dstObj [ GetObject $dstEndpoint ]
-        # Deputs "dstObj:$dstObj"			
+                    # Deputs "dstObj:$dstObj"			
                     if { $dstObj == "" } {
                     Deputs "illegal object...$dstEndpoint"
-                     error " key:dst value:$dst"                
+                        error " key:dst value:$dst"                
                     }
-                   
                  
                     if { [ $dstObj isa RouteBlock ] } {
                         if { [ $dstObj cget -protocol ] == "bgp" } {
                             set routeBlockHandle [ $dstObj cget -handle ]
                             set hBgp [ ixNet getP $routeBlockHandle ]
-        Deputs "bgp route block:$hBgp"
+                            Deputs "bgp route block:$hBgp"
                             if { [ catch {
                                 set rangeCnt [ llength [ ixNet getL $hBgp routeRange ] ]
                             } ] } {
                                 set rangeCnt [ llength [ ixNet getL $hBgp vpnRouteRange ] ]
                             }
-                            if { $rangeCnt > 1 } {
+
+                            if { $rangeCnt > 0 } {
                                 set p [ ixNet getP $routeBlockHandle ]
                                 set startIndex [ string first $p $routeBlockHandle ]
                                 set endIndex [ expr $startIndex + [ string length $p ] - 1 ]
                                 set routeBlockHandle \
                                 [ string replace $routeBlockHandle \
                                 $startIndex $endIndex $p.0 ]
-            Deputs "route block handle:$routeBlockHandle"		
+                                Deputs "route block handle:$routeBlockHandle"		
                             } else {
                                 set routeBlockHandle [ $dstObj cget -hPort ]/protocols/bgp
                             }
                             set dstHandle [ concat $dstHandle $routeBlockHandle ]
+                        } elseif { [ $dstObj cget -protocol ] == "isis" } {
+                            #set routeBlockHandle [ $dstObj cget -handle ]
+                            #set hIsis [ ixNet getP $routeBlockHandle ]
+                            #Deputs "ISIS route block:$hIsis"
+                            #if { [ catch {
+                            #    set rangeCnt [ llength [ ixNet getL $hIsis routeRange ] ]
+                            #} ] } {
+                            #    set rangeCnt [ llength [ ixNet getL $hIsis vpnRouteRange ] ]
+                            #}
+                            #
+                            #if { $rangeCnt > 0 } {
+                            #    set p [ ixNet getP $routeBlockHandle ]
+                            #    set startIndex [ string first $p $routeBlockHandle ]
+                            #    set endIndex [ expr $startIndex + [ string length $p ] - 1 ]
+                            #    set routeBlockHandle \
+                            #    [ string replace $routeBlockHandle \
+                            #    $startIndex $endIndex $p.0 ]
+                            #    Deputs "route block handle:$routeBlockHandle"		
+                            #} else {
+                            #    set routeBlockHandle [ $dstObj cget -hPort ]/protocols/isis
+                            #}
+                            set routeBlockHandle [ $dstObj cget -hPort ]/protocols/isis
+                            set dstHandle [ concat $dstHandle $routeBlockHandle ]
                         } else {
-        Deputs "dst obj:$dstObj"				
-        Deputs "route block handle:[$dstObj cget -handle]"				
+                            Deputs "dst obj:$dstObj"				
+                            Deputs "route block handle:[$dstObj cget -handle]"				
                             set dstHandle [ concat $dstHandle [ $dstObj cget -handle ] ]
                         }
                     } elseif { [ $dstObj isa IxiaCapi::PoolNameObject ] } {
 					    set dstHandle [ concat $dstHandle [ $dstObj cget -handle ] ]
 					} elseif { [ $dstObj isa IxiaCapi::Host ] } {
-                       Deputs " $dstObj isa Host"
+                        Deputs " $dstObj isa Host"
                         if {$trafficType == "ipv4"} {
                             #set dstHandle [ concat $srcHandle [ $dstObj cget -topv4Handle ] ]
                             set dstHandle [ $dstObj cget -topv4Handle ] 
@@ -300,14 +354,32 @@ Deputs "vport:$vport"
                         }
                     } elseif { [ $dstObj isa MulticastGroup ] } {
                         set dstHandle [ concat $dstHandle [ $dstObj cget -handle ] ]
+                    } elseif { [ $dstObj isa IxiaCapi::BgpRouter ] } {
+                        set dstHandle [ concat $dstHandle [ixNet getP [ ixNet getP [ $dstObj cget -handle ]]] ]
+                    } elseif { [ $dstObj isa IxiaCapi::Ospfv2Router ] } {
+                        set dstHandle [ concat $dstHandle [ixNet getP [ ixNet getP [ $dstObj cget -handle ]]] ]
+                    } elseif { [ $dstObj isa IxiaCapi::Ospfv3Router ] } {
+                        set dstHandle [ concat $dstHandle [ixNet getP [ ixNet getP [ $dstObj cget -handle ]]] ]
+                    } elseif { [ $dstObj isa SimulatedSummaryRoute ] } {
+                        set dstHandle [ concat $dstHandle [ixNet getP [ixNet getP [ ixNet getP [ $dstObj cget -trafficObj ]]]] ]
+                        #set srcHandle [ concat $srcHandle [ $srcObj cget -trafficObj ] ]
+                    } elseif { [ $dstObj isa SimulatedRouter ] } {
+                        set dstHandle [ concat $dstHandle [ixNet getP [ixNet getP [ ixNet getP [ $dstObj cget -trafficObj ]]]] ]
+                        #set srcHandle [ concat $srcHandle [ $srcObj cget -trafficObj ] ]
+                    } elseif { [ $dstObj isa SimulatedExternalRoute ] } {
+                        set dstHandle [ concat $dstHandle [ixNet getP [ixNet getP [ ixNet getP [ $dstObj cget -hUserlsa ]]]] ]
+                        #set srcHandle [ concat $srcHandle [ $srcObj cget -hUserlsa ] ]
+                    } elseif { [ $dstObj isa IxiaCapi::IsisRouter ] } {
+                        set dstHandle [ concat $dstHandle [ixNet getP [ ixNet getP [ $dstObj cget -handle ]]] ]
                     } else {
                         set dstHandle [ concat $dstHandle [ $dstObj cget -handle ] ]
                     }
                 }
-        #-- advanced stream Ports/Emulations
-        Deputs "Traffic type: advanced stream:$trafficType"
-                  #-- Create advanced stream
-                  #-- create trafficItem      
+                Deputs "dst handle:$dstHandle"
+                #-- advanced stream Ports/Emulations
+                Deputs "Traffic type: advanced stream:$trafficType"
+                #-- Create advanced stream
+                #-- create trafficItem      
                 if { $bidirection } {
                     set bi True
                 } else {
@@ -320,7 +392,7 @@ Deputs "vport:$vport"
                 }
                 if { $fullMesh } {
                     Deputs "traffic src/dst type: full mesh"		  
-                      ixNet setMultiA $handle \
+                    ixNet setMultiA $handle \
                          -trafficItemType l2L3 \
                          -routeMesh oneToOne \
                          -srcDestMesh fullMesh \
@@ -329,8 +401,8 @@ Deputs "vport:$vport"
 
                 } else {
                     if { $no_mesh } {
-        Deputs "traffic src/dst type: none"		  		  
-                      ixNet setMultiA $handle \
+                        Deputs "traffic src/dst type: none"		  		  
+                        ixNet setMultiA $handle \
                          -trafficItemType l2L3 \
                          -biDirectional $bi \
                          -routeMesh oneToOne \
@@ -338,8 +410,8 @@ Deputs "vport:$vport"
                          -allowSelfDestined $sd \
                          -trafficType $trafficType ;#can be ipv4 or ipv6 or ethernetVlan
                     } else {
-        Deputs "traffic src/dst type: one 2 one"		  		  
-                      ixNet setMultiA $handle \
+                        Deputs "traffic src/dst type: one 2 one"		  		  
+                        ixNet setMultiA $handle \
                          -trafficItemType l2L3 \
                          -biDirectional $bi \
                          -routeMesh oneToOne \
@@ -352,50 +424,40 @@ Deputs "vport:$vport"
                     ixNet setA $handle/tracking -trackBy sourceDestPortPair0
                     ixNet commit
                 }
-        Deputs "add endpointSet..."
-                  ixNet commit
-                  #-- add endpointSet
-                  set endpointSet [ixNet add $handle endpointSet]
-        Deputs "src:$srcHandle"
-                  ixNet setA $endpointSet -sources $srcHandle
-        Deputs "dst:$dstHandle"
-                  ixNet setA $endpointSet -destinations $dstHandle
-                  
-                  ixNet commit
-                  set handle      [ ixNet remapIds $handle ]
-        Deputs "handle:$handle"
-       
-                  ixNet commit
-               } else {                             
+                Deputs "add endpointSet..."
+                ixNet commit
+                #-- add endpointSet
+                set endpointSet [ixNet add $handle endpointSet]
+                ixNet setA $endpointSet -sources $srcHandle
+                ixNet setA $endpointSet -destinations $dstHandle
+                ixNet commit
+                set handle      [ ixNet remapIds $handle ]
+     
+                ixNet commit
+            } else {                             
                 set endPoint [ixNet add $handle endpointSet]
-            Deputs "port:$hPort"
+                Deputs "port:$hPort"
                 set dests [list]
                 set root [ixNet getRoot]
                 foreach port [ ixNet getList $root vport ] {
-            Deputs "dest port:$port"
+                    Deputs "dest port:$port"
                     if { $port == $hPort } {
                         continue
                     }
-            Deputs "lappend dests..."
+                    Deputs "lappend dests..."
                    lappend dests "$port/protocols"
                 }
-            Deputs "dests: $dests"
-            # IxDebugOff
+                Deputs "dests: $dests"
+                # IxDebugOff
                 if { [ llength $dests ] == 0 } {
-                
                     ixNet setMultiA $endPoint -sources "$hPort/protocols" -destinations "$hPort/protocols"
                 } else {
-                
                     ixNet setMultiA $endPoint -sources "$hPort/protocols" -destinations $dests
                 }
            
                 ixNet commit
-          
                 set handle      [ ixNet remapIds $handle ]
-          
                 set endPoint [ ixNet remapIds $endPoint ]
-                         
-                       
                 ixNet setA $handle/tracking -trackBy sourceDestPortPair0
                 ixNet commit
             }

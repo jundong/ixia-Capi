@@ -115,7 +115,21 @@ namespace eval IxiaCapi {
 			   eval $objName withdraw_route
 			}
         }
-       
+        method DeleteRouteBlock { args } {
+            set tag "body BgpRouter::DeleteRouteBlock [info script]"
+			Deputs "----- TAG: $tag -----"
+            foreach { key value } $args {
+                set key [string tolower $key]
+				switch -exact -- $key {
+					-blockname {
+					    set blocknamename [::IxiaCapi::NamespaceDefine $value]						
+					}
+				}
+			}
+			if { [info exists blocknamename ] } {
+               eval $objName remove_route_block -route_block $blocknamename
+			}
+        }
         method GetRouterStats {} {
             set tag "body BgpRouter::GetRouterStats [info script]"
 			Deputs "----- TAG: $tag -----"
@@ -137,16 +151,19 @@ namespace eval IxiaCapi {
 			Deputs "----- TAG: $tag -----"
             set className BgpSession
             BgpSession ${this}_c  $Port
+            ${this}_c config -ip_version ipv4
             if { $routerId != "null" } {
                ${this}_c config -router_id $routerId
             }
+            set handle [ ${this}_c cget -handle ]
             set objName ${this}_c
             set argslist(-peertype)                  -type
             set argslist(-routerid)                  -router_id
             set argslist(-testerip)                  -ipv4_addr           
             set argslist(-testeras)                 -as
             set argslist(-sutip)                    -dut_ip
-            set argslist(-sutas)                    -dut_as                                
+            set argslist(-sutas)                    -dut_as
+            set argslist(-gateway)                  -ip_gw
 			#set argslist(-flagmd5)                       
             #set argslist(-md5)
             set argslist(-holdtimer)                  -hold_time_interval
@@ -195,6 +212,26 @@ namespace eval IxiaCapi {
 			Deputs "----- TAG: $tag -----"
 			eval Enable
 		}
+		method BgpV4Disable {} {
+            set tag "body BgpV4Router::BgpV4Disable [info script]"
+			Deputs "----- TAG: $tag -----"
+			eval Disable
+		}
+        method BgpV4AdvertiseRouteBlock { args } {
+            set tag "body BgpV4Router::BgpV4AdvertiseRouteBlock [info script]"
+			Deputs "----- TAG: $tag -----"
+			eval "AdvertiseRouteBlock $args"
+        }
+        method BgpV4WithdrawRouteBlock { args } {
+            set tag "body BgpV4Router::BgpV4WithdrawRouteBlock  [info script]"
+			Deputs "----- TAG: $tag -----"
+			eval "WithdrawRouteBlock $args"
+        }
+        method BgpV4DeleteRouteBlock { args } {
+            set tag "body BgpV4Router::BgpV4DeleteRouteBlock  [info script]"
+			Deputs "----- TAG: $tag -----"
+			eval "DeleteRouteBlock $args"
+        }
 	}
 	
 	class BgpV6Router {
@@ -209,7 +246,7 @@ namespace eval IxiaCapi {
             if { $routerId != "null" } {
                ${this}_c config -router_id $routerId 
             }
-            
+            set handle [ ${this}_c cget -handle ]
             
             set objName ${this}_c
             set argslist(-peertype)                  -type
@@ -217,7 +254,8 @@ namespace eval IxiaCapi {
             set argslist(-testerip)                  -ipv6_addr           
             set argslist(-testeras)                  -as
             set argslist(-sutip)                     -dut_ip
-            set argslist(-sutas)                     -dut_as                                
+            set argslist(-sutas)                     -dut_as
+            set argslist(-gateway)                  -ip_gw
 			#set argslist(-flagmd5)                       
             #set argslist(-md5)
             set argslist(-holdtimer)                  -hold_time_interval
@@ -264,12 +302,30 @@ namespace eval IxiaCapi {
 			
 			eval "CreateRouteBlock $args"
 		}
+        method BgpV6AdvertiseRouteBlock { args } {
+            set tag "body BgpV6Router::BgpV6AdvertiseRouteBlock [info script]"
+			Deputs "----- TAG: $tag -----"
+			eval "AdvertiseRouteBlock $args"
+        }
+        method BgpV6WithdrawRouteBlock { args } {
+            set tag "body BgpV6Router::BgpV6WithdrawRouteBlock  [info script]"
+			Deputs "----- TAG: $tag -----"
+			eval "WithdrawRouteBlock $args"
+        }
+        method BgpV6DeleteRouteBlock { args } {
+            set tag "body BgpV6Router::BgpV6DeleteRouteBlock  [info script]"
+			Deputs "----- TAG: $tag -----"
+			eval "DeleteRouteBlock $args"
+        }
 		method BgpV6Enable {} {
             set tag "body BgpV6Router::BgpV6Enable [info script]"
 			Deputs "----- TAG: $tag -----"
 			eval Enable
 		}
+		method BgpV6Disable {} {
+            set tag "body BgpV6Router::BgpV6Disable [info script]"
+			Deputs "----- TAG: $tag -----"
+			eval Disable
+		}
 	}
-    
-    
 }

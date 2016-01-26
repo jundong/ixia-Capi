@@ -14,21 +14,27 @@ class OspfSession {
     inherit RouterEmulationObject
     
 	public variable hNetworkRange
+    public variable abr
+    public variable asbr
 	
     constructor { port } {
 		global errNumber
 		
 		set tag "body OspfvSession::ctor [info script]"
-Deputs "----- TAG: $tag -----"
+        Deputs "----- TAG: $tag -----"
 
 		set portObj [ GetObject $port ]
 		set handle ""
+        set abr false
+        set asbr false
+        array set interface [ list ]
+        
 		reborn
 	}
 	
 	method reborn {} {
 		set tag "body OspfSession::reborn [info script]"
-Deputs "----- TAG: $tag -----"
+        Deputs "----- TAG: $tag -----"
 
 		if { [ catch {
 			set hPort   [ $portObj cget -handle ]
@@ -40,18 +46,20 @@ Deputs "----- TAG: $tag -----"
 		ixNet setM $hPort/protocols/ospfV3 -enableDrOrBdr True
 		ixNet commit
 		
+		#-- add interface
 		set rb_interface [ ixNet getL $hPort interface ]
 		if { [ llength $rb_interface ] == 0 } {
 			set rb_interface [ ixNet add $hPort interface ]
-			ixNet setA $rb_interface -enabled True
 			ixNet commit
 			set rb_interface [ ixNet remapIds $rb_interface ]
-	
-	    }
-	    Deputs "rb_interface is: $rb_interface"
-		array set interface [ list ]
-		
-		
+            
+			ixNet setM $rb_interface \
+				-enabled True
+			ixNet commit
+		} else {
+			set rb_interface [ lindex $rb_interface end ]
+		}
+        Deputs "rb_interface:$rb_interface"
 	}
 	
     method config { args } {}
@@ -66,18 +74,18 @@ Deputs "----- TAG: $tag -----"
 	method get_stats {} {}
 	method generate_interface { args } {
 		set tag "body OspfSession::generate_interface [info script]"
-Deputs "----- TAG: $tag -----"
-Deputs "handle:$handle"		
+        Deputs "----- TAG: $tag -----"
+        Deputs "handle:$handle"		
 		foreach int $rb_interface {
 			if { [ ixNet getA $int -type ] == "routed" } {
 				continue
 			}
 			set hInt [ ixNet add $handle interface ]
-			ixNet setM $hInt -interfaces $int -enabled True -connectedToDut True
-			
 			ixNet commit
 			set hInt [ ixNet remapIds $hInt ]
-			set interface($int) $hInt	
+            ixNet setM $hInt -interfaces $int -enabled True -connectedToDut True
+			set interface($int) $hInt
+            Deputs "hInt:$hInt"
 		}
 	}	
 }
@@ -86,6 +94,7 @@ body OspfSession::config { args } {
     global errNumber
 	
 	set intf_num 1
+    set network_type P2P
     set tag "body OspfSession::config [info script]"
     Deputs "----- TAG: $tag -----"
         
@@ -97,6 +106,12 @@ body OspfSession::config { args } {
             -router_id {
 				set router_id $value
 			}
+            -abr {
+				set abr $value
+			}
+            -asbr {
+                set asbr $value
+            }
 			-area_id {			
 				set area_id $value
 			}
@@ -181,9 +196,7 @@ body OspfSession::config { args } {
 	# v3 -interfaceType pointToPoint, -interfaceType broadcast
 	# v2 -networkType pointToPoint, -networkType broadcast, -networkType pointToMultipoint
 	if { [ info exists network_type ] } {
-	
 		switch $network_type {
-		
 			NATIVE {
 				set network_type pointToMultipoint
 			}
@@ -246,8 +259,7 @@ body OspfSession::config { args } {
 				 set v6bit 0
 			 }
 			 set opt_val "00$dcbit$rbit$nbit$mcbit$ebit$v6bit"
-			 set opt_val [BinToDec $opt_val]
-#			 set opt_val [Int2Hex $opt_val]		
+			 set opt_val [BinToDec $opt_val]	
 			 ixNet setA $interface($int) -routerOptions $opt_val
 			 ixNet commit
 		 }
@@ -285,7 +297,7 @@ body OspfSession::config { args } {
 body OspfSession::advertise_topo {} {
 
 	set tag "body OspfSession::advertise_topo [info script]"
-Deputs "----- TAG: $tag -----"
+    Deputs "----- TAG: $tag -----"
 
 	foreach route [ ixNet getL $handle routeRange ] {
 	
@@ -298,7 +310,7 @@ Deputs "----- TAG: $tag -----"
 body OspfSession::withdraw_topo {} {
 
 	set tag "body OspfSession::withdraw_topo [info script]"
-Deputs "----- TAG: $tag -----"
+    Deputs "----- TAG: $tag -----"
 
 	foreach route [ ixNet getL $handle routeRange ] {
 	
@@ -349,16 +361,15 @@ Deputs "----- TAG: $tag -----"
     return [GetStandardReturnHeader]
 }
 body OspfSession::set_topo {args} {
-	
 	set tag "body OspfSession::set_topo [info script]"
-Deputs "----- TAG: $tag -----"
+    Deputs "----- TAG: $tag -----"
 
 	set hRouter $handle
 	set hNetworkRange [ixNet add $hRouter networkRange]
 	ixNet commit
 
 	set hNetworkRange [ ixNet remapIds $hNetworkRange ]
-	ixNet setA $hNetworkRange -enalbed True
+	ixNet setA $hNetworkRange -enabled True
 	ixNet commit
 	
 	
@@ -409,16 +420,15 @@ Deputs "----- TAG: $tag -----"
 
 class Ospfv2Session {
 	inherit OspfSession
-
+    
     constructor { port } { chain $port } {
 		set tag "body Ospfv2Session::ctor [info script]"
-Deputs "----- TAG: $tag -----"
-        
+        Deputs "----- TAG: $tag -----"    
     }
 	
 	method reborn {} {
 		set tag "body Ospfv2Session::reborn [info script]"
-Deputs "----- TAG: $tag -----"
+        Deputs "----- TAG: $tag -----"
 		chain
 		
 		ixNet setA $hPort/protocols/ospf -enabled True
@@ -426,13 +436,14 @@ Deputs "----- TAG: $tag -----"
 		
 		#-- add ospf protocol
 		set handle [ ixNet add $hPort/protocols/ospf router ]
-		ixNet setA $handle -Enabled True
 		ixNet commit
 		set handle [ ixNet remapIds $handle ]
+        ixNet setA $handle -Enabled True
 		ixNet setA $handle -name $this
-Deputs "handle:$handle"		
+        ixNet commit
+        Deputs "handle:$handle"		
 		set protocol ospf
-		
+        generate_interface
 	}
 	
 	method config { args } {}
@@ -756,9 +767,9 @@ body Ospfv2Session::config { args } {
 	set enabled 		True
 	
 	set tag "body Ospfv2Session::config [info script]"
-Deputs "----- TAG: $tag -----"
-		
-Deputs "Args:$args "
+    Deputs "----- TAG: $tag -----"
+            
+    Deputs "Args:$args "
 	foreach { key value } $args {
 		set key [string tolower $key]
 		switch -exact -- $key {
@@ -858,7 +869,6 @@ Deputs "Args:$args "
 	}
 	if { [ info exists ipv4_addr ] } {
 		foreach rb $rb_interface {
-		
 			if { [ ixNet getA $rb -type ] == "routed" } {
 				continue
 			}
@@ -871,8 +881,7 @@ Deputs "Args:$args "
 				-gateway $ipv4_gw \
 				-maskWidth $ipv4_prefix_len
 			ixNet commit
-		}
- 		generate_interface	
+		}	
 	}	
 	
 	if {[ info exists outer_vlan_id ]} {
@@ -905,17 +914,13 @@ Deputs "Args:$args "
 					               -vlanPriority $Pri
 					ixNet commit
 					incr inner_vlan_id $inner_vlan_step
-					
 				}
 
 				if { [ info exists enabled ] } {
 					ixNet setA $int -enabled $enabled
-					ixNet commit			
-					
-				}
-				
+					ixNet commit				
+				}	
 			}
-			
 		}
 	}
 	
@@ -927,9 +932,9 @@ Deputs "Args:$args "
 			-ipv4_prefix_len 32 \
 			-ipv4_gw $loopback_ipv4_gw
 		set loopbackInt [ $this.loopback cget -handle ] 
-Deputs "loopback int:$loopbackInt"
+        Deputs "loopback int:$loopbackInt"
 		set viaInt [ lindex $rb_interface end ]
-Deputs "via interface:$viaInt"
+        Deputs "via interface:$viaInt"
 		ixNet setA $loopbackInt/unconnected \
 			-connectedVia $viaInt
 		ixNet commit
@@ -947,8 +952,8 @@ Deputs "via interface:$viaInt"
 	
 	ixNet commit
 	eval chain $args
+    
 	return [GetStandardReturnHeader]
-	
 }
 
 class Ospfv3Session {
@@ -956,22 +961,20 @@ class Ospfv3Session {
 	
     constructor { port } { chain $port } {
 		set tag "body Ospfv3Session::ctor [info script]"
-Deputs "----- TAG: $tag -----"
-	    
-
+        Deputs "----- TAG: $tag -----"
     }
 	
 	method reborn {} {
 		set tag "body Ospfv3Session::reborn [info script]"
-Deputs "----- TAG: $tag -----"
+        Deputs "----- TAG: $tag -----"
 		chain
 	    if {[ixNet getA $hPort/protocols/ospf -enabled]} {
 		    ixNet setM $hPort/protocols/ospf -enabled False
 	    }	    
 	    
-	   ixNet setM $hPort/protocols/ospfV3 -enabled True
-	   ixNet commit 
-Deputs "handle:$handle"		
+        ixNet setM $hPort/protocols/ospfV3 -enabled True
+        ixNet commit 
+        Deputs "handle:$handle"		
 		#-- add ospf protocol
 		set handle [ ixNet add $hPort/protocols/ospfV3 router ]
 		ixNet setA $handle -Enabled True
@@ -979,7 +982,7 @@ Deputs "handle:$handle"
 		set handle [ ixNet remapIds $handle ]
 		ixNet setA $handle -name $this		
 		set protocol ospfV3
- 		
+ 		generate_interface
 	}
 	
 	method config { agrs } {}
@@ -987,12 +990,11 @@ Deputs "handle:$handle"
 	method get_stats {} {}
 }
 body Ospfv3Session::get_status {} {
-
 	set tag "body Ospfv3Session::get_status [info script]"
-Deputs "----- TAG: $tag -----"
+    Deputs "----- TAG: $tag -----"
 
     set root [ixNet getRoot]
-Deputs "root $root"
+    Deputs "root $root"
     set view {::ixNet::OBJ-/statistics/view:"OSPFv3 Aggregated Statistics"}
 	after 5000
     set captionList         [ ixNet getA $view/page -columnCaptions ]
@@ -1008,24 +1010,24 @@ Deputs "root $root"
 	set full_index				[ lsearch -exact $captionList {Full State Count} ]
 	
 	set stats [ ixNet getA $view/page -rowValues ]
-Deputs "stats:$stats"
+    Deputs "stats:$stats"
     set portFound 0
     foreach row $stats {
-	   eval {set row} $row
-Deputs "row:$row"
-Deputs "port index:$name_index"
-	   set rowPortName [ lindex $row $name_index ]
-Deputs "row port name:$name_index"
-    set connectionInfo [ ixNet getA $hPort -connectionInfo ]
-Deputs "connectionInfo :$connectionInfo"
-    regexp -nocase {chassis=\"([0-9\.]+)\" card=\"([0-9\.]+)\" port=\"([0-9\.]+)\"} $connectionInfo match chassis card port
-Deputs "chas:$chassis card:$card port$port"
-	set portName ${chassis}/Card${card}/Port${port}
-Deputs "filter name: $portName"
-	   if { [ regexp $portName $rowPortName ] } {
-		  set portFound 1
-		  break
-	   }
+        eval {set row} $row
+        Deputs "row:$row"
+        Deputs "port index:$name_index"
+        set rowPortName [ lindex $row $name_index ]
+        Deputs "row port name:$name_index"
+        set connectionInfo [ ixNet getA $hPort -connectionInfo ]
+        Deputs "connectionInfo :$connectionInfo"
+        regexp -nocase {chassis=\"([0-9\.]+)\" card=\"([0-9\.]+)\" port=\"([0-9\.]+)\"} $connectionInfo match chassis card port
+        Deputs "chas:$chassis card:$card port$port"
+        set portName ${chassis}/Card${card}/Port${port}
+        Deputs "filter name: $portName"
+        if { [ regexp $portName $rowPortName ] } {
+            set portFound 1
+            break
+        }
     }	
 	
 
@@ -1296,9 +1298,9 @@ body Ospfv3Session::config { args } {
 	set enabled 		True
 	
 	set tag "body Ospfv3Session::config [info script]"
-Deputs "----- TAG: $tag -----"
-	
-Deputs "Args:$args "
+    Deputs "----- TAG: $tag -----"
+        
+    Deputs "Args:$args "
 	foreach { key value } $args {
 		set key [string tolower $key]
 		switch -exact -- $key {
@@ -1399,7 +1401,6 @@ Deputs "Args:$args "
 			ixNet setA $ipv6Int -gateway $ipv6_gw
 		}
 		ixNet commit
- 		generate_interface	
 	}	
 	
 	if {[ info exists outer_vlan_id ]} {
@@ -1477,59 +1478,66 @@ class SimulatedSummaryRoute {
 	inherit EmulationObject
 	
 	public variable routerObj
-	
+	public variable hUserlsagroup
+	public variable hUserlsa
+    
     constructor { router } {
 		global errNumber
 	    
 		set tag "body SimulatedSummaryRoute::ctor [info script]"
-Deputs "----- TAG: $tag -----"
-
-		set routerObj [ GetObject $router ]
-		set handle ""
-		reborn
-		# set trafficObj $handle
-	}
-	
-	method reborn {} {
-		set tag "body SimulatedSummaryRoute::reborn [info script]"
-Deputs "----- TAG: $tag -----"
-
+        Deputs "----- TAG: $tag -----"
+        
+        set routerObj [ GetObject $router ]
 		if { [ catch {
 			set hRouter   [ $routerObj cget -handle ]
 		} ] } {
 			error "$errNumber(1) Router Object in SimulatedSummaryRoute ctor"
 		}
 		
-		set hRouteRange [ixNet add $hRouter routeRange]
+		#set hRouteRange [ixNet add $hRouter routeRange]
+		#ixNet commit
+		#
+		#set handle [ ixNet remapIds $hRouteRange ]
+		#ixNet setA $handle -enabled True
+		#ixNet commit
+        
+        Deputs "hRouter is: $hRouter"
+		set hUserlsagroup [ixNet add $hRouter userLsaGroup]
 		ixNet commit
 		
-		set handle [ ixNet remapIds $hRouteRange ]
-		ixNet setA $handle -enalbed True
+		set hUserlsagroup [ ixNet remapIds $hUserlsagroup ]
+		ixNet setA $hUserlsagroup -enabled True
 		ixNet commit
-		
+	    
+	    set hUserlsa [ixNet add $hUserlsagroup userLsa]
+	    ixNet commit
+	    set hUserlsa [ ixNet remapIds $hUserlsa ]
+        ixNet setAttribute $hUserlsa -lsaType areaSummary
+        ixNet commit
+        
+	    ixNet setA $hUserlsa -enabled True
+	    ixNet commit
+		set trafficObj $hUserlsa
+        
 		set portObj [ $routerObj cget -portObj ]
 		set hPort [ $routerObj cget -hPort ]
-Deputs "portObj:$portObj"
-Deputs "hPort:$hPort"
+        Deputs "portObj:$portObj"
+        Deputs "hPort:$hPort"
 	}
-	method config { args } {}
 	
+	method config { args } {}
 }
 body SimulatedSummaryRoute::config { args } {
     global errorInfo
     global errNumber
     set tag "body SimulatedSummaryRoute::config [info script]"
-Deputs "----- TAG: $tag -----"
+    Deputs "----- TAG: $tag -----"
 
-	if { $handle == "" } {
-		reborn
-	}
-#param collection
-Deputs "Args:$args "
+    #param collection
+    Deputs "Args:$args "
     foreach { key value } $args {
         set key [string tolower $key]
         switch -exact -- $key {
-            
             -age {
 				set age $value
             }            
@@ -1542,16 +1550,60 @@ Deputs "Args:$args "
 			-route_block {
 				set route_block $value
             }
-
+            -abr {
+                set abr $value
+            }
+            -asbr {
+                set asbr $value
+            }
+            -router_id {
+                ixNet setAttribute $hUserlsa -advertisingRouterId $value
+                ixNet commit
+            }
+            -first_addr {
+                ixNet setAttribute $hUserlsa -linkStateId $value
+                ixNet commit
+            }
+            -prefix_len {
+                set prefixlength $value
+            }
+            -num_addr {
+                set numberaddress $value
+            }
+            -modifier {
+                set modifier $value
+            }
+            -metric {
+                set metric $value
+            }
         }
     }
-	
+                
+	if { [ info exists prefixlength ] } {
+        ixNet setAttribute $hUserlsa/summaryIp -networkMask [ ixNumber2Ipmask $prefixlength ]
+        ixNet commit
+	}
+    
+	if { [ info exists modifier ] } {
+        ixNet setAttribute $hUserlsa/summaryIp -incrementLinkStateIdBy 0.0.0.$modifier
+        ixNet commit
+	}
+    
+	if { [ info exists metric ] } {
+        ixNet setAttribute $hUserlsa/summaryIp -metric $metric
+        ixNet commit
+	}
+    
+	if { [ info exists numberaddress ] } {
+        ixNet setAttribute $hUserlsa/summaryIp -numberOfLsa $numberaddress
+        ixNet commit
+	}
+    
 	if { [ info exists metric ] } {
 		ixNet setA $handle -metric $metric
 	}
 	
 	if { [ info exists route_block ] } {
-	
 		set rb [ GetObject $route_block ]
 		$route_block configure -handle $handle
 		$route_block configure -protocol "ospf"
@@ -1567,13 +1619,13 @@ Deputs "Args:$args "
 		set step		[ $rb cget -step ]
 		set prefix_len	[ $rb cget -prefix_len ]
 		
-Deputs "num:$num start:$start step:$step prefix_len:$prefix_len"
+        Deputs "num:$num start:$start step:$step prefix_len:$prefix_len"
 		ixNet setM $handle \
 			-mask $prefix_len \
 			-numberOfRoutes $num \
 			-step $step \
 			-enabled True
-		ixNet setA $handle -networkNumber $start
+		ixNet setA $handle -networkNumber $num
 		ixNet setA $handle -firstRoute $start
 		
 		ixNet commit
@@ -1586,14 +1638,11 @@ Deputs "num:$num start:$start step:$step prefix_len:$prefix_len"
 		
 		set routeBlock($rb,handle) $handle
 		lappend routeBlock(obj) $rb
-
-	} else {
-	
+	} else {	
 		return [GetErrorReturnHeader "Madatory parameter needed...-route_block"]
 	}
 	
     return [GetStandardReturnHeader]
-	
 }
 
 class SimulatedInterAreaRoute {
@@ -1616,7 +1665,7 @@ Deputs "----- TAG: $tag -----"
 		ixNet commit
 		
 		set handle [ ixNet remapIds $hRouteRange ]
-		ixNet setA $handle -enalbed True
+		ixNet setA $handle -enabled True
 		ixNet commit
 		
 		set trafficObj $handle
@@ -1624,113 +1673,21 @@ Deputs "----- TAG: $tag -----"
 	
 	
 	method config { args } {}
-	
-}
-
-class SimulatedLink {
-	inherit NetObject
-	
-    constructor { router } {
-		global errNumber
-	    
-		set tag "body SimulatedSummaryRoute::ctor [info script]"
-Deputs "----- TAG: $tag -----"
-
-		set routerObj [ GetObject $router ]
-		if { [ catch {
-			set hRouter   [ $routerObj cget -handle ]
-		} ] } {
-			error "$errNumber(1) Router Object in SimulatedSummaryRoute ctor"
-		}
-		
-		set hRouteRange [ixNet add $hRouter routeRange]
-		ixNet commit
-		
-		set handle [ ixNet remapIds $hRouteRange ]
-		Deputs "handle: $handle"
-		ixNet setA $handle -enalbed True
-		ixNet commit
-		
-		set trafficObj $handle
-	}
-	method config { args } {}
-}
-body SimulatedLink::config { args } {
-    global errorInfo
-    global errNumber
-    set tag "body SimulatedLink::config [info script]"
-Deputs "----- TAG: $tag -----"
-
-#param collection
-Deputs "Args:$args "
-    foreach { key value } $args {
-	   set key [string tolower $key]
-	   switch -exact -- $key {
-		  
-		  -age {
-				set age $value
-		  }            
-			-checksum {
-				set checksum $value
-		  }
-		  -metric {
-				set metric $value
-		  }            
-			-route_block {
-				set route_block $value
-		  }
-
-	   }
-    }
-	
-	if { [ info exists metric ] } {
-		ixNet setA $handle -metric $metric
-	}
-	
-	if { [ info exists route_block ] } {
-	
-		set rb [ GetObject $route_block ]
-		$route_block configure -handle $handle
-		
-		if { $rb == "" } {
-		
-			return [GetErrorReturnHeader "No object found...-route_block"]
-			
-		}
-		
-		set num 		[ $rb cget -num ]
-		set start 		[ $rb cget -start ]
-		set step		[ $rb cget -step ]
-		set prefix_len	[ $rb cget -prefix_len ]
-		
-		ixNet setM $handle \
-			-mask $prefix_len \
-			-networkNumber $start \
-			-numberOfRoutes $num \
-			-metric $step
-#		-enabled True
-		
-	} else {
-	
-		return [GetErrorReturnHeader "Madatory parameter needed...-route_block"]
-	}
-	
-	ixNet commit
-	
-    return [GetStandardReturnHeader]
 	
 }
 
 class SimulatedRouter {
-	inherit NetObject
+	inherit EmulationObject
 
+    public variable routerObj
 	public variable hUserlsagroup
 	public variable hUserlsa
+    
     constructor { router } {
 		global errNumber
 	    
 		set tag "body SimulatedSummaryRoute::ctor [info script]"
-Deputs "----- TAG: $tag -----"
+        Deputs "----- TAG: $tag -----"
 
 		set routerObj [ GetObject $router ]
 		if { [ catch {
@@ -1738,51 +1695,61 @@ Deputs "----- TAG: $tag -----"
 		} ] } {
 			error "$errNumber(1) Router Object in SimulatedSummaryRoute ctor"
 		}
-Deputs "hRouter is: $hRouter"
+        Deputs "hRouter is: $hRouter"
 		set hUserlsagroup [ixNet add $hRouter userLsaGroup]
 		ixNet commit
 		
 		set hUserlsagroup [ ixNet remapIds $hUserlsagroup ]
-		ixNet setA $hUserlsagroup -enalbed True
+		ixNet setA $hUserlsagroup -enabled True
 		ixNet commit
 	    
 	    set hUserlsa [ixNet add $hUserlsagroup userLsa]
 	    ixNet commit
-	    
+    
 	    set hUserlsa [ ixNet remapIds $hUserlsa ]
-	    ixNet setA $hUserlsa -enalbed True
+	    ixNet setA $hUserlsa -enabled True
 	    ixNet commit
-		
+        
+        ixNet setAttribute $hUserlsa  -linkStateId  [ ixNet getA $hRouter -routerId ]
+        ixNet commit
+        
+        ixNet setAttribute $hUserlsa -lsaType router
+        ixNet commit
+        
 		set trafficObj $hUserlsa
 	}
 	method config { args } {}
 }
 body SimulatedRouter::config { args } {
 	global errorInfo
-     global errNumber
+    global errNumber
 	
 	set type normal
-     set tag "body SimulatedRouter::config [info script]"
-Deputs "----- TAG: $tag -----"
-
-Deputs "Args:$args "
+    set tag "body SimulatedRouter::config [info script]"
+    Deputs "----- TAG: $tag -----"
+    
+    Deputs "Args:$args "
+    
+    set abr [ $routerObj cget -abr ]
+    set asbr [ $routerObj cget -asbr ]
 	foreach { key value } $args {
 		set key [string tolower $key]
-		switch -exact -- $key {
-			-id {
-				set id $value
-			}            
-			-type {
-				set type $value
+		switch -exact -- $key {        
+			-router_type_value {
+                set type [ string tolower $value ]
 			}
+            -router_lsa_name {
+                ixNet setAttribute $hUserlsagroup -description $value
+                ixNet commit
+            }
+            -router_id {
+                ixNet setAttribute $hUserlsa -advertisingRouterId $value
+                ixNet commit
+            }
 		}
 	}
-	
-	if { [ info exists id ] } {
-		ixNet setA $hUserlsa -advertisingRouterId $id
-	}
-	
-	if { [ info exists type ] } {
+    
+	if { [ info exists router_type_value ] } {
 		switch $type {						
 			abr {
 				ixNet setM $hUserlsa/router -bBit True
@@ -1793,6 +1760,18 @@ Deputs "Args:$args "
 			vl {
 				ixNet setM $hUserlsa/router -vBit True
 			}
+            bbit {
+                ixNet setM $hUserlsa/router -bBit True
+            }
+            eBit {
+                ixNet setM $hUserlsa/router -eBit True
+            }
+            vbit {
+                ixNet setM $hUserlsa/router -vBit True
+            }
+            wbit {
+                ixNet setM $hUserlsa/router -wBit True
+            }
 			normal {
 				ixNet setM $hUserlsa/router \
 				-bBit False \
@@ -1801,11 +1780,10 @@ Deputs "Args:$args "
 				-wBit False
 			}
 		}
+        ixNet commit
 	}
 	
-	ixNet commit
 	return [GetStandardReturnHeader]
-	
 }
 
 class SimulatedNssaRoute {
@@ -1815,7 +1793,7 @@ class SimulatedNssaRoute {
 		global errNumber
 	    
 		set tag "body SimulatedSummaryRoute::ctor [info script]"
-Deputs "----- TAG: $tag -----"
+        Deputs "----- TAG: $tag -----"
 
 		set routerObj [ GetObject $router ]
 		if { [ catch {
@@ -1828,7 +1806,7 @@ Deputs "----- TAG: $tag -----"
 		ixNet commit
 		
 		set handle [ ixNet remapIds $hRouteRange ]
-		ixNet setA $handle -enalbed True
+		ixNet setA $handle -enabled True
 		ixNet commit
 		
 		set trafficObj $handle
@@ -1898,17 +1876,18 @@ Deputs "Args:$args "
 	ixNet commit
 	
     return [GetStandardReturnHeader]
-	
 }
 
 class SimulatedExternalRoute {
 	inherit NetObject
-	
+	public variable hUserlsagroup
+	public variable hUserlsa
+    
     constructor { router } {
 		global errNumber
 	    
 		set tag "body SimulatedSummaryRoute::ctor [info script]"
-Deputs "----- TAG: $tag -----"
+        Deputs "----- TAG: $tag -----"
 
 		set routerObj [ GetObject $router ]
 		if { [ catch {
@@ -1917,14 +1896,26 @@ Deputs "----- TAG: $tag -----"
 			error "$errNumber(1) Router Object in SimulatedSummaryRoute ctor"
 		}
 		
-		set hRouteRange [ixNet add $hRouter routeRange]
+        Deputs "hRouter is: $hRouter"
+		set hUserlsagroup [ixNet add $hRouter userLsaGroup]
 		ixNet commit
 		
-		set handle [ ixNet remapIds $hRouteRange ]
-		ixNet setA $handle -enalbed True
+		set hUserlsagroup [ ixNet remapIds $hUserlsagroup ]
+		ixNet setA $hUserlsagroup -enabled True
 		ixNet commit
-		
-		set trafficObj $handle
+	    
+	    set hUserlsa [ixNet add $hUserlsagroup userLsa]
+	    ixNet commit
+    
+	    set hUserlsa [ ixNet remapIds $hUserlsa ]
+	    ixNet setA $hUserlsa -enabled True
+	    ixNet commit
+            
+        ixNet setAttribute $hUserlsa  -linkStateId  [ ixNet getA $hRouter -routerId ]
+        ixNet commit
+
+        ixNet setAttribute $hUserlsa -lsaType asExternal
+        ixNet commit
 	}
 	method config { args } {}
 }
@@ -1932,66 +1923,120 @@ body SimulatedExternalRoute::config { args } {
     global errorInfo
     global errNumber
     set tag "body SimulatedExternalRoute::config [info script]"
-Deputs "----- TAG: $tag -----"
-
-#param collection
-Deputs "Args:$args "
+    Deputs "----- TAG: $tag -----"
+    
+    #param collection
+    Deputs "Args:$args "
     foreach { key value } $args {
 	   set key [string tolower $key]
 	   switch -exact -- $key {
-		  
-		  -age {
-				set age $value
-		  }            
-			-checksum {
-				set checksum $value
-		  }
-		  -metric {
-				set metric $value
-		  }            
-			-route_block {
-				set route_block $value
-		  }
-
+            -start {
+                set start $value
+            }            
+            -prefix_len {
+                set prefix_len $value
+            }
+            -num {
+                set num $value
+            }            
+            -router_id {
+                set router_id $value
+            }
+            -metric {
+                set metric $value
+            }
+            -metric_type {
+                set metric_type $value
+            }
+            -asbr {
+                set asbr $value
+            }
+            -nubit {
+                set nubit $value
+            }
+            -labit {
+                set labit $value
+            }
+            -nssa {
+                set nssa $value
+            }
+            -pbit {
+                set pbit $value
+            }
+            -modifier {
+                set modifier $value
+            }
+            -fbit {
+                set fbit $value
+            }
+            -fw_addr {
+                set fw_addr $value
+            }
 	   }
     }
-	
+    
+ 	if { [ info exists router_id ] } {
+		ixNet setAttribute $hUserlsa  -advertisingRouterId  $router_id
+        ixNet commit
+	}
+
+    set asExternal [ ixNet add $hUserlsa asExternal ]
+    ixNet commit
+    set asExternal [ ixNet remapIds $asExternal ]
+	if { [ info exists prefix_len ] } {
+		ixNet setAttribute $asExternal  -addPrefixLength  $prefix_len
+        ixNet commit
+	}
+	if { [ info exists start ] } {
+		ixNet setAttribute $asExternal  -addPrefix  $start
+        ixNet commit
+	}
+	if { [ info exists num ] } {
+		ixNet setAttribute $asExternal  -lsaCount  $num
+        ixNet commit
+	}
+	if { [ info exists modifier ] } {
+		ixNet setAttribute $asExternal  -incrLinkStateId  $modifier
+        ixNet commit
+	}
+	if { [ info exists fbit ] } {
+		ixNet setAttribute $asExternal  -fBit  $fbit
+        ixNet commit
+	}
+	if { [ info exists asbr ] } {
+		ixNet setAttribute $asExternal  -eBit  $asbr
+        ixNet commit
+	}
+	if { [ info exists fw_addr ] } {
+		ixNet setAttribute $asExternal  -forwardingAddress  $fw_addr
+        ixNet commit
+	}
+	if { [ info exists metric_type ] } {
+		ixNet setAttribute $asExternal  -referenceLsType  $metric_type
+        ixNet commit
+	}
 	if { [ info exists metric ] } {
-		ixNet setA $handle -metric $metric
+		ixNet setAttribute $asExternal  -metric  $metric
+        ixNet commit
+	}
+	if { [ info exists nubit ] } {
+		ixNet setAttribute $asExternal  -optBitNu  $nubit
+        ixNet commit
+	}
+	if { [ info exists labit ] } {
+		ixNet setAttribute $asExternal  -optBitLa  $labit
+        ixNet commit
+	}	
+	if { [ info exists pbit ] } {
+		ixNet setAttribute $asExternal  -optBitP  $pbit
+        ixNet commit
+	}
+ 	if { [ info exists tbit ] } {
+		ixNet setAttribute $asExternal  -tBit  $tbit
+        ixNet commit
 	}
 	
-	if { [ info exists route_block ] } {
-	
-		set rb [ GetObject $route_block ]
-		$route_block configure -handle $handle
-		
-		if { $rb == "" } {
-		
-			return [GetErrorReturnHeader "No object found...-route_block"]
-			
-		}
-		
-		set num 		[ $rb cget -num ]
-		set start 		[ $rb cget -start ]
-		set step		[ $rb cget -step ]
-		set prefix_len	[ $rb cget -prefix_len ]
-		
-		ixNet setM $handle \
-			-mask $prefix_len \
-			-firstRoute $start \
-			-numberOfRoutes $num \
-			-step $step
-#		-enabled True
-		
-	} else {
-	
-		return [GetErrorReturnHeader "Madatory parameter needed...-route_block"]
-	}
-	
-	ixNet commit
-	
-    return [GetStandardReturnHeader]
-	
+    return [GetStandardReturnHeader]	
 }
 
 class SimulatedLinkRoute {
@@ -2001,7 +2046,7 @@ class SimulatedLinkRoute {
 		global errNumber
 	    
 		set tag "body SimulatedLinkRoute::ctor [info script]"
-Deputs "----- TAG: $tag -----"
+        Deputs "----- TAG: $tag -----"
 
 		set routerObj [ GetObject $router ]
 		Deputs "routerObj: $routerObj"
@@ -2012,14 +2057,12 @@ Deputs "----- TAG: $tag -----"
 			error "$errNumber(1) Router Object in SimulatedSummaryRoute ctor"
 		}
 		
-		set hRouteRange [ixNet add $hRouter routeRange]
-		ixNet commit
-		
-		set handle [ ixNet remapIds $hRouteRange ]
-		ixNet setA $handle -enalbed True
-		ixNet commit
-		
-		set trafficObj $handle
+		#set hRouteRange [ixNet add $hRouter routeRange]
+		#ixNet commit
+		#
+		#set handle [ ixNet remapIds $hRouteRange ]
+		#ixNet setA $handle -enabled True
+		#ixNet commit
 	}
 	method config { args } {}
 }
@@ -2027,66 +2070,62 @@ body SimulatedLinkRoute::config { args } {
     global errorInfo
     global errNumber
     set tag "body SimulatedLinkRoute::config [info script]"
-Deputs "----- TAG: $tag -----"
-
-#param collection
-Deputs "Args:$args "
+    Deputs "----- TAG: $tag -----"
+    
+    #param collection
+    Deputs "Args:$args "
+    
+    set link_type p2p
+    set link_int_id 0
+    set nei_int_id 0
+    set flag_adv "" ; #No Found
+    set nei_int_id 0
+    set nei_router_id 0.0.0.0
+    set link_int_addr "" ; #No Found
+    set metric 0
+    set hUserlsa ""
     foreach { key value } $args {
-	   set key [string tolower $key]
-	   switch -exact -- $key {
-		  
-		  -age {
-				set age $value
-		  }            
-			-checksum {
-				set checksum $value
-		  }
-		  -metric {
-				set metric $value
-		  }            
-			-route_block {
-				set route_block $value
-		  }
-
-	   }
+        set key [string tolower $key]
+        switch -exact -- $key {
+            -link_type {
+                set link_type $value
+                if { [ string tolower $link_type ] == "p2p" } {
+                    set link_type pointToPoint
+                }
+            }
+            -flag_adv {
+                set flag_adv $value
+            }
+            -metric {
+                set metric $value
+            }
+            -link_int_id {
+                set link_int_id $value
+            }
+            -nei_int_id {
+                set nei_int_id $value
+            }
+            -nei_router_id {
+                set nei_router_id $value
+            }
+            -link_int_addr {
+                set link_int_addr $value
+            }            
+            -router_name {
+                set router_name $value
+            }
+        }
     }
-	
-	if { [ info exists metric ] } {
-		ixNet setA $handle -metric $metric
-	}
-	
-	if { [ info exists route_block ] } {
-	
-		set rb [ GetObject $route_block ]
-		$route_block configure -handle $handle
-		
-		if { $rb == "" } {
-		
-			return [GetErrorReturnHeader "No object found...-route_block"]
-			
-		}
-		
-		set num 		[ $rb cget -num ]
-		set start 		[ $rb cget -start ]
-		set step		[ $rb cget -step ]
-		set prefix_len	[ $rb cget -prefix_len ]
-		
-		ixNet setM $handle \
-			-mask $prefix_len \
-			-firstRoute $start \
-			-numberOfRoutes $num \
-			-step $step
-#		-enabled True
-		
-	} else {
-	
-		return [GetErrorReturnHeader "Madatory parameter needed...-route_block"]
-	}
-	
-	ixNet commit
-	
+    
+    set hUserlsa [ $router_name cget -hUserlsa ]
+    ixNet setA $hUserlsa -expandIntoLinksOrAttachedRouters true
+    ixNet commit
+    set router [ ixNet add $hUserlsa router ]
+    ixNet commit
+    set router [ ixNet remapIds $router ]
+    ixNet setAttribute $router -interfaces [list [list $link_int_id $nei_int_id $nei_router_id $link_type $metric] ]
+    ixNet commit
     return [GetStandardReturnHeader]
-	
 }
 
 class SimulatedIntraAreaRoute {
@@ -2096,7 +2135,7 @@ class SimulatedIntraAreaRoute {
 		global errNumber
 	    
 		set tag "body SimulatedSummaryRoute::ctor [info script]"
-Deputs "----- TAG: $tag -----"
+        Deputs "----- TAG: $tag -----"
 
 		set routerObj [ GetObject $router ]
 		if { [ catch {
@@ -2109,7 +2148,7 @@ Deputs "----- TAG: $tag -----"
 		ixNet commit
 		
 		set handle [ ixNet remapIds $hRouteRange ]
-		ixNet setA $handle -enalbed True
+		ixNet setA $handle -enabled True
 		ixNet commit
 		
 		set trafficObj $handle

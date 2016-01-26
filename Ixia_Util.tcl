@@ -610,9 +610,9 @@ Deputs "macStep:$macStep"
     return $macStep
 }
 
---
-GetIpStep 0 1 => 0.0.0.1
-GetIpStep 1 1 => 0.0.0.2
+
+#GetIpStep 0 1 => 0.0.0.1
+#GetIpStep 1 1 => 0.0.0.2
 proc GetIpStep { offset val } {
 
 	if { [ catch {
