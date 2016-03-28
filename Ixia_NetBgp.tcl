@@ -131,7 +131,7 @@ body BgpSession::config { args } {
 	Deputs "----- TAG: $tag -----"
 	
 	set loopback_ipv4_gw 1.1.1.1
-	set bgpType "IBGP"
+	set bgpType "EBGP"
 
 	#param collection
 	Deputs "Args:$args "
@@ -177,14 +177,14 @@ body BgpSession::config { args } {
 			-ip_gw {
 				set ip_gw $value
 			}
-			-type {
-			    if { $value == "IBGP" } {
+			-peer_type {
+			    if { [ string tolower $value ] == "ibgp" } {
 				    set value "internal"
 				}
-				if { $value == "EBGP" } {
+				if { [ string tolower $value ] == "ebgp" } {
 				    set value "external"
 				}
-				set type $value
+				set peer_type $value
                 set bgpType $value
 			}
 			-bgp_id -
@@ -215,6 +215,8 @@ body BgpSession::config { args } {
         
         if { [ info exists ip_gw ] } {
             ixNet setA $int -gateway $ip_gw		
+        } elseif { [ info exists dut_ip ] } {
+            ixNet setA $int -gateway $dut_ip
         } else {
             ixNet setA $int -gateway "192.85.1.1"
         }
@@ -225,7 +227,7 @@ body BgpSession::config { args } {
 		
 	}
 	if { [ info exists type ] } {
-		ixNet setA $handle -type $type
+		ixNet setA $handle -type $peer_type
 	}
     if { [ info exists afi ] } {
         Deputs "not implemented parameter: afi"
@@ -265,6 +267,8 @@ body BgpSession::config { args } {
 		ixNet setA $int -ip $ipv6_addr
         if { [ info exists ip_gw ] } {
             ixNet setA $int -gateway $ip_gw
+        } elseif { [ info exists dut_ip ] } {
+            ixNet setA $int -gateway $dut_ip
         } else {
             ixNet setA $int -gateway "2000::1"
         }
@@ -388,7 +392,7 @@ body BgpSession::set_route { args } {
                 ixNet setM $hRouteBlock \
                     -enableNextHop True \
 					-nextHopSetMode setManually \
-                    -nextHopIpType ipv4 \
+                    -nextHopIpType $ip_version \
                     -nextHopIpAddress $nexthop
                     
             }
@@ -413,7 +417,6 @@ body BgpSession::set_route { args } {
 					set newEle [lreplace $asPathEle 0 0]
 					
 					lappend aspathCmd [list true $as_type $newEle]
-                    					
 				}
 				
 				

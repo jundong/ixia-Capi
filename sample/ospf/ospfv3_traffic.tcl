@@ -52,7 +52,7 @@ if { [catch {
     port1 CreateStaEngine -StaEngineName Statistics1 -StaType Statistics
     port2 CreateStaEngine -StaEngineName Statistics2 -StaType Statistics
     
-    #step5：使能BGP进程Active                                                                                       
+    #step5：使能Ospfv3进程Active                                                                                       
     ospfv3Router1 Ospfv3Enable
     ospfv3Router2 Ospfv3Enable
 

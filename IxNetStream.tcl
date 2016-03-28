@@ -258,13 +258,12 @@ namespace eval IxiaCapi {
                     } elseif { [ $srcObj isa IxiaCapi::Ospfv2Router ] } {
                         set srcHandle [ concat $srcHandle [ixNet getP [ ixNet getP [ $srcObj cget -handle ]]] ]
                     } elseif { [ $srcObj isa IxiaCapi::Ospfv3Router ] } {
-                        set srcHandle [ concat $srcHandle [ixNet getP [ ixNet getP [ $srcObj cget -handle ]]] ]
+                        set srcHandle [ concat $srcHandle [ixNet getP [ ixNet getP [ $srcObj cget -handle ]]]]
                     } elseif { [ $srcObj isa SimulatedSummaryRoute ] } {
                         #set srcHandle [ concat $srcHandle [ixNet getP [ ixNet getP [ ixNet getP [ $srcObj cget -trafficObj ] ] ] ] ]
                         set srcHandle [ concat $srcHandle [ $srcObj cget -trafficObj ] ]
                     } elseif { [ $srcObj isa SimulatedExternalRoute ] } {
-                        #set srcHandle [ concat $srcHandle [ixNet getP [ ixNet getP [ ixNet getP [ $srcObj cget -hUserlsa ] ] ] ] ]
-                        set srcHandle [ concat $srcHandle [ $srcObj cget -hUserlsa ] ]
+                        set srcHandle [ concat $srcHandle [ixNet getP [ixNet getP [ixNet getP [ ixNet getP [ $srcObj cget -hUserlsa ]]]]]]
                     } elseif { [ $srcObj isa SimulatedRouter ] } {
                         #set srcHandle [ concat $srcHandle [ixNet getP [ ixNet getP [ ixNet getP [ $srcObj cget -trafficObj ] ] ] ] ]
                         set srcHandle [ concat $srcHandle [ $srcObj cget -trafficObj ] ]
@@ -359,7 +358,7 @@ namespace eval IxiaCapi {
                     } elseif { [ $dstObj isa IxiaCapi::Ospfv2Router ] } {
                         set dstHandle [ concat $dstHandle [ixNet getP [ ixNet getP [ $dstObj cget -handle ]]] ]
                     } elseif { [ $dstObj isa IxiaCapi::Ospfv3Router ] } {
-                        set dstHandle [ concat $dstHandle [ixNet getP [ ixNet getP [ $dstObj cget -handle ]]] ]
+                        set dstHandle [ concat $dstHandle [ixNet getP [ ixNet getP [ $dstObj cget -handle ]]]]
                     } elseif { [ $dstObj isa SimulatedSummaryRoute ] } {
                         set dstHandle [ concat $dstHandle [ixNet getP [ixNet getP [ ixNet getP [ $dstObj cget -trafficObj ]]]] ]
                         #set srcHandle [ concat $srcHandle [ $srcObj cget -trafficObj ] ]
@@ -367,8 +366,7 @@ namespace eval IxiaCapi {
                         set dstHandle [ concat $dstHandle [ixNet getP [ixNet getP [ ixNet getP [ $dstObj cget -trafficObj ]]]] ]
                         #set srcHandle [ concat $srcHandle [ $srcObj cget -trafficObj ] ]
                     } elseif { [ $dstObj isa SimulatedExternalRoute ] } {
-                        set dstHandle [ concat $dstHandle [ixNet getP [ixNet getP [ ixNet getP [ $dstObj cget -hUserlsa ]]]] ]
-                        #set srcHandle [ concat $srcHandle [ $srcObj cget -hUserlsa ] ]
+                        set dstHandle [ concat $dstHandle [ixNet getP [ixNet getP [ixNet getP [ ixNet getP [ $dstObj cget -hUserlsa ]]]]]]
                     } elseif { [ $dstObj isa IxiaCapi::IsisRouter ] } {
                         set dstHandle [ concat $dstHandle [ixNet getP [ ixNet getP [ $dstObj cget -handle ]]] ]
                     } else {

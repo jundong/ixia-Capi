@@ -249,7 +249,7 @@ namespace eval IxiaCapi {
             set handle [ ${this}_c cget -handle ]
             
             set objName ${this}_c
-            set argslist(-peertype)                  -type
+            set argslist(-peertype)                  -peer_type
             set argslist(-routerid)                  -router_id
             set argslist(-testerip)                  -ipv6_addr           
             set argslist(-testeras)                  -as

@@ -230,6 +230,13 @@ namespace eval IxiaCapi {
                 if { [ info exists TxFrames ] } {
                     uplevel 1 "set $TxFrames $value"
                 }
+                
+                lappend retStats -TxSignature
+                lappend retStats $value
+                
+                if { [ info exists TxSignature ] } {
+                    uplevel 1 "set $TxSignature $value"
+                }
             } elseif { $caption == "Valid Frames Rx." } {
                 set value [ IxiaCapi::Regexer::IntTrans $value ]
                 puts "Valid Frames Rx.: $value"
@@ -273,11 +280,11 @@ namespace eval IxiaCapi {
                     set value 0
                 }
                 
-                lappend retStats -TxSignature
+                lappend retStats -RxSignature
                 lappend retStats $value
                 
-                if { [ info exists TxSignature ] } {
-                    uplevel 1 "set $TxSignature $value"
+                if { [ info exists RxSignature ] } {
+                    uplevel 1 "set $RxSignature $value"
                 }
             } elseif { $caption == "CRC Errors" } {
                 set value [ IxiaCapi::Regexer::IntTrans $value ]

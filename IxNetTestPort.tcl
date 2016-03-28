@@ -319,9 +319,9 @@ Deputs "----- TAG: $tag -----"
         global errorInfo
 
         set tag "body TestPort::CreateHost [info script]"
-Deputs "----- TAG: $tag -----"
-#param collection
-Deputs "Args:$args "
+        Deputs "----- TAG: $tag -----"
+        #param collection
+        Deputs "Args:$args "
         eval " CreateAccessHost $args "
     }
    
@@ -2140,12 +2140,15 @@ Deputs "RouterId:$routerId"
                         uplevel 1 "set $duplexMode AUTO"
                     }
                     regexp -nocase {(hd|fd)} $regstr  match dm
-                    if { $dm == "hd" } {
-                        uplevel 1 "set $duplexMode HALF"
-                    } else {
-                        uplevel 1 "set $duplexMode FULL"
+                    uplevel 1 "set $duplexMode FULL"
+                    if { [ info exists dm ] } {
+                        if { $dm == "hd" } {
+                            uplevel 1 "set $duplexMode HALF"
+                        } else {
+                            uplevel 1 "set $duplexMode FULL"
+                        }
+                        Deputs "duplex mode: $duplexMode"
                     }
-                    Deputs "duplex mode: $duplexMode"
                 }
             } elseif { $PortType == "ethernetvm" } {
                 if { [ info exists autoNeg ] } {
